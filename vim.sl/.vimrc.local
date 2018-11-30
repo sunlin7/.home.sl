@@ -1,0 +1,2 @@
+" FIXME: workaround for https://github.com/spf13/spf13-vim/issues/819
+inoremap <expr><CR> neosnippet#expandable() ? neosnippet#mappings#expand_or_jump_impl() : pumvisible() ? neocomplete#close_popup() : "\<CR>"

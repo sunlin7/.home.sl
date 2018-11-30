@@ -1,0 +1,115 @@
+# -*- mode: shell-script -*-
+# some functions
+
+## the follow clip maybe useful when get a new environment.
+# case $- in
+#     *c*) return # it's run for command, just return
+#        ;;
+#     *) ;;       # run as interactive shell
+# esac
+# env -i PWD=$PWD LOGNAME=$LOGNAME USER=$USER LANG=$LANG HOME=$HOME SHELL=$SHELL TERM=$TERM MAIL=$MAIL /bin/bash -l -i -v -c "eval $*"
+
+# custome MYCD_PROJECT_INDICATOR, MYCD_PROJECT_CDPATH in .bashrc
+# Project indicator is an array as (sub01 sub02 ...)
+MYCD_DEFAULT_HOME=~
+MYCD_DEFAULT_CDPATH=$HOME:$file_dir
+MYCD_DEFAULT_PROJECT_ROOT=
+MYCD_PROJECT_INDICATOR=(inc src)
+MYCD_PROJECT_CDPATH=(inc src)
+
+function find_project_indicator() {
+    [ ! -d "$1" ] && return 0
+
+    command cd "$1"
+    if [ $? -eq 0 ]; then
+        shift
+        not_exist=
+        for i in "$@"; do
+            [ ! -e "$i" ] && not_exist=1
+        done
+
+        if [ $not_exist ]; then
+            parent=$(dirname "$(pwd)")
+            [ "$parent" != "/" ] && find_project_indicator "$parent" "$@"
+            return $?
+        else
+            echo "$(pwd)"
+            return 0
+        fi
+    fi
+    return 1
+}
+
+function _modify_cd_path_with_prj() {
+    MYCD_PROJECT_ROOT="$1"
+    NEW_PROJ_CDPATH=.
+    for i in "${MYCD_PROJECT_CDPATH[@]}"; do
+        NEW_PROJ_CDPATH=$NEW_PROJ_CDPATH:"${MYCD_PROJECT_ROOT}/$i"
+    done
+    CDPATH=$NEW_PROJ_CDPATH:$MYCD_DEFAULT_CDPATH
+    export CDPATH MYCD_PROJECT_ROOT
+}
+
+function mycd_buildin() {
+    if [ $# -eq 0 ]; then
+        command cd "$MYCD_DEFAULT_HOME"
+        return $?
+    elif [ "." == "$1" ]; then
+        shift
+        command cd "$MYCD_PROJECT_ROOT" "$@"
+        return $?
+    else
+        if command cd "$@"; then
+            NEW_PRJ_ROOT=$(find_project_indicator "$(pwd)" "${MYCD_PROJECT_INDICATOR[@]}")
+            if [ -n "$NEW_PRJ_ROOT" ] && [ "$NEW_PRJ_ROOT" != "$MYCD_PROJECT_ROOT" ]; then
+                _modify_cd_path_with_prj "$NEW_PRJ_ROOT"
+            fi
+        fi
+    fi
+}
+
+pa () {
+    if [ $# -eq 0 ]; then
+        ps aux
+    else
+        exp=
+        for i in "$@"; do
+            # here we append a blank at tail, so the first char of exp will no be blank.
+            exp="${exp}-e \"$i\" "
+            eval "ps aux | grep $exp | grep -v grep"
+        done
+    fi
+}
+
+[[ -n "$SSH_CLIENT" ]] && [[ -z "$DISPLAY" ]] && export DISPLAY=${SSH_CLIENT/ */:0}
+[[ -d "$HOME/.root/bin" ]] && PATH="$HOME/.root/bin:$PATH"
+[[ -d "$HOME/.bin" ]]      && PATH="$HOME/.bin:$PATH"
+export PATH
+
+# some aliases
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+alias cd=mycd_buildin
+alias cd.='cd ..'
+alias cd..='cd ../..'
+alias cd...='cd ../../..'
+alias cd....='cd ../../../..'
+alias cd-='cd -'
+for cmd in "gio trash" gvfs-trash trash-put; do
+    command -v ${cmd/ */} > /dev/null && alias rm=$cmd && break;
+done
+
+[[ -n "$EMACS" ]] && export EDITOR="emacsclient"
+
+operator_system=$(uname -o)
+if [ "$operator_system" == "Cygwin" -o "$operator_system" == "Msys" ]; then
+    function o() {
+        [[ -n "$1" ]] && (command cd "$(dirname $1)" && explorer "$(basename $1)")
+    }
+    alias mintty='mintty.exe -i /Cygwin-Terminal.ico -o Blue=84,84,252 -o BoldBlue=127,127,252 -'
+else
+    for cmd in "gio open" xdg-open gvfs-open gnome-open; do
+        command -v ${cmd/ */} > /dev/null && alias o=$cmd && break;
+    done
+fi

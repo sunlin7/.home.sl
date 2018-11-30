@@ -1,0 +1,189 @@
+#+TITLE: My emacs configuration
+
+This is my .emacs configure for emacs25 on Ubuntu 16.04.
+It depends on the spacemacs.
+
+** My configurations
+Some times I want remove all the confgiure files but the saved files,
+so set save-file directory out of .emacs.d directory.
+#+BEGIN_SRC emacs-lisp
+(defvar sl-savefile-dir "~/.emacs.save/")
+#+END_SRC
+
+Define the configuration directory, and load it.
+#+BEGIN_SRC emacs-lisp
+(defvar sl-init-file "~/.home.sl/emacs.spacemacs/init.el")
+(when (file-exists-p sl-init-file)
+  (load-file sl-init-file))
+#+END_SRC
+After that, we can install the packages from elpa, just run follow function by press <kbd>Alt+x<kbd>
+#+begin_src emacs-lisp :tangle yes
+sl-package-install-all
+#+end_src
+*** emacs with msys64
+Follow elisp will make the emacs with msys64 work better.
+#+BEGIN_SRC elisp
+  ;; set path before load libraries
+  (autoload 'string-join "subr-x")
+  (when (string= system-type "windows-nt")
+    (let ((msys-path (cond ((string-match "x86_64" system-configuration) "D:/msys64/")
+                           (t "D:/msys/"))))
+      (when (file-exists-p msys-path)
+        (dolist (item '("mingw64/bin" "mingw32/bin" "usr/bin"))
+          (add-to-list 'exec-path (concat msys-path item)))
+        (setenv "PATH" (replace-regexp-in-string "/" "\\\\" (string-join exec-path path-separator)))
+        (setenv "PYTHONPATH" (concat msys-path "usr/lib/python2.7/site-packages/"))
+        (let ((cygwin-mount-el "~/.emacs.save/cygwin-mount.el"))
+          (load-file "~/.emacs.save/cygwin-mount.el")
+          (cygwin-mount-activate)))))
+#+END_SRC
+
+** Integrate with spacemacs
+Config the spacemacs with follow layers
+#+BEGIN_SRC emacs-lisp
+  (defun dotspacemacs/layers ()
+    "Layer configuration:
+  This function should only modify configuration layer settings."
+    (setq-default
+     ;; List of configuration layers to load.
+     dotspacemacs-configuration-layers
+     '(markdown
+       django
+       graphviz
+       gtags
+       plantuml
+       syntax-checking
+       (chinese :variables chinese-default-input-method 'wubi)
+       (javascript :variables tern-command '("tern"))
+       typescript
+       vimscript
+       windows-scripts
+       html
+       php
+       (sql :variables
+            sql-capitalize-keywords t
+            sql-capitalize-keywords-blacklist '("name" "varchar"))
+       ;; ----------------------------------------------------------------
+       ;; Example of useful layers you may want to use right away.
+       ;; Uncomment some layer names and press `SPC f e R' (Vim style) or
+       ;; `M-m f e R' (Emacs style) to install them.
+       ;; ----------------------------------------------------------------
+       helm
+       smex
+       (semantic :disabled-for emacs-lisp) ; company-backend for elisp has problem with semantic
+       auto-completion
+       better-defaults
+       emacs-lisp
+       git
+       ;; markdown
+       neotree
+       org
+       (shell :variables
+              shell-default-height 30
+              shell-default-position 'bottom)
+       ;; spell-checking
+       ;; syntax-checking
+       ;; version-control
+       python
+       (c-c++ :variables
+              c-c++-default-mode-for-headers 'c++-mode
+              c-c++-enable-clang-support t
+              c-c++-enable-google-newline t
+              c-c++-enable-google-style t
+              c-c++-enable-rtags-support t)
+       ibuffer
+       yaml
+       )
+     dotspacemacs-additional-packages sl-packages-list
+     )
+
+#+END_SRC
+And add function in your dotspacemacs/user-config:
+#+BEGIN_SRC emacs-lisp
+  ;; https://github.com/syl20bnr/spacemacs/issues/10293#issuecomment-384337054
+  (defun spacemacs//pyvenv-mode-set-local-virtualenv ()
+      "Set pyvenv virtualenv from \".venv\" by looking in parent directories. handle directory or file"
+      (interactive)
+      (let ((root-path (locate-dominating-file default-directory
+                         ".venv")))
+        (when root-path
+          (let* ((file-path (expand-file-name ".venv" root-path))
+                  (virtualenv
+                    (if (file-directory-p file-path)
+                      file-path
+                      (with-temp-buffer
+                        (insert-file-contents-literally file-path)
+                        (buffer-substring-no-properties (line-beginning-position)
+                          (line-end-position))))))
+            (if (file-directory-p virtualenv)
+              (pyvenv-activate virtualenv)
+              (pyvenv-workon virtualenv))))))
+#+END_SRC
+
+Then try load the spacemacs and its settings.
+#+BEGIN_SRC emacs-lisp
+  ;; assume the spacemaces was installed.
+  (setq spacemacs-start-directory "~/.emacs.spacemacs/")
+  (defvar sl-spacemacs-init (expand-file-name "init.el" spacemacs-start-directory))
+  (when (file-exists-p sl-spacemacs-init)
+    (custom-set-variables '(magit-git-executable "~/.root/git-2.0.4/bin/git"))
+    (load-file "~/.root/share/gtags/gtags.el")
+    (add-to-list 'sl-packages-list 'flycheck-popup-tip)
+    ;; load the spacemacs
+    (load-file sl-spacemacs-init)
+    ;; post-config for prelude
+    (menu-bar-mode t)
+    (eval-after-load 'projectile          ; map the "G" for shortcut "s g"
+      #'(define-key projectile-command-map (kbd "G") #'projectile-grep))
+    ;; fix the c-basic-offset for google-c-style
+    (eval-after-load 'google-c-style
+      (dolist (v google-c-style)
+        (when (and (listp v) (eq (car v) 'c-basic-offset)) 
+          (setcdr v 4))))
+    ;; check the the checkers
+    (when (not (executable-find "gcc"))
+      (custom-set-variables '(flycheck-disabled-checkers '(c/c++-gcc))))
+    (when (not (executable-find "clang"))
+      (custom-set-variables '(flycheck-disabled-checkers '(c/c++-clang)))))
+#+END_SRC
+
+And the project settings:
+#+begin_src emacs-lisp
+  (defvar my-project-init (expand-file-name "projects.el" sl-savefile-dir))
+  (when (file-exists-p my-project-init)
+    (add-hook 'after-init-hook (lambda () (load-file my-project-init)))
+    (defun sl-ede-project-reload ()
+      (interactive)
+      (setq ede-cpp-root-project-list nil)
+      (load-file my-project-init)))
+#+end_src
+
+Some misc settings.
+#+BEGIN_SRC emacs-lisp
+  ;; rtags has problem for watching on NFS, watch the source only
+  (custom-set-variables '(rtags-process-flags "--watch-sources-only"))
+
+  (custom-set-variables
+   '(ecb-fix-window-size t)
+   '(max-lisp-eval-depth 100000)
+   '(max-specpdl-size    100000)
+   '(dired-listing-switches "-alt"))
+  (put 'downcase-region 'disabled nil)
+
+  (eval-after-load 'dired-x
+    '(when (boundp 'dired-omit-extensions)
+       (delete ".bin" dired-omit-extensions)))
+  (add-to-list 'auto-coding-alist '("\\.log" . dos))
+  (when (daemonp)
+    (add-hook 'after-init-hook (lambda () (cd "~"))))
+
+  (add-hook 'after-change-major-mode-hook
+            '(lambda () (when (eq major-mode 'js-mode)
+                          (setq-local whitespace-line-column 120))))
+
+  (setq-default org-plantuml-jar-path
+                (expand-file-name "~/.root/share/plantuml.jar"))
+  (defvar org-babel-load-languages)
+  (org-babel-do-load-languages 'org-babel-load-languages
+                               (add-to-list 'org-babel-load-languages '(plantuml . t)))
+#+END_SRC

@@ -1,0 +1,37 @@
+#+Title: My .home.sl direcotry
+
+This is my .home.sl directory, it containts my Emcas and vim configurations.
+
+ The configurations are maintained as git subtrees, follow repos are included,
+| [[https://github.com/sunlin7/.emacs.sl.git][.emacs.sl]] |
+| [[https://github.com/spf13/spf13-vim][spf13-vim]] |
+
+* Install and config
+** .emacs.sl for Emacs
+The .emacs.sl is included in this repo.
+
+Please refer the [[file:emacs.sl/README.org][emacs.sl/README.org]] for setup.
+** .emacs.spacemacs for Emacs
+The .emcas.spacemacs is included in this repo.
+Please refer the [[file:.emacs.spacemace/README.org][emacs.spacemacs/README.org]]
+** The ultimate vim distribution http://vim.spf13.com
+The vim-spf13 can install via
+#+BEGIN_SRC sh
+curl http://j.mp/spf13-vim3 -L -o - | sh
+#+END_SRC
+
+Then make a link for .vimrc.local
+#+BEGIN_SRC sh
+ln -s ~/.home.sl/vim.sl/.vimrc.local ~/.vimrc.local
+#+END_SRC
+
+And upgrade spf13
+#+BEGIN_SRC sh
+cd $HOME/to/spf13-vim/ && git pull
+vim +BundleInstall! +BundleClean +q
+#+END_SRC
+
+* Update or upgrade
+#+BEGIN_SRC sh
+cd ~/.home.sl/ && git pull
+#+END_SRC
