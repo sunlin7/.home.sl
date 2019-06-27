@@ -56,11 +56,12 @@
               (when (eq major-mode 'c++-mode)
                 (defvar flycheck-clang-args)
                 (add-to-list 'flycheck-clang-args "-std=c++11")
-                (defvar company-clang-arguments)
-                (add-to-list 'company-clang-arguments "--std=c++11"))
-
+                (when (boundp 'company-clang-arguments)
+                  (add-to-list 'company-clang-arguments "--std=c++11"))
+                )
+              ;; if rtags available, make sure it's the first company-backend
               (defvar company-backends)
-              (when (and (rtags-is-indexed) (member 'company-rtags company-backends))
+              (when (and (fboundp 'rtags-is-indexed) (rtags-is-indexed) (member 'company-rtags company-backends))
                 (setq-local company-backends (push 'company-rtags company-backends))))))
 
 ;; when use press the key map, the package will autoload, and function applied.

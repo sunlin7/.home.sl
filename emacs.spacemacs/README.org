@@ -96,7 +96,7 @@ Config the spacemacs with follow layers
        )
      dotspacemacs-additional-packages sl-packages-list
      )
-
+  )
 #+END_SRC
 And add function in your dotspacemacs/user-config:
 #+BEGIN_SRC emacs-lisp
@@ -140,6 +140,10 @@ Then try load the spacemacs and its settings.
       (dolist (v google-c-style)
         (when (and (listp v) (eq (car v) 'c-basic-offset)) 
           (setcdr v 4))))
+    ;; tab-width corresponed to the c-basic-offset
+    (add-hook 'c-mode-common-hook
+              (lambda ()
+                (setq-local tab-width c-basic-offset)))
     ;; check the the checkers
     (when (not (executable-find "gcc"))
       (custom-set-variables '(flycheck-disabled-checkers '(c/c++-gcc))))
