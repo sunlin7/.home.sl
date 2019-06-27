@@ -8,8 +8,8 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(default-frame-alist
-    (quote ((top . 0) (left . 0) (width . 110) (height . 40) ; get by `frame-height', `frame-width' when maximum
-            (background-color . "black") (foreground-color . "white"))))
+    ((top . 0) (left . 0) (width . 110) (height . 40) ; get by `frame-height', `frame-width' when maximum
+     (background-color . "black") (foreground-color . "white")))
  '(delete-by-moving-to-trash t)
  '(delete-selection-mode t)
  '(make-backup-files nil)
