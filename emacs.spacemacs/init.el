@@ -4,7 +4,7 @@
 
 (defvar sl-root-dir (file-name-directory load-file-name)
   "The root dir of the .emacs.sl .")
-(defvar sl-site-lisp-dir (expand-file-name "../emacs.sl/site-lisp" sl-root-dir)
+(defvar sl-site-lisp-dir (expand-file-name "../emacs.spacemacs/site-lisp" sl-root-dir)
   "The site-lisp dir'.")
 (defvar sl-site-start-dir (expand-file-name  "site-start.d" sl-root-dir)
   "This site-start.d dir.")
