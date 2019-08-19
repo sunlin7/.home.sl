@@ -80,9 +80,12 @@
   (add-to-list 'flycheck-clang-args "-Wno-missing-field-initializers")
 
   (when (equal major-mode 'c++-mode)
-    (setq-local flycheck-clang-language-standard "c++11")
-    (defvar flycheck-gcc-language-standard)
-    (setq-local flycheck-gcc-language-standard "c++11"))
+    (when (and (boundp 'flycheck-clang-language-standard)
+               (not (string-empty-p flycheck-clang-language-standard)))
+      (setq-local flycheck-clang-language-standard "c++11"))
+    (when (and (boundp 'flycheck-gcc-language-standard)
+               (not (string-empty-p flycheck-gcc-language-standard)))
+      (setq-local flycheck-gcc-language-standard "c++11")))
 
   (let ((cur-proj (ede-current-project)))
     (when cur-proj
