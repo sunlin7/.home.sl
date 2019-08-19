@@ -51,7 +51,9 @@ Config the spacemacs with follow layers
        django
        graphviz
        gtags
-       plantuml
+       (plantuml :variables
+                 plantuml-jar-path (expand-file-name "~/.root/share/plantuml.jar")
+                 org-plantuml-jar-path (expand-file-name "~/.root/share/plantuml.jar"))
        syntax-checking
        (chinese :variables chinese-default-input-method 'wubi)
        (javascript :variables tern-command '("tern"))
@@ -135,6 +137,10 @@ Then try load the spacemacs and its settings.
     (menu-bar-mode t)
     (eval-after-load 'projectile          ; map the "G" for shortcut "s g"
       #'(define-key projectile-command-map (kbd "G") #'projectile-grep))
+    (when (not (file-exists-p plantuml-jar-path)) ; download plantuml automatically
+      (plantuml-download-jar))
+    (custom-set-variables '(plantuml-default-exec-mode 'jar)) ; prefer local 'jar than 'server
+
     ;; fix the c-basic-offset for google-c-style
     (eval-after-load 'google-c-style
       (dolist (v google-c-style)
