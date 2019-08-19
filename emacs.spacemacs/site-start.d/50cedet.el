@@ -158,9 +158,17 @@ TAGS is the tag from semantic."
 (eval-after-load 'semantic
   '(progn
      (defvar semantic-mode-map)
-     (define-key semantic-mode-map (kbd "C-.") 'semantic-goto-definition)
-     (define-key semantic-mode-map (kbd "C-,") 'semantic-pop-tag-mark)
-     (define-key semantic-mode-map (kbd "C-c , f") 'sl-select-local-tags)))
+     ;; (define-key semantic-mode-map (kbd "C-.") 'semantic-goto-definition)
+     ;; (define-key semantic-mode-map (kbd "C-,") 'semantic-pop-tag-mark)
+     (define-key semantic-mode-map (kbd "C-c , t") 'sl-select-local-tags)
+     (define-key-after
+       (lookup-key cedet-menu-map [navigate-menu])
+       [semantic-select-local-tags]
+       '(menu-item "(SL)Find Local Tags..." sl-select-local-tags
+                   :enable (and (semantic-active-p))
+                   :help "Find tags in current buffer..")
+       'semantic-symref-symbol)
+     ))
 
 (defun sl-cedet-directory-name-to-file-name (orig-fun file)
   "Check the return value, if it longer than 255, generate an MD5 value instead.
