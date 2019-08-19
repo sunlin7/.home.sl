@@ -104,5 +104,17 @@
   (when (functionp 'flycheck-pos-tip-mode)
     (flycheck-pos-tip-mode)))
 
+;; fix the pycompile-checker executable
+(add-hook 'python-mode-hook
+          (lambda ()
+            (when (and (boundp flycheck-python-pycompile-executable)
+                       (not flycheck-python-pycompile-executable))
+              (setq-local flycheck-python-pycompile-executable
+                          (if (string= (file-name-base python-shell-interpreter) "ipython")
+                              ;; (string-trim (shell-command-to-string (concat python-shell-interpreter " -c 'from __future__ import print_function; import sys; print(sys.executable)'")))
+                              (or (executable-find "python3") (executable-find "python2") "python")
+                            python-shell-interpreter))
+              )))
+
 (provide '50flycheck)
 ;;; 50flycheck ends here
