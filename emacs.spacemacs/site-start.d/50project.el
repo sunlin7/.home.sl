@@ -124,12 +124,10 @@ Each directory needs a project file to control it.")
             (hash-table-keys name-uniq) nil t)))
       (find-file (gethash choice name-uniq)))))
 
-(add-hook 'ede-minor-mode-hook
-          (lambda ()
-            (defvar ede-minor-mode-map)
-            (define-key ede-minor-mode-map (kbd "C-c . j") 'sl-ede-find-file)))
-(eval-after-load "cpp-root"
-  '(global-set-key (kbd "C-c . w") 'sl-ede-workspace-switch))
+(eval-after-load "ede"
+  '(progn
+     (define-key ede-minor-mode-map (kbd "C-c . j") 'sl-ede-find-file)
+     (define-key ede-minor-mode-map (kbd "C-c . w") 'sl-ede-workspace-switch)))
 
 (eval-after-load "projectile" ; FIXME: workaround for projectile extremly slow on NFS
   '(progn
@@ -192,13 +190,12 @@ want add all files in project to tags file."
          ede-cpp-root-project-list))
   (run-hooks 'sl-ede-project-reload-hook))
 
-(add-hook
- 'after-init-hook
- (lambda ()
-   (eval-after-load "ede"
-     '(run-hooks 'sl-ede-project-reload-hook))))
+(eval-after-load "ede"
+  '(add-hook 'after-init-hook 'sl-ede-project-reload))
 
 (defun sl-compilation-start (OLDFUN command &optional mode name-function highlight-regexp)
+  "Create tag with sl-ede-project-xtags if it avaliable.
+OLDFUN is the original function, COMMAND MODE NAME-FUNCTION HIGHLIGHT-REGEXP are bypass"
   (let* ((project-root (and (string= command "global -u")
                             (ggtags-process-string "global" "-p")))
          (project-xtags (expand-file-name sl-ede-project-xtags project-root)))
