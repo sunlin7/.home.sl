@@ -191,8 +191,6 @@ Some misc settings.
             '(lambda () (when (eq major-mode 'js-mode)
                           (setq-local whitespace-line-column 120))))
 
-  (setq-default org-plantuml-jar-path
-                (expand-file-name "~/.root/share/plantuml.jar"))
   (defvar org-babel-load-languages)
   (org-babel-do-load-languages 'org-babel-load-languages
                                (add-to-list 'org-babel-load-languages '(plantuml . t)))
