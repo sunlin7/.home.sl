@@ -1,8 +1,6 @@
 ;;; CEDET --- cedet configure
 ;;; Commentary:
 ;;; Code:
-;;; for emacs-lisp-modle
-;; make emacs-lisp-mode support.
 (autoload 'xref-pop-marker-stack "xref")
 (autoload 'xref-push-marker-stack "xref")
 (autoload 'semantic-tag-p "semantic/tag")
@@ -13,10 +11,9 @@
 (autoload 'semantic-fetch-tags "semantic/tag")
 (autoload 'semantic-ia-fast-jump "semantic/ia")
 (autoload 'semantic-ia--fast-jump-helper "semantic/ia")
-(autoload 'semantic-momentary-highlight-tag "semantic/decorate")
 (autoload 'global-semantic-mru-bookmark-mode "semantic/mru-bookmark")
-(autoload 'global-semantic-idle-summary-mode "semantic/idle")
-(autoload 'global-semantic-stickyfunc-mode   "semantic/util-modes")
+;; (autoload 'global-semantic-idle-summary-mode "semantic/idle")
+;; (autoload 'global-semantic-stickyfunc-mode   "semantic/util-modes")
 
 (add-hook 'after-init-hook
           (lambda ()
@@ -30,6 +27,7 @@
      ;; (global-semantic-stickyfunc-mode   t)
      ;; (ede-enable-generic-projects)
 
+     ;; make emacs-lisp-mode support.
      ;; (defvar semantic-new-buffer-setup-functions)
      ;; (add-to-list 'semantic-new-buffer-setup-functions
      ;;              '(emacs-lisp-mode . semantic-default-elisp-setup))
@@ -58,12 +56,6 @@
 ;; (semanticdb-enable-gnu-global-databases 'c-mode)
 ;; (semanticdb-enable-gnu-global-databases 'c++-mode)
 
-;;(load-file "~/.emacs.sl/site-lisp/cedet-bzr/lisp/cedet/cedet-cscope.el")
-;;(load-file "~/.emacs.sl/site-lisp/cedet-bzr/lisp/cedet/semantic/db-cscope.el")
-;;(when (cedet-cscope-version-check t)
-;;  (semanticdb-enable-cscope-databases 'c-mode)
-;;  (semanticdb-enable-cscope-databases 'c++-mode))
-
 ;;(defalias 'cedet-called-interactively-p 'called-interactively-p)
 ;;(mapc 'load (directory-files "~/.emacs.sl/site-lisp/cedet-bzr/lisp/cedet/semantic/ectags/" t "^[0-9].*.el$"))
 ;;(when (semantic-ectags-test-version) ;; (cedet-ectag-version-check)
@@ -74,41 +66,20 @@
 ;; (setq-mode-local c-mode semanticdb-find-default-throttle
 ;;                  '(project unloaded system recursive))
 
-(defvar sl-semantic-go-to-tag-flag nil "Non-nil means centerize the code after jump to the tag.")
-(make-variable-buffer-local 'sl-semantic-go-to-tag-flag)
 (defun sl-semantic-go-to-tag-adv (orig tag &optional parent)
-  "Center the tag after jump to it.
+  "Work with xref marker, and Center the tag after jumping.
 ORIG is the original function.
 TAG, PARENT is the param."
-  (if (not sl-semantic-go-to-tag-flag)
-      (apply orig tag parent)
-    (let* ((sl-semantic-go-to-tag-flag nil)
-           (old (buffer-name))
-           (not-used (apply orig tag parent))
-           (new (buffer-name)))
-      (when (not (string= old new))
-        (save-excursion
-          (switch-to-buffer (current-buffer)) ; recenter-top-bottom request window availible
-          (recenter-top-bottom))))))
-;;(advice-add 'semantic-go-to-tag :around #'sl-semantic-go-to-tag-adv)
-
-(defun semantic-goto-definition (point)
-  "Goto definition using semantic-ia-fast-jump(POINT) \
-save the pointer marker if tag is found."
-  (interactive "d")
-  (require 'semantic/ia)
   (condition-case err
-      (let ((sl-semantic-go-to-tag-flag t))
+      (progn
         (xref-push-marker-stack)
-        (semantic-ia-fast-jump point))
+        (apply orig tag parent)
+        (recenter find-function-recenter-line)
+        (run-hooks 'find-function-after-hook))
     (error ;;if not found remove the tag saved in the ring
      (xref-pop-marker-stack)
      (signal (car err) (cdr err)))))
-
-(defun semantic-pop-tag-mark ()
-  "Popup the tag save by semantic-goto-definition."
-  (interactive)
-  (xref-pop-marker-stack))
+(advice-add 'semantic-go-to-tag :around #'sl-semantic-go-to-tag-adv)
 
 (defun sl-semantic-get-tags (prefix tags)
   "Construct candidates from the list inside of tags.
@@ -140,26 +111,18 @@ TAGS is the tag from semantic."
 (defun sl-select-local-tags ()
   "Select the local tags."
   (interactive)
-  (condition-case err
-      (let* ((tag-list (sl-semantic-get-tags "" (semantic-fetch-tags))))
-        (when tag-list
-          (let* ((tag-name (completing-read "Tags: " (mapcar 'car tag-list)))
-                 ;; (tag (semantic-complete-read-tag-buffer-deep
-                 ;;       "Jump to symbol: " (assoc tag-name tag-list)))
-                 (tag (cdr (assoc tag-name tag-list))))
-            (when (semantic-tag-p tag)
-              (xref-push-marker-stack)
-              (semantic-ia--fast-jump-helper tag)))))
-    (error
-     ;;if not found remove the tag saved in the ring
-     (xref-pop-marker-stack)
-     (signal (car err) (cdr err)))))
+  (let* ((tag-list (sl-semantic-get-tags "" (semantic-fetch-tags))))
+    (when tag-list
+      (let* ((tag-name (completing-read "Tags: " (mapcar 'car tag-list)))
+             ;; (tag (semantic-complete-read-tag-buffer-deep
+             ;;       "Jump to symbol: " (assoc tag-name tag-list)))
+             (tag (cdr (assoc tag-name tag-list))))
+        (when (semantic-tag-p tag)
+          (semantic-ia--fast-jump-helper tag))))))
 
 (eval-after-load 'semantic
   '(progn
      (defvar semantic-mode-map)
-     ;; (define-key semantic-mode-map (kbd "C-.") 'semantic-goto-definition)
-     ;; (define-key semantic-mode-map (kbd "C-,") 'semantic-pop-tag-mark)
      (define-key semantic-mode-map (kbd "C-c , t") 'sl-select-local-tags)
      (define-key-after
        (lookup-key cedet-menu-map [navigate-menu])
