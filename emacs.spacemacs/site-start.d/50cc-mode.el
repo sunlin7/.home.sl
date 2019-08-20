@@ -74,5 +74,31 @@
               (setq-local company-backends (push 'company-rtags company-backends)))))
 
 
+(eval-after-load 'rtags
+  '(progn
+     (defun sl-rtags-find-symbol-at-point-adv (orig &optional prefix)
+       "Support xref marker position. ORIG is the original function, PREFIX is bypass to orig."
+       (condition-case err
+           (progn
+             (xref-push-marker-stack)
+             (apply orig prefix))
+         (error ;;if not found remove the tag saved in the ring
+          (xref-pop-marker-stack)
+          (signal (car err) (cdr err)))))
+     (advice-add 'rtags-find-symbol-at-point :around #'sl-rtags-find-symbol-at-point-adv)))
+
+(add-hook 'after-init-hook
+          (lambda ()
+            (dolist (mode '(c-mode c++-mode python-mode emacs-lisp-mode))
+              (let* ((mode-map (intern (format "spacemacs-%s-map-root-map" mode))))
+                (define-key (symbol-value mode-map) (kbd "C-.")
+                  (lambda ()
+                    (interactive)
+                    (call-interactively (if (and (member major-mode c-c++-modes) (equal c-c++-backend 'rtags)
+                                                 (fboundp 'rtags-is-indexed) (rtags-is-indexed))
+                                            'rtags-find-symbol-at-point
+                                          'spacemacs/jump-to-definition))))
+                (define-key (symbol-value mode-map) (kbd "C-,") 'xref-pop-marker-stack)))))
+
 (provide '50cc-mode)
 ;;; 50cc-mode ends here
