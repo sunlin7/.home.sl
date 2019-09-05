@@ -101,7 +101,7 @@
      ;; Save the running clock and all clock history when exiting Emacs, load it on startup
      (org-clock-persistence-insinuate)))
 
-(eval-after-load 'ox
+(eval-after-load 'ox-html
   '(progn
      ;; https://niklasfasching.de/posts/org-html-export-inline-images/
      (defun org-html-export-to-mhtml (async subtree visible body)

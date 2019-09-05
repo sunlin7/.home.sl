@@ -60,7 +60,8 @@
           (lambda ()
             ;; c/c++ common settings
             (declare-function c-toggle-hungry-state "cc-cmds")
-            (c-toggle-auto-hungry-state 1) ; hungry-delete and auto-newline
+            (c-toggle-hungry-state 1)
+            ;; (c-toggle-auto-hungry-state 1) ; hungry-delete and auto-newline
             ;; (c-set-offset 'case-label '+) ; indent the case
 
             ;; for c++11 as default

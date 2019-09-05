@@ -4,7 +4,7 @@
 
 (defvar sl-root-dir (file-name-directory load-file-name)
   "The root dir of the .emacs.sl .")
-(defvar sl-site-lisp-dir (expand-file-name "../emacs.spacemacs/site-lisp" sl-root-dir)
+(defvar sl-site-lisp-dir (expand-file-name "site-lisp" sl-root-dir)
   "The site-lisp dir'.")
 (defvar sl-site-start-dir (expand-file-name  "site-start.d" sl-root-dir)
   "This site-start.d dir.")
@@ -34,7 +34,7 @@
 (if (file-exists-p sl-modules)
     (load sl-modules)
   (message "No 'modules.el' file in %s, load all modules." sl-modules)
-  (mapc 'load-file (directory-files sl-site-start-dir t "^[0-9].*.el$")))
+  (mapc (lambda (x) (load (file-name-sans-extension x))) (directory-files sl-site-start-dir t "^[0-9].*.el$")))
 
 (provide 'sl-init)
 ;;; init.el ends here
