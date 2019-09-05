@@ -1,10 +1,11 @@
 #+TITLE: My emacs configuration
+#+INCLUDE: ~/.emacs.save/org/common_header.org
 
-This is my .emacs configure for emacs25 on Ubuntu 16.04.
-It depends on the spacemacs.
+This is my .emacs configure for emacs25 on Ubuntu 18.04.
+It depends on the Spacemacs.
 
 ** My configurations
-Some times I want remove all the confgiure files but the saved files,
+Sometimes I want remove all the confgiure files but the saved files,
 so set save-file directory out of .emacs.d directory.
 #+BEGIN_SRC emacs-lisp
 (defvar sl-savefile-dir "~/.emacs.save/")
@@ -39,88 +40,67 @@ Follow elisp will make the emacs with msys64 work better.
 #+END_SRC
 
 ** Integrate with spacemacs
-Config the spacemacs with follow layers
+Config the spacemacs with follow layers in =.spacemacs=
 #+BEGIN_SRC emacs-lisp
   (defun dotspacemacs/layers ()
     "Layer configuration:
   This function should only modify configuration layer settings."
-    (setq-default
-     ;; List of configuration layers to load.
-     dotspacemacs-configuration-layers
-     '(markdown
-       django
-       graphviz
-       gtags
-       (plantuml :variables
-                 plantuml-jar-path (expand-file-name "~/.root/share/plantuml.jar")
-                 org-plantuml-jar-path (expand-file-name "~/.root/share/plantuml.jar"))
-       syntax-checking
-       (chinese :variables chinese-default-input-method 'wubi)
-       (javascript :variables tern-command '("tern"))
-       typescript
-       vimscript
-       windows-scripts
-       html
-       php
-       (sql :variables
-            sql-capitalize-keywords t
-            sql-capitalize-keywords-blacklist '("name" "varchar"))
-       ;; ----------------------------------------------------------------
-       ;; Example of useful layers you may want to use right away.
-       ;; Uncomment some layer names and press `SPC f e R' (Vim style) or
-       ;; `M-m f e R' (Emacs style) to install them.
-       ;; ----------------------------------------------------------------
-       helm
-       smex
-       (semantic :disabled-for emacs-lisp) ; company-backend for elisp has problem with semantic
-       auto-completion
-       better-defaults
-       emacs-lisp
-       git
-       ;; markdown
-       neotree
-       org
-       (shell :variables
-              shell-default-height 30
-              shell-default-position 'bottom)
-       ;; spell-checking
-       ;; syntax-checking
-       ;; version-control
-       python
-       (c-c++ :variables
-              c-c++-default-mode-for-headers 'c++-mode
-              c-c++-enable-clang-support t
-              c-c++-enable-google-newline t
-              c-c++-enable-google-style t
-              c-c++-enable-rtags-support t)
-       ibuffer
-       yaml
-       )
-     dotspacemacs-additional-packages sl-packages-list
-     )
-  )
+    '(csv
+      django
+      graphviz
+      ;; gtags
+      (plantuml :variables
+                plantuml-jar-path (expand-file-name "~/.root/share/plantuml.jar")
+                org-plantuml-jar-path (expand-file-name "~/.root/share/plantuml.jar"))
+      syntax-checking
+      (chinese :variables chinese-default-input-method 'wubi)
+      (javascript :variables tern-command '("tern"))
+      typescript
+      vimscript
+      windows-scripts
+      html
+      php
+      (sql :variables
+           sql-capitalize-keywords t
+           sql-capitalize-keywords-blacklist '("name" "varchar"))
+      ;; ----------------------------------------------------------------
+      ;; Example of useful layers you may want to use right away.
+      ;; Uncomment some layer names and press `SPC f e R' (Vim style) or
+      ;; `M-m f e R' (Emacs style) to install them.
+      ;; ----------------------------------------------------------------
+      auto-completion
+      better-defaults
+      emacs-lisp
+      git
+      helm
+      markdown
+      multiple-cursors
+      org
+      ;; (shell :variables
+      ;;        shell-default-height 30
+      ;;        shell-default-position 'bottom)
+      ;; spell-checking
+      ;; syntax-checking
+      treemacs
+      ;; version-control
+      smex
+      (semantic :disabled-for emacs-lisp) ; company-backend for elisp has problem with semantic
+      python
+      (c-c++ :variables
+             c-c++-enable-google-style t
+             c-c++-enable-google-newline t
+             ;; c-c++-enable-clang-support t
+             c-c++-backend 'rtags
+             )
+      ibuffer
+      yaml)
+    )
 #+END_SRC
-And add function in your dotspacemacs/user-config:
-#+BEGIN_SRC emacs-lisp
-  ;; https://github.com/syl20bnr/spacemacs/issues/10293#issuecomment-384337054
-  (defun spacemacs//pyvenv-mode-set-local-virtualenv ()
-      "Set pyvenv virtualenv from \".venv\" by looking in parent directories. handle directory or file"
-      (interactive)
-      (let ((root-path (locate-dominating-file default-directory
-                         ".venv")))
-        (when root-path
-          (let* ((file-path (expand-file-name ".venv" root-path))
-                  (virtualenv
-                    (if (file-directory-p file-path)
-                      file-path
-                      (with-temp-buffer
-                        (insert-file-contents-literally file-path)
-                        (buffer-substring-no-properties (line-beginning-position)
-                          (line-end-position))))))
-            (if (file-directory-p virtualenv)
-              (pyvenv-activate virtualenv)
-              (pyvenv-workon virtualenv))))))
-#+END_SRC
+
+And set the additional packages in =.spacemacs=,
+#+begin_src elisp
+ dotspacemacs-additional-packages sl-packages-list
+#+end_src
 
 Then try load the spacemacs and its settings.
 #+BEGIN_SRC emacs-lisp
@@ -128,7 +108,7 @@ Then try load the spacemacs and its settings.
   (setq spacemacs-start-directory "~/.emacs.spacemacs/")
   (defvar sl-spacemacs-init (expand-file-name "init.el" spacemacs-start-directory))
   (when (file-exists-p sl-spacemacs-init)
-    (custom-set-variables '(magit-git-executable "~/.root/git-2.0.4/bin/git"))
+    ;; (custom-set-variables '(magit-git-executable "~/.root/git-2.0.4/bin/git"))
     (load-file "~/.root/share/gtags/gtags.el")
     (add-to-list 'sl-packages-list 'flycheck-popup-tip)
     ;; load the spacemacs
@@ -140,6 +120,7 @@ Then try load the spacemacs and its settings.
     (when (not (file-exists-p plantuml-jar-path)) ; download plantuml automatically
       (plantuml-download-jar))
     (custom-set-variables '(plantuml-default-exec-mode 'jar)) ; prefer local 'jar than 'server
+    (eval-after-load 'plantuml-mode #'(plantuml-set-output-type "png")) ; default svg request libsvg, change to PNG.
 
     ;; fix the c-basic-offset for google-c-style
     (eval-after-load 'google-c-style
@@ -190,8 +171,11 @@ Some misc settings.
   (add-hook 'after-change-major-mode-hook
             '(lambda () (when (eq major-mode 'js-mode)
                           (setq-local whitespace-line-column 120))))
-
-  (defvar org-babel-load-languages)
-  (org-babel-do-load-languages 'org-babel-load-languages
-                               (add-to-list 'org-babel-load-languages '(plantuml . t)))
 #+END_SRC
+
+** Addtional Requirest
+If need support python =live-py-mode=, it request the =thinter= package, can install by 
+#+begin_src shell
+apt-get install python36-tkinter
+#+end_src
+

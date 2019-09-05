@@ -3,17 +3,36 @@
 This is my .home.sl directory, it containts my Emcas and vim configurations.
 
  The configurations are maintained as git subtrees, follow repos are included,
-| [[https://github.com/sunlin7/.emacs.sl.git][.emacs.sl]] |
-| [[https://github.com/spf13/spf13-vim][spf13-vim]] |
+| [[https://github.com/sunlin7/.home.sl/tree/master/emacs.spacemacs][.emacs.spacemacs]] | active using now                           |
+| [[https://github.com/SpaceVim/SpaceVim][SpaceVim]]         | active using now                           |
+| [[https://github.com/sunlin7/.home.sl/tree/master/emacs.sl][.emacs.sl]]        | I switch to Spacemacs since 2018/11  |
+| [[https://github.com/spf13/spf13-vim][spf13-vim]]        | I switch to SpaceVim since 2019/05         |
 
 * Install and config
+** .emacs.spacemacs for Emacs
+The .emcas.spacemacs is included in this repo.
+Please refer the [[file:emacs.spacemacs/README.org][emacs.spacemacs/README.org]]
+** The SpaceVim distribution https://spacevim.org/
+The SpaceVim can be installed via
+#+BEGIN_SRC sh
+curl -sLf https://spacevim.org/install.sh | bash
+#+END_SRC
+
+Then make a link for .vimrc.local
+#+BEGIN_SRC sh
+ln -s ~/.home.sl/vim.sl/.vimrc.local ~/.vimrc.local
+#+END_SRC
+
+Upgrade with one of follow step:
+- ~git -C ~/.SpaceVim pull.```~
+- Add ~automatic_update = 1~ to your custom configuration file, or
+- Use ~:SPUpdate SpaceVim~ in SpaceVim buffer. 
+For more information, please refer the https://spacevim.org/.
+
 ** .emacs.sl for Emacs
 The .emacs.sl is included in this repo.
 
 Please refer the [[file:emacs.sl/README.org][emacs.sl/README.org]] for setup.
-** .emacs.spacemacs for Emacs
-The .emcas.spacemacs is included in this repo.
-Please refer the [[file:.emacs.spacemace/README.org][emacs.spacemacs/README.org]]
 ** The ultimate vim distribution http://vim.spf13.com
 The vim-spf13 can install via
 #+BEGIN_SRC sh
@@ -33,5 +52,5 @@ vim +BundleInstall! +BundleClean +q
 
 * Update or upgrade
 #+BEGIN_SRC sh
-cd ~/.home.sl/ && git pull
+git -C ~/.home.sl/ pull
 #+END_SRC
