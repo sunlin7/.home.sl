@@ -12,6 +12,8 @@
   "The modules for personal, if this file not exit, all modules will load.")
 (defvar sl-packages-list '()
   "The list of the package used for currrent configuration.")
+(defvar sl-jump-from-user-interactive nil
+  "Flag for marking the jumpping action from user interactive.")
 (defcustom sl-savefile-dir (expand-file-name "savefile" user-emacs-directory)
   "The directory to save data."
   :group 'sl-emacs

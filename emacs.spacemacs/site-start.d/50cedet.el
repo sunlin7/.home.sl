@@ -70,15 +70,17 @@
   "Work with xref marker, and Center the tag after jumping.
 ORIG is the original function.
 TAG, PARENT is the param."
-  (condition-case err
-      (progn
-        (xref-push-marker-stack)
-        (apply orig tag parent)
-        (recenter find-function-recenter-line)
-        (run-hooks 'find-function-after-hook))
-    (error ;;if not found remove the tag saved in the ring
-     (xref-pop-marker-stack)
-     (signal (car err) (cdr err)))))
+  (if sl-jump-from-user-interactive     ; the `semantic-change-function' will trigger `semantic-go-to-tag' also
+      (condition-case err
+          (progn
+            (xref-push-marker-stack)
+            (apply orig tag parent)
+            (recenter find-function-recenter-line)
+            (run-hooks 'find-function-after-hook))
+        (error ;;if not found remove the tag saved in the ring
+         (xref-pop-marker-stack)
+         (signal (car err) (cdr err))))
+    (apply orig tag parent)))
 (advice-add 'semantic-go-to-tag :around #'sl-semantic-go-to-tag-adv)
 
 (defun sl-semantic-get-tags (prefix tags)

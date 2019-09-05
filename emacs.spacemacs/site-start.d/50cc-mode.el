@@ -85,7 +85,13 @@
          (error ;;if not found remove the tag saved in the ring
           (xref-pop-marker-stack)
           (signal (car err) (cdr err)))))
-     (advice-add 'rtags-find-symbol-at-point :around #'sl-rtags-find-symbol-at-point-adv)))
+     (advice-add 'rtags-find-symbol-at-point :around #'sl-rtags-find-symbol-at-point-adv)
+
+     (add-hook 'rtags-after-find-file-hook
+               '(lambda ()
+                  (when sl-jump-from-user-interactive
+                    (recenter find-function-recenter-line)
+                    (run-hooks 'find-function-after-hook))))))
 
 (add-hook 'after-init-hook
           (lambda ()
