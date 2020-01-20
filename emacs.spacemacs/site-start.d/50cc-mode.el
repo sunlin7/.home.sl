@@ -26,11 +26,11 @@
         ((string= "c-mode" major-mode)
          (let ((default-directory temporary-file-directory))
            (shell-command-on-region (point-min) (point-max)
-                                    "gcc -x c -o a - && ./a")))
+                                    "gcc -g -O0 -x c -std=gnu11 -o a - && ./a")))
         ((string= "c++-mode" major-mode)
          (let ((default-directory temporary-file-directory))
            (shell-command-on-region (point-min) (point-max)
-                                    "g++ -x c++ -std=c++11 -o a - && ./a")))
+                                    "g++ -g -O0 -x c++ -std=c++11 -o a - && ./a")))
         ((call-interactively 'compile))))
 
 (eval-after-load 'hideshow
@@ -45,6 +45,14 @@
         (if (hs-already-hidden-p)
             (hs-show-all)
           (hs-hide-all))))
+
+     (define-key-after
+       hs-minor-mode-menu
+       [\(SL\)Toggle\ Show/Hide\ all]
+       '(menu-item "(SL)Toggle Show/Hide all..." sl-toggle-hideshow-all
+                   :help "Toggle Show/Hide all in current buffer..")
+       'Toggle\ Hiding)
+
      (define-key hs-minor-mode-map (kbd "C-M-;") 'sl-toggle-hideshow-all)
      (define-key hs-minor-mode-map (kbd "C-;") 'hs-toggle-hiding)))
 
@@ -68,44 +76,41 @@
             (when (eq major-mode 'c++-mode)
               (when (boundp 'company-clang-arguments)
                 (setq-local company-clang-arguments (add-to-list 'company-clang-arguments "--std=c++11"))))
-            ;; if rtags available, make sure it's the first of company-backend
-            (when (and (boundp 'company-backends)
-                       (member 'company-rtags company-backends)
-                       (functionp 'rtags-is-indexed) (rtags-is-indexed))
-              (setq-local company-backends (push 'company-rtags company-backends)))))
+            ))
 
 
-(eval-after-load 'rtags
+(defun sl-setup-short-keys-for-jumper ()
+  "Setup the short keys for jumping."
+  (let ((mode-map (intern (format "spacemacs-%s-map-root-map" major-mode))))
+    (when (and spacemacs-jump-handlers (boundp mode-map))
+      (define-key (symbol-value mode-map) (kbd "C-.") 'xref-find-definitions)
+      (define-key (symbol-value mode-map) (kbd "C->") 'xref-find-references)
+      (define-key (symbol-value mode-map) (kbd "C-,") 'xref-pop-marker-stack))))
+
+(add-hook 'after-change-major-mode-hook
+          #'sl-setup-short-keys-for-jumper)
+
+(defun sl-python-send-region (&optional beg end)
+  "Support send current line.
+BEG for begine,
+END for end."
+  (interactive)
+  (if (region-active-p)
+      (call-interactively #'python-shell-send-region)
+    (python-shell-send-region
+     (save-excursion (python-nav-beginning-of-statement))
+     (save-excursion (python-nav-end-of-statement)))))
+
+(eval-after-load 'python
   '(progn
-     (defun sl-rtags-find-symbol-at-point-adv (orig &optional prefix)
-       "Support xref marker position. ORIG is the original function, PREFIX is bypass to orig."
-       (condition-case err
-           (progn
-             (xref-push-marker-stack)
-             (apply orig prefix))
-         (error ;;if not found remove the tag saved in the ring
-          (xref-pop-marker-stack)
-          (signal (car err) (cdr err)))))
-     (advice-add 'rtags-find-symbol-at-point :around #'sl-rtags-find-symbol-at-point-adv)
-
-     (add-hook 'rtags-after-find-file-hook
-               '(lambda ()
-                  (when sl-jump-from-user-interactive
-                    (recenter find-function-recenter-line)
-                    (run-hooks 'find-function-after-hook))))))
-
-(add-hook 'after-init-hook
-          (lambda ()
-            (dolist (mode '(c-mode c++-mode python-mode emacs-lisp-mode))
-              (let* ((mode-map (intern (format "spacemacs-%s-map-root-map" mode))))
-                (define-key (symbol-value mode-map) (kbd "C-.")
-                  (lambda ()
-                    (interactive)
-                    (call-interactively (if (and (member major-mode c-c++-modes) (equal c-c++-backend 'rtags)
-                                                 (fboundp 'rtags-is-indexed) (rtags-is-indexed))
-                                            'rtags-find-symbol-at-point
-                                          'spacemacs/jump-to-definition))))
-                (define-key (symbol-value mode-map) (kbd "C-,") 'xref-pop-marker-stack)))))
+     (defvar python-mode-map)
+     (define-key python-mode-map "\C-c\C-e" 'sl-python-send-region)
+     (define-key-after
+       (lookup-key python-mode-map [menu-bar Python])
+       [Eval\ statement]
+       '(menu-item "Eval statement/region" sl-python-send-region
+                   :help "Eval statement or region in inferior Python session.")
+       'Eval\ string)))
 
 (provide '50cc-mode)
 ;;; 50cc-mode ends here

@@ -116,5 +116,15 @@
                             python-shell-interpreter))
               )))
 
+;; fix that the pipenv only find pylint in virtual evnvironment
+;; (eval-after-load 'pipenv
+;;   (advice-add 'pipenv-executable-find :around
+;;               #'(lambda(ORIG executable)
+;;                   (let ((res (funcall ORIG executable)))
+;;                     (or res
+;;                         (progn
+;;                           (message "Warrning: %s not found in pipenv, try global one", executable)
+;;                           (executable-find executable)))))))
+
 (provide '50flycheck)
 ;;; 50flycheck ends here
