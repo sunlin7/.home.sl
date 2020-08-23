@@ -82,7 +82,7 @@
 (defun sl-setup-short-keys-for-jumper ()
   "Setup the short keys for jumping."
   (let ((mode-map (intern (format "spacemacs-%s-map-root-map" major-mode))))
-    (when (and spacemacs-jump-handlers (boundp mode-map))
+    (when (and (boundp 'spacemacs-jump-handlers) (boundp mode-map))
       (define-key (symbol-value mode-map) (kbd "C-.") 'xref-find-definitions)
       (define-key (symbol-value mode-map) (kbd "C->") 'xref-find-references)
       (define-key (symbol-value mode-map) (kbd "C-,") 'xref-pop-marker-stack))))
