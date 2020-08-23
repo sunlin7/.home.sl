@@ -2,6 +2,10 @@
 ;;; Commentary:
 ;;; Code:
 (autoload 'yas-load-directory "yasnippet")
+(defun sl-disable-yas-minor-mode ()
+  "Disable the `yas-minor-mode' for not well unsupport major-mode."
+  (when (fboundp 'yas-minor-mode)
+    (yas-minor-mode -1)))
 (add-hook
  'after-init-hook
  (lambda ()
@@ -11,10 +15,6 @@
      (let ((snippets-dir (expand-file-name "snippets/" sl-savefile-dir)))
        (when (file-exists-p snippets-dir)
          (yas-load-directory snippets-dir)))
-     (defun sl-disable-yas-minor-mode ()
-       "Disable the `yas-minor-mode' for not well unsupport major-mode."
-       (when (fboundp 'yas-minor-mode)
-         (yas-minor-mode -1)))
      (add-hook 'term-mode-hook 'sl-disable-yas-minor-mode)      ; TAB key conflict, turn yas off
      (add-hook 'inferior-python-mode-hook 'sl-disable-yas-minor-mode))))
 
