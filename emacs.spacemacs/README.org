@@ -52,10 +52,20 @@ Config the spacemacs with follow layers in =.spacemacs=
   (defun dotspacemacs/layers ()
     "Layer configuration:
   This function should only modify configuration layer settings."
-    '(csv
+    '(systemd
+      csv
+      dap
+      rust
       django
       graphviz
       gtags
+      lsp
+      ;; lua
+      (lua :variables
+           lua-backend 'lsp-emmy
+           lua-lsp-emmy-jar-path (expand-file-name "share/EmmyLua-LS-all.jar" portable-root-dir)
+           lua-lsp-emmy-enable-file-watchers nil
+           lua-indent-offset 4)
       (plantuml :variables
                 plantuml-jar-path (expand-file-name "~/.root/share/plantuml.jar")
                 org-plantuml-jar-path (expand-file-name "~/.root/share/plantuml.jar"))
@@ -80,6 +90,7 @@ Config the spacemacs with follow layers in =.spacemacs=
       emacs-lisp
       git
       helm
+      ;; ivy
       markdown
       multiple-cursors
       org
@@ -89,7 +100,7 @@ Config the spacemacs with follow layers in =.spacemacs=
       ;; spell-checking
       ;; syntax-checking
       treemacs
-      ;; version-control
+      version-control
       smex
       (semantic :disabled-for emacs-lisp) ; company-backend for elisp has problem with semantic
       python
@@ -97,10 +108,15 @@ Config the spacemacs with follow layers in =.spacemacs=
              c-c++-enable-google-style t
              c-c++-enable-google-newline t
              ;; c-c++-enable-clang-support t
-             c-c++-backend 'clangd
+             c-c++-backend 'lsp-clangd
              )
       ibuffer
-      yaml)
+      imenu-list
+      yaml
+      octave
+      (xclipboard :variables xclipboard-enable-cliphist t)
+      ietf
+      )
     )
 #+END_SRC
 
@@ -109,6 +125,15 @@ And set the additional packages in =.spacemacs=,
  dotspacemacs-additional-packages sl-packages-list
 #+end_src
 
+Try to ignore follow packages:
+#+begin_src emacs-lisp
+  dotspacemacs-excluded-packages '(ccls
+                                   rtags
+                                   company-rtags
+                                   company-ycmd
+                                   flycheck-rtags
+                                   helm-rtags)
+#+end_src
 Then try load the spacemacs and its settings.
 #+BEGIN_SRC emacs-lisp
   ;; assume the spacemaces was installed.
@@ -116,8 +141,14 @@ Then try load the spacemacs and its settings.
   (defvar sl-spacemacs-init (expand-file-name "init.el" spacemacs-start-directory))
   (when (file-exists-p sl-spacemacs-init)
     ;; (custom-set-variables '(magit-git-executable "~/.root/git-2.0.4/bin/git"))
-    (load-file "~/.root/share/gtags/gtags.el")
-    (add-to-list 'sl-packages-list 'flycheck-popup-tip)
+    (let ((magit-exec (expand-file-name "bin/git" portable-root-dir)))
+      (when (file-exists-p magit-exec)
+        (setq-default magit-git-executable magit-exec)))
+    (let ((gtags-el (expand-file-name "share/gtags/gtags.el" portable-root-dir)))
+      (when (file-exists-p gtags-el)
+        (load-file gtags-el)))
+    (setq sl-packages-list
+          (append sl-packages-list '(flycheck-popup-tip)))
     (let ((dotspath (expand-file-name ".spacemacs" portable-home-dir)))
       (when (file-exists-p dotspath)
         (defvar dotspacemacs-filepath dotspath)))
@@ -130,7 +161,7 @@ Then try load the spacemacs and its settings.
     (when (not (file-exists-p plantuml-jar-path)) ; download plantuml automatically
       (plantuml-download-jar))
     (custom-set-variables '(plantuml-default-exec-mode 'jar)) ; prefer local 'jar than 'server
-    (eval-after-load 'plantuml-mode #'(plantuml-set-output-type "png")) ; default svg request libsvg, change to PNG.
+    ;; (eval-after-load 'plantuml-mode #'(plantuml-set-output-type "png")) ; default svg request libsvg, change to PNG.
 
     ;; fix the c-basic-offset for google-c-style
     (eval-after-load 'google-c-style
