@@ -5,15 +5,22 @@ This is my .emacs configure for emacs25 on Ubuntu 18.04.
 It depends on the Spacemacs.
 
 ** My configurations
+To make the emacs portable, we get the root-dir and home-dir from load file
+#+begin_src emacs-lisp
+(defvar portable-root-dir
+  (expand-file-name ".." invocation-directory))
+(defvar portable-home-dir
+  (file-name-directory (or load-file-name (buffer-file-name))))
+#+end_src
 Sometimes I want remove all the confgiure files but the saved files,
 so set save-file directory out of .emacs.d directory.
 #+BEGIN_SRC emacs-lisp
-(defvar sl-savefile-dir "~/.emacs.save/")
+(defvar sl-savefile-dir (expand-file-name ".emacs.save/" portable-home-dir))
 #+END_SRC
 
 Define the configuration directory, and load it.
 #+BEGIN_SRC emacs-lisp
-(defvar sl-init-file "~/.home.sl/emacs.spacemacs/init.el")
+(defvar sl-init-file (expand-file-name ".home.sl/emacs.spacemacs/init.el" portable-home-dir))
 (when (file-exists-p sl-init-file)
   (load-file sl-init-file))
 #+END_SRC
@@ -105,12 +112,15 @@ And set the additional packages in =.spacemacs=,
 Then try load the spacemacs and its settings.
 #+BEGIN_SRC emacs-lisp
   ;; assume the spacemaces was installed.
-  (setq spacemacs-start-directory "~/.emacs.spacemacs/")
+  (setq spacemacs-start-directory (expand-file-name ".emacs.spacemacs/" portable-home-dir))
   (defvar sl-spacemacs-init (expand-file-name "init.el" spacemacs-start-directory))
   (when (file-exists-p sl-spacemacs-init)
     ;; (custom-set-variables '(magit-git-executable "~/.root/git-2.0.4/bin/git"))
     (load-file "~/.root/share/gtags/gtags.el")
     (add-to-list 'sl-packages-list 'flycheck-popup-tip)
+    (let ((dotspath (expand-file-name ".spacemacs" portable-home-dir)))
+      (when (file-exists-p dotspath)
+        (defvar dotspacemacs-filepath dotspath)))
     ;; load the spacemacs
     (load-file sl-spacemacs-init)
     ;; post-config for prelude
