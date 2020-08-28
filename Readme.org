@@ -27,6 +27,8 @@ Upgrade with one of follow step:
 - Use ~:SPUpdate SpaceVim~ in SpaceVim buffer. 
 For more information, please refer the https://spacevim.org/.
 
+** Misc tools
+Please refer the [[./tools/Readme.org]] for details.
 * Update or upgrade
 #+BEGIN_SRC sh
 git -C ~/.home.sl/ pull

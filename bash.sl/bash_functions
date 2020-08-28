@@ -113,3 +113,5 @@ else
         command -v ${cmd/ */} > /dev/null && alias o=$cmd && break;
     done
 fi
+
+[[ -z "$HOSTALIASES" ]] && export HOSTALIASES=$HOME/.local/etc/hosts

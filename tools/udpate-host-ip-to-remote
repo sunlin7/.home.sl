@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# Update current host IP to remote ~/.hosts.
+# The target host can use the hosts file via `export HOSTALIASES=~/.local/etc/hosts`
+# this script require the ssh login already be authenticated via ssh key.
+# A example for start this script from cygwin:
+# $ cygstart.exe --hide /usr/bin/bash ..PATH../update-host-ip-to-remote my-pc '192.168.0.[0-9]*' ssh-h1 ssh-h2
+# And the in host machine, the
+PATH=/bin:/usr/bin:$PATH
+if [[ $# < 3 ]]; then
+    echo 'Update IP to remote host
+update-host-ip-to-remote MY-HOST-NAME IP-PATTERN SSH-HOST1 [SSH-HOSTN, ...]'
+    exit 1
+fi
+
+HOST_NAME=$1
+shift
+IP_PART=$1
+shift
+IP_STR=$(ipconfig)
+[[ -z "IP_STR" ]] && IP_STR=$(ip addr)
+OA_IP=$(echo "$IP_STR" | sed -e  's/.*IPv4 Address.*\('$IP_PART'\).*$/\1/p' -e 'd')
+for x in "$@"; do
+    ssh $x "/usr/bin/sudo sed -e '/.*$HOST_NAME.*/ d' /etc/hosts -i; echo $OA_IP $HOST_NAME | /usr/bin/sudo tee -a /etc/hosts;"
+    ssh -il $x "HOSTALIASES=\$(test -z $HOSTALIASES && echo ~/.local/etc/hosts || echo $HOSTALIASES);
+sed -e '/.*$HOST_NAME.*/ d' \$HOSTALIASES -i;
+echo $OA_IP $HOST_NAME >> \$HOSTALIASES;"
+done
