@@ -33,3 +33,9 @@ Please refer the [[./tools/Readme.org]] for details.
 #+BEGIN_SRC sh
 git -C ~/.home.sl/ pull
 #+END_SRC
+
+* Misc note for usage
+** WSL2 DISPLAY
+In .bashrc
+export DISPLAY="$(route -4 |awk '/172/ {print $1"1:0"}')"
+
