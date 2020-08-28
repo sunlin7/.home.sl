@@ -152,7 +152,6 @@ And the project settings:
 Some misc settings.
 #+BEGIN_SRC emacs-lisp
   (custom-set-variables
-   '(ecb-fix-window-size t)
    '(max-lisp-eval-depth 100000)
    '(max-specpdl-size    100000)
    '(dired-listing-switches "-alt"))
