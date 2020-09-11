@@ -143,22 +143,19 @@ Then try load the spacemacs and its settings.
     (load-file sl-spacemacs-init)
     ;; post-config for spacemacs
     (menu-bar-mode t)
-    (eval-after-load 'projectile          ; map the "G" for shortcut "s g"
-      #'(define-key projectile-command-map (kbd "G") #'projectile-grep))
-    (when (not (file-exists-p plantuml-jar-path)) ; download plantuml automatically
-      (plantuml-download-jar))
-    (custom-set-variables '(plantuml-default-exec-mode 'jar)) ; prefer local 'jar than 'server
-    ;; (eval-after-load 'plantuml-mode #'(plantuml-set-output-type "png")) ; default svg request libsvg, change to PNG.
+    ;; (when (not (file-exists-p plantuml-jar-path)) ; download plantuml automatically
+    ;;  (plantuml-download-jar))
+    ;; (eval-after-load 'plantuml-mode #'(plantuml-set-output-type "png"))
+    (custom-set-variables '(plantuml-default-exec-mode 'jar))
 
-    ;; fix the c-basic-offset for google-c-style
-    (eval-after-load 'google-c-style
-      (dolist (v google-c-style)
-        (when (and (listp v) (eq (car v) 'c-basic-offset)) 
-          (setcdr v 4))))
-    ;; tab-width corresponed to the c-basic-offset
-    (add-hook 'c-mode-common-hook
-              (lambda ()
-                (setq-local tab-width c-basic-offset)))
+    ;;;; fix the c-basic-offset for google-c-style
+    ;; (eval-after-load 'google-c-style
+    ;;   (dolist (v google-c-style)
+    ;;     (when (and (listp v) (eq (car v) 'c-basic-offset))
+    ;;       (setcdr v 4))))
+    ;;;; tab-width corresponed to the c-basic-offset
+    ;; (add-hook 'c-mode-common-hook
+    ;;           (lambda () (setq-local tab-width c-basic-offset)))
     ;; check the the checkers
     (when (not (executable-find "gcc"))
       (custom-set-variables '(flycheck-disabled-checkers '(c/c++-gcc))))
