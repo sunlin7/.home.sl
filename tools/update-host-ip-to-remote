@@ -18,7 +18,12 @@ IP_PART=$1
 shift
 IP_STR=$(ipconfig)
 [[ -z "IP_STR" ]] && IP_STR=$(ip addr)
+[[ -z "IP_STR" ]] && IP_STR=$(ifconfig)
 OA_IP=$(echo "$IP_STR" | sed -e  's/.*IPv4 Address.*\('$IP_PART'\).*$/\1/p' -e 'd')
+if [[ -z "$OA_IP" ]]; then
+    echo "Can't get IP"
+    exit 1
+fi
 for x in "$@"; do
     ssh $x "/usr/bin/sudo sed -e '/.*$HOST_NAME.*/ d' /etc/hosts -i; echo $OA_IP $HOST_NAME | /usr/bin/sudo tee -a /etc/hosts;"
     ssh -il $x "HOSTALIASES=\$(test -z $HOSTALIASES && echo ~/.local/etc/hosts || echo $HOSTALIASES);
