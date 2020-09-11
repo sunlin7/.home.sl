@@ -186,6 +186,7 @@ And the project settings:
 
 Some misc settings.
 #+BEGIN_SRC emacs-lisp
+  (xterm-mouse-mode 0)
   (custom-set-variables
    '(max-lisp-eval-depth 100000)
    '(max-specpdl-size    100000)
@@ -196,6 +197,7 @@ Some misc settings.
     '(when (boundp 'dired-omit-extensions)
        (delete ".bin" dired-omit-extensions)))
   (add-to-list 'auto-coding-alist '("\\.log" . dos))
+  (add-to-list 'auto-mode-alist '("\\.mtl\\'" . xml-mode))
 
   (add-hook 'after-change-major-mode-hook
             '(lambda () (when (eq major-mode 'js-mode)
