@@ -7,22 +7,19 @@ It depends on the Spacemacs.
 ** My configurations
 To make the emacs portable, we get the root-dir and home-dir from load file
 #+begin_src emacs-lisp
-(defvar portable-root-dir
-  (expand-file-name ".." invocation-directory))
-(defvar portable-home-dir
-  (file-name-directory (or load-file-name (buffer-file-name))))
+  (defvar portable-root-dir (expand-file-name ".." invocation-directory))
+  (defvar portable-home-dir (file-name-directory (or load-file-name (buffer-file-name))))
 #+end_src
 Sometimes I want remove all the confgiure files but the saved files,
 so set save-file directory out of .emacs.d directory.
 #+BEGIN_SRC emacs-lisp
-(defvar sl-savefile-dir (expand-file-name ".emacs.save/" portable-home-dir))
+  (defvar sl-savefile-dir (expand-file-name ".emacs.save/" portable-home-dir))
 #+END_SRC
 
 Define the configuration directory, and load it.
 #+BEGIN_SRC emacs-lisp
-(defvar sl-init-file (expand-file-name ".home.sl/emacs.spacemacs/init.el" portable-home-dir))
-(when (file-exists-p sl-init-file)
-  (load-file sl-init-file))
+  (defvar sl-init-file (expand-file-name ".home.sl/emacs.spacemacs/init.el" portable-home-dir))
+  (when (file-exists-p sl-init-file) (load-file sl-init-file))
 #+END_SRC
 After that, we can install the packages from elpa, just run follow function by press <kbd>Alt+x<kbd>
 #+begin_src emacs-lisp :tangle yes
@@ -140,21 +137,16 @@ Then try load the spacemacs and its settings.
   (setq spacemacs-start-directory (expand-file-name ".emacs.spacemacs/" portable-home-dir))
   (defvar sl-spacemacs-init (expand-file-name "init.el" spacemacs-start-directory))
   (when (file-exists-p sl-spacemacs-init)
-    ;; (custom-set-variables '(magit-git-executable "~/.root/git-2.0.4/bin/git"))
     (let ((magit-exec (expand-file-name "bin/git" portable-root-dir)))
-      (when (file-exists-p magit-exec)
-        (setq-default magit-git-executable magit-exec)))
+      (when (file-exists-p magit-exec) (setq-default magit-git-executable magit-exec)))
     (let ((gtags-el (expand-file-name "share/gtags/gtags.el" portable-root-dir)))
-      (when (file-exists-p gtags-el)
-        (load-file gtags-el)))
-    (setq sl-packages-list
-          (append sl-packages-list '(flycheck-popup-tip)))
+      (when (file-exists-p gtags-el) (load-file gtags-el)))
+
     (let ((dotspath (expand-file-name ".spacemacs" portable-home-dir)))
-      (when (file-exists-p dotspath)
-        (defvar dotspacemacs-filepath dotspath)))
+      (when (file-exists-p dotspath) (defvar dotspacemacs-filepath dotspath)))
     ;; load the spacemacs
     (load-file sl-spacemacs-init)
-    ;; post-config for prelude
+    ;; post-config for spacemacs
     (menu-bar-mode t)
     (eval-after-load 'projectile          ; map the "G" for shortcut "s g"
       #'(define-key projectile-command-map (kbd "G") #'projectile-grep))
@@ -202,12 +194,12 @@ Some misc settings.
     '(when (boundp 'dired-omit-extensions)
        (delete ".bin" dired-omit-extensions)))
   (add-to-list 'auto-coding-alist '("\\.log" . dos))
-  (when (daemonp)
-    (add-hook 'after-init-hook (lambda () (cd "~"))))
 
   (add-hook 'after-change-major-mode-hook
             '(lambda () (when (eq major-mode 'js-mode)
                           (setq-local whitespace-line-column 120))))
+  (when (daemonp) (add-hook 'after-init-hook (lambda () (cd "~"))))
+
 #+END_SRC
 
 ** Addtional Requirest
