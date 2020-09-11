@@ -82,6 +82,7 @@ pa () {
 }
 
 [[ -n "$SSH_CLIENT" ]] && [[ -z "$DISPLAY" ]] && export DISPLAY=${SSH_CLIENT/ */:0}
+[[ -n "$SSH_CLIENT" ]] && [[ -z "$PULSE_SERVER" ]] && export PULSE_SERVER=tcp:${SSH_CLIENT/ */}
 [[ -d "$HOME/.root/bin" ]] && PATH="$HOME/.root/bin:$PATH"
 [[ -d "$HOME/.bin" ]]      && PATH="$HOME/.bin:$PATH"
 export PATH
