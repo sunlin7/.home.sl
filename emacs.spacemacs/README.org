@@ -137,12 +137,22 @@ Then try load the spacemacs and its settings.
     (let ((gtags-el (expand-file-name "share/gtags/gtags.el" portable-root-dir)))
       (when (file-exists-p gtags-el) (load-file gtags-el)))
 
+    (setq sl-packages-list (append sl-packages-list
+                                   '(flycheck-popup-tip nov pdf-tools org-pdftools)))
+
     (let ((dotspath (expand-file-name ".spacemacs" portable-home-dir)))
       (when (file-exists-p dotspath) (defvar dotspacemacs-filepath dotspath)))
     ;; load the spacemacs
     (load-file sl-spacemacs-init)
     ;; post-config for spacemacs
     (menu-bar-mode t)
+    (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode))
+    (pdf-loader-install)
+    (eval-after-load 'pdf-tools
+      #'(push 'pdf-view-midnight-minor-mode pdf-tools-enabled-modes))
+    (use-package org-pdftools
+      :hook (org-load . org-pdftools-setup-link))
+
     ;; (when (not (file-exists-p plantuml-jar-path)) ; download plantuml automatically
     ;;  (plantuml-download-jar))
     ;; (eval-after-load 'plantuml-mode #'(plantuml-set-output-type "png"))
