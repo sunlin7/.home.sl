@@ -202,6 +202,18 @@ Some misc settings.
   (add-hook 'after-change-major-mode-hook
             '(lambda () (when (eq major-mode 'js-mode)
                           (setq-local whitespace-line-column 120))))
+
+  (advice-add 'pyvenv-activate :around
+              #'(lambda (ORIG directory)
+                  (let ((sl-calling-pyvenv-activate t))
+                    (funcall ORIG directory))))
+  (advice-add 'pyvenv-deactivate :around
+              #'(lambda (ORIG)
+                  (if (and (boundp 'sl-calling-pyvenv-activate)
+                           sl-calling-pyvenv-activate)
+                      (ignore-errors (funcall ORIG))
+                    (funcall ORIG))))
+
   (when (daemonp) (add-hook 'after-init-hook (lambda () (cd "~"))))
 
 #+END_SRC
