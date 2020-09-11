@@ -36,6 +36,9 @@ git -C ~/.home.sl/ pull
 
 * Misc note for usage
 ** WSL2 DISPLAY
-In .bashrc
+In .bashrc of WSL2 env
 export DISPLAY="$(route -4 |awk '/172/ {print $1"1:0"}')"
+
+** WSL start emacs daemon from windows shortcut
+wsl.exe -u sunlin7 -e /bin/bash -lc "PATH=~/.root/bin:$PATH emacs --daemon --display=172.17.16.1:0"
 
