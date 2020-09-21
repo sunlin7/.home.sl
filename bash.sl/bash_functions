@@ -81,8 +81,10 @@ pa () {
     fi
 }
 
+[[ -n "$EMACS" ]] && export EDITOR="emacsclient"
 [[ -n "$SSH_CLIENT" ]] && [[ -z "$DISPLAY" ]] && export DISPLAY=${SSH_CLIENT/ */:0}
 [[ -n "$SSH_CLIENT" ]] && [[ -z "$PULSE_SERVER" ]] && export PULSE_SERVER=tcp:${SSH_CLIENT/ */}
+[[ -z "$HOSTALIASES" ]] && export HOSTALIASES=$HOME/.local/etc/hosts
 [[ -d "$HOME/.root/bin" ]] && PATH="$HOME/.root/bin:$PATH"
 [[ -d "$HOME/.bin" ]]      && PATH="$HOME/.bin:$PATH"
 export PATH
@@ -101,8 +103,6 @@ for cmd in "gio trash" gvfs-trash trash-put; do
     command -v ${cmd/ */} > /dev/null && alias rm=$cmd && break;
 done
 
-[[ -n "$EMACS" ]] && export EDITOR="emacsclient"
-
 operator_system=$(uname -o)
 if [ "$operator_system" == "Cygwin" -o "$operator_system" == "Msys" ]; then
     function o() {
@@ -115,4 +115,3 @@ else
     done
 fi
 
-[[ -z "$HOSTALIASES" ]] && export HOSTALIASES=$HOME/.local/etc/hosts
