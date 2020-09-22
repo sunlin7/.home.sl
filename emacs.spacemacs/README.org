@@ -224,3 +224,13 @@ If need support python =live-py-mode=, it request the =thinter= package, can ins
 apt-get install python36-tkinter
 #+end_src
 
+** Ctrl+Alt_R+X not working for mintty (xterm)
+   Report to [[https://github.com/mintty/mintty/issues/1034][mintty#1034 CTRL + ALT_R + F combination does not work]], workaround is following
+   [[https://github.com/mintty/mintty/issues/1034#issuecomment-693930315][mintty1034#issuecomment-693930315]] to map ALT_R to ALT_L.
+#+begin_src text :tangle "map-alt_r-to-alt_l.reg"
+  Windows Registry Editor Version 5.00
+
+  [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Keyboard Layout]
+  "Scancode Map"=hex:00,00,00,00,00,00,00,00,02,00,00,00,38,00,38,e0,00,00,00,00
+#+end_src
+
