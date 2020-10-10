@@ -2,22 +2,29 @@
 ;;; Commentary:
 ;;; Code:
 
-;; (add-hook 'gdb-mode-hook
-;;           '(lambda ()
-;;              (define-key gud-minor-mode-map [(f9)] 'gud-run)
-;;              (define-key gud-minor-mode-map [(f5)] 'gud-step)
-;;              (define-key gud-minor-mode-map [(f7)] 'gud-next)
-;;              (define-key gud-minor-mode-map [(f6)] 'gud-finish)
-;;              (define-key gud-minor-mode-map [(f8)] 'gud-go)))
+(add-hook 'gdb-mode-hook
+          '(lambda ()
+             (define-key gud-minor-mode-map [(f5)] 'gud-go)
+             (define-key gud-minor-mode-map [(f6)] 'gud-print)
+             (define-key gud-minor-mode-map [(S+f6)] 'gud-pstar)
+             (define-key gud-minor-mode-map [(f7)] 'gud-step)
+             (define-key gud-minor-mode-map [(f8)] 'gud-next)
+             (define-key gud-minor-mode-map [(S-f8)] 'gud-finish)
+             (define-key gud-minor-mode-map [(C-f8)] 'gud-until)
+             (define-key gud-minor-mode-map [(f9)] 'gud-break)
+             (define-key gud-minor-mode-map [(S-f9)] 'gud-remove)
+             (define-key gud-minor-mode-map [(C-f9)] 'gud-tbreak)))
 
-;; (defadvice gud-display-line (after gud-display-line-centered activate)
-;;   "Center the line in the window."
+;; (defun sl-gud-display-line-centered (true-file line)
+;;   "Center the line in the source frame"
 ;;   (when (and gud-overlay-arrow-position gdb-source-window)
 ;;     (with-selected-window gdb-source-window
 ;;       ;; (marker-buffer gud-overlay-arrow-position)
 ;;       (save-restriction
-;;         (forward-line (ad-get-arg 1))
+;;         ;; (forward-line (ad-get-arg 1))
 ;;         (recenter)))))
+
+;; (advice-add 'gud-display-line :after #'sl-gud-display-line-centered)
 
 (provide '50gdb)
 ;;; 50gdb ends here
