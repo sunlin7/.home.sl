@@ -33,7 +33,8 @@
     (message full-file-name)
     (kill-new full-file-name)))
 
-(global-set-key (kbd "C-c . l k") 'sl-copy-full-path)
+(add-hook 'after-change-major-mode-hook
+          (lambda () (global-set-key (kbd "C-c . l k") 'sl-copy-full-path)))
 
 (provide '20misc)
 ;;; 20misc ends here
