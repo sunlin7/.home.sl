@@ -26,6 +26,8 @@ Upgrade with one of follow step:
 - Add ~automatic_update = 1~ to your custom configuration file, or
 - Use ~:SPUpdate SpaceVim~ in SpaceVim buffer. 
 For more information, please refer the https://spacevim.org/.
+NOTE: vimproc didn't build automatically, run follow command to build it:
+make -C ~/.SpaceVim/bundle/vimproc.vim/
 
 ** Misc tools
 Please refer the [[./tools/Readme.org]] for details.
