@@ -39,8 +39,7 @@
             '(auto-completion
               better-defaults
               csv
-              (chinese :variables
-                       chinese-default-input-method 'wubi)
+              chinese
               (c-c++ :variables
                      c-c++-enable-google-style t
                      c-c++-enable-google-newline t
@@ -150,6 +149,13 @@
   (load-file sl-spacemacs-init)
   (setq dotspacemacs-frame-title-format "%b@%S")
   ;; post-config for spacemacs
+  (when (featurep 'pyim)
+    (let ((file (expand-file-name "share/pyim-wbdict-v86.rime" portable-root-dir)))
+      (pyim-extra-dicts-add-dict `(:name "wbdict-v86-rime" :file ,file)))
+    (custom-set-variables '(pyim-default-scheme 'wubi)
+                          '(default-input-method "pyim")
+                          '(pyim-assistant-scheme-enable t)))
+
   (menu-bar-mode t)
   (when sl-x11-support
     (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode))
