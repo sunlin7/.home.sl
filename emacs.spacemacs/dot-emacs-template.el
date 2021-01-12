@@ -13,6 +13,12 @@
 (defvar PYTHON_VER_BIN "python3")
 (when (executable-find PYTHON_VER_BIN) (setenv "PYTHONUSERBASE" portable-root-dir))
 
+;; remove windows Python from path which has issues for emacs-win32
+(setq exec-path
+      (seq-remove
+       (lambda (x) (string-match-p "AppData/Local/Programs/Python" x))
+       exec-path))
+
 ;; assume the spacemaces was installed.
 (setq spacemacs-start-directory (expand-file-name ".emacs.spacemacs/" portable-home-dir))
 (defvar sl-spacemacs-init (expand-file-name "init.el" spacemacs-start-directory))
@@ -21,11 +27,41 @@
     (when (file-exists-p magit-exec) (setq-default magit-git-executable magit-exec)))
   (let ((gtags-el (expand-file-name "share/gtags/gtags.el" portable-root-dir)))
     (when (file-exists-p gtags-el) (load-file gtags-el)))
-  ;; FIXME: the ~/.spacemacs.env has incorrect PYTHONUSERBASE, correct it.
+  ;; FIXME: the ~/.spacemacs.env maybe has incorrect PYTHONUSERBASE, correct it.
   (setenv "PYTHONUSERBASE" portable-root-dir)
 
-  (if sl-x11-support
-      (setq sl-packages-list (append sl-packages-list
+  (pcase system-type
+    ('windows-nt
+     (setq sl-packages-list (append sl-packages-list
+                                    '(flycheck-popup-tip))
+           sl-packages-excluded '(ccls
+                                  rtags
+                                  company-rtags
+                                  company-ycmd
+                                  flycheck-rtags
+                                  helm-rtags
+                                  tern
+                                  tide)
+           sl-configuration-layers
+           '(auto-completion
+             better-defaults
+             csv
+             emacs-lisp
+             git
+             helm
+             ibuffer
+             javascript
+             lua
+             multiple-cursors
+             org
+             python
+             sql
+             treemacs
+             version-control
+             windows-scripts
+             )))
+    ((and sl-x11-support)
+     (setq sl-packages-list (append sl-packages-list
                                      '(flycheck-popup-tip nov pdf-tools org-pdftools))
             sl-packages-excluded '(ccls
                                    rtags
@@ -92,56 +128,55 @@
               (xclipboard :variables
                           xclipboard-enable-cliphist t)
               yaml
-              windows-scripts))
-
-    ;; else just terminal without X11
-    (setq sl-packages-list (append sl-packages-list
-                                   '(flycheck-popup-tip))
-          sl-packages-excluded '(ccls
-                                 rtags
-                                 company-rtags
-                                 company-ycmd
-                                 flycheck-rtags
-                                 helm-rtags
-                                 pdf-tools
-                                 org-pdftools
-                                 tide
-                                 yasnippet
-                                 yasnippet-snippets)
-          sl-configuration-layers
-          '(auto-completion
-            better-defaults
-            (c-c++ :variables
-                   c-c++-enable-google-style t
-                   c-c++-enable-google-newline t
-                   ;; c-c++-enable-clang-support t
-                   c-c++-backend 'lsp-clangd)
-            emacs-lisp
-            gtags
-            helm
-            html
-            ibuffer
-            imenu-list
-            lsp
-            (lua :variables
-                 lua-backend 'lsp-emmy
-                 lua-lsp-emmy-jar-path (expand-file-name "share/EmmyLua-LS-all.jar" portable-root-dir)
-                 lua-lsp-emmy-enable-file-watchers nil
-                 lua-indent-offset 4)
-            markdown
-            multiple-cursors
-            nginx
-            smex
-            (sql :variables
-                 sql-capitalize-keywords t
-                 sql-capitalize-keywords-blacklist '("name" "varchar"))
-            ;; ivy
-            (semantic :disabled-for emacs-lisp) ; company-backend for elisp has problem with semantic
-            python
-            (xclipboard :variables
-                        xclipboard-enable-cliphist t)
-            yaml
-            vimscript)))
+              windows-scripts)))
+    (t ;; terminal without X11
+      (setq sl-packages-list (append sl-packages-list
+                                     '(flycheck-popup-tip))
+            sl-packages-excluded '(ccls
+                                   rtags
+                                   company-rtags
+                                   company-ycmd
+                                   flycheck-rtags
+                                   helm-rtags
+                                   pdf-tools
+                                   org-pdftools
+                                   tide
+                                   yasnippet
+                                   yasnippet-snippets)
+            sl-configuration-layers
+            '(auto-completion
+              better-defaults
+              (c-c++ :variables
+                     c-c++-enable-google-style t
+                     c-c++-enable-google-newline t
+                     ;; c-c++-enable-clang-support t
+                     c-c++-backend 'lsp-clangd)
+              emacs-lisp
+              gtags
+              helm
+              html
+              ibuffer
+              imenu-list
+              lsp
+              (lua :variables
+                   lua-backend 'lsp-emmy
+                   lua-lsp-emmy-jar-path (expand-file-name "share/EmmyLua-LS-all.jar" portable-root-dir)
+                   lua-lsp-emmy-enable-file-watchers nil
+                   lua-indent-offset 4)
+              markdown
+              multiple-cursors
+              nginx
+              smex
+              (sql :variables
+                   sql-capitalize-keywords t
+                   sql-capitalize-keywords-blacklist '("name" "varchar"))
+              ;; ivy
+              (semantic :disabled-for emacs-lisp) ; company-backend for elisp has problem with semantic
+              python
+              (xclipboard :variables
+                          xclipboard-enable-cliphist t)
+              yaml
+              vimscript))))
 
   (let ((dotspath (expand-file-name ".spacemacs" portable-home-dir)))
     (when (file-exists-p dotspath) (defvar dotspacemacs-filepath dotspath)))
@@ -182,7 +217,18 @@
   (when (not (executable-find "clang"))
     (custom-set-variables '(flycheck-disabled-checkers '(c/c++-clang)))))
 
-(when (daemonp) (add-hook 'after-init-hook (lambda () (cd "~"))))
+(when (daemonp)
+  (add-hook 'after-init-hook
+            (lambda () (cd "~")
+              ;; try to preload these on mingw64/cygwin
+              (with-temp-buffer
+                (require 'helm-files)
+                (require 'helm-external)
+                (require 'helm-mode)
+                (helm-mode t)))))
+
+(when (not (executable-find invocation-name))
+  (warn "Emacs not in PATH, recommend '[...\mingw64.exe] bash -lc runemacs'"))
 
 (xterm-mouse-mode 0)
 
