@@ -46,6 +46,8 @@ If need support python =live-py-mode=, it request the =thinter= package, can ins
 apt-get install python36-tkinter
 #+end_src
 
+Spacemacs use some symbols fonts in ~spacemacs--diminished-minor-modes~, install ~ttf-ancient-fonts-symbola~ or ~adobe-source-han-sans-cn-fonts~ for them.
+The fonts depends by ~all-the-icons~ can downloaded with elisp `all-the-icons-install-fonts'.
 ** Ctrl+Alt_R+X not working for mintty (xterm)
    Report to [[https://github.com/mintty/mintty/issues/1034][mintty#1034 CTRL + ALT_R + F combination does not work]], workaround is following
    [[https://github.com/mintty/mintty/issues/1034#issuecomment-693930315][mintty1034#issuecomment-693930315]] to map ALT_R to ALT_L.
