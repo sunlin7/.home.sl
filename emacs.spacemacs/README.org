@@ -59,8 +59,13 @@ The fonts depends by ~all-the-icons~ can downloaded with elisp `all-the-icons-in
 #+end_src
 
 ** Shortcuts from Windows to Remote
-   *shortcut for remote host:*
+   *shortcut for remote linux host:*
    \cygwin64\bin\cygstart.exe --hide /usr/bin/ssh.exe -XCnf dev "/bin/bash -lc '~/.root/bin/emacsclient\ -c\ -n\ --alternate-editor='"
+   
    *shortcut for WSL:*
    wsl.exe -u sunlin7 -e /bin/bash -lc "~/.root/bin/emacsclient -c -n --alternate-editor="
+   
+   *shortcut for mingw64*
+   C:\msys64\mingw64.exe bash -lc "runemacs --daemon"
+   C:\msys64\mingw64\bin\emacsclientw.exe -c
 
