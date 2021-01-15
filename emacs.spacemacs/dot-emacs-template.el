@@ -61,7 +61,7 @@
              version-control
              windows-scripts
              )))
-    ((and sl-x11-support)
+    ((guard sl-x11-support)
      (setq sl-packages-list (append sl-packages-list
                                     '(flycheck-popup-tip nov pdf-tools org-pdftools))
            sl-packages-excluded '(anaconda-mode
@@ -135,7 +135,7 @@
                          xclipboard-enable-cliphist t)
              yaml
              windows-scripts)))
-    (t ;; terminal without X11
+    (t ;; terminal without X11, a minimum config
      (setq sl-packages-list (append sl-packages-list
                                     '(flycheck-popup-tip))
            sl-packages-excluded '(anaconda-mode
@@ -158,35 +158,15 @@
            sl-configuration-layers
            '(auto-completion
              better-defaults
-             (c-c++ :variables
-                    c-c++-enable-google-style t
-                    c-c++-enable-google-newline t
-                    ;; c-c++-enable-clang-support t
-                    c-c++-backend 'lsp-clangd)
              emacs-lisp
-             gtags
              helm
-             html
              ibuffer
              imenu-list
-             lsp
-             (lua :variables
-                  lua-backend 'lsp-emmy
-                  lua-lsp-emmy-jar-path (expand-file-name "share/EmmyLua-LS-all.jar" portable-root-dir)
-                  lua-lsp-emmy-enable-file-watchers nil
-                  lua-indent-offset 4)
              markdown
-             multiple-cursors
              nginx
              smex
-             (sql :variables
-                  sql-capitalize-keywords t
-                  sql-capitalize-keywords-blacklist '("name" "varchar"))
              ;; ivy
              (semantic :disabled-for emacs-lisp) ; company-backend for elisp has problem with semantic
-             python
-             (xclipboard :variables
-                         xclipboard-enable-cliphist t)
              yaml
              vimscript))))
 
