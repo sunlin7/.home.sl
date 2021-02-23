@@ -88,6 +88,7 @@ pa () {
 [[ -d "$HOME/.root/bin" ]] && PATH="$HOME/.root/bin:$PATH"
 [[ -d "$HOME/.bin" ]]      && PATH="$HOME/.bin:$PATH"
 export PATH
+export LIBGL_ALWAYS_INDIRECT=1
 
 # some aliases
 alias ll='ls -alF'
