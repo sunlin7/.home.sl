@@ -48,7 +48,8 @@ apt-get install python36-tkinter
 
 Spacemacs use some symbols fonts in ~spacemacs--diminished-minor-modes~, install ~ttf-ancient-fonts-symbola~ or ~adobe-source-han-sans-cn-fonts~ for them.
 The fonts depends by ~all-the-icons~ can downloaded with elisp `all-the-icons-install-fonts'.
-** Ctrl+Alt_R+X not working for mintty (xterm)
+** Misc notes
+*** Ctrl+Alt_R+X not working for mintty (xterm)
    Report to [[https://github.com/mintty/mintty/issues/1034][mintty#1034 CTRL + ALT_R + F combination does not work]], workaround is following
    [[https://github.com/mintty/mintty/issues/1034#issuecomment-693930315][mintty1034#issuecomment-693930315]] to map ALT_R to ALT_L.
 #+begin_src text :tangle "map-alt_r-to-alt_l.reg"
@@ -56,6 +57,19 @@ The fonts depends by ~all-the-icons~ can downloaded with elisp `all-the-icons-in
 
   [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Keyboard Layout]
   "Scancode Map"=hex:00,00,00,00,00,00,00,00,02,00,00,00,38,00,38,e0,00,00,00,00
+#+end_src
+*** Ctrl+Backspace and Ctrl+Shift+Backspace for mintty
+According https://github.com/mintty/mintty/issues/1082, remap both =Ctrl+Back= and =Ctrl+Shift+Back= in =~/.minttyrc=:
+#+begin_src conf
+  KeyFunctions=C+Back:"[127:5u";C+S+Back:"[127:6u";
+#+end_src
+
+Then add keymap in =~/.emacs=:
+#+begin_src emacs-lisp
+  (global-set-key (kbd "\e[127;5u") [C-backspace]) ; mintty < 3.4.5, modifyOtherKeys=1
+  (global-set-key (kbd "\e[127;6u") [C-S-backspace])
+  (global-set-key (kbd "\e[127:5u") [C-backspace]) ; mintty >= 3.4.5, remap in .minttyrc
+  (global-set-key (kbd "\e[127:6u") [C-S-backspace])
 #+end_src
 
 ** Shortcuts from Windows to Remote

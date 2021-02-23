@@ -243,6 +243,11 @@
         (funcall orig command)))))
 (advice-add 'gud-basic-call :around #'sl-adv-gud-basic-call)
 
+(global-set-key (kbd "\e[127;5u") [C-backspace])
+(global-set-key (kbd "\e[127:5u") [C-backspace])
+(global-set-key (kbd "\e[127;6u") [C-S-backspace])
+(global-set-key (kbd "\e[127:6u") [C-S-backspace])
+
 ;; (custom-set-variables
 ;;  '(default-frame-alist
 ;;     '((top . 1)
