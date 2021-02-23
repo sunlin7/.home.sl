@@ -103,9 +103,9 @@
                          javascript-lsp-linter nil)
              lsp
              (lua :variables
-                  lua-backend 'lsp-emmy
-                  lua-lsp-emmy-jar-path (expand-file-name "share/EmmyLua-LS-all.jar" portable-root-dir)
-                  lua-lsp-emmy-enable-file-watchers nil
+                  lua-lsp-server 'lua-language-server
+                  lsp-clients-lua-language-server-bin (expand-file-name "share/lua-language-server/bin/Linux/lua-language-server" portable-root-dir)
+                  lsp-clients-lua-language-server-main-location (expand-file-name "share/lua-language-server/main.lua" portable-root-dir)
                   lua-indent-offset 4)
              markdown
              multiple-cursors
