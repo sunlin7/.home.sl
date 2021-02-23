@@ -10,8 +10,7 @@
   (when (file-exists-p sl-init-file) (load-file sl-init-file)))
 
 (defvar sl-x11-support (string-match-p " X11 " system-configuration-features))
-(defvar PYTHON_VER_BIN "python3")
-(when (executable-find PYTHON_VER_BIN) (setenv "PYTHONUSERBASE" portable-root-dir))
+;; (defvar PYTHON_VER_BIN "python3")
 
 ;; remove windows Python from path which has issues for emacs-win32
 (setq exec-path
@@ -27,8 +26,8 @@
     (when (file-exists-p magit-exec) (setq-default magit-git-executable magit-exec)))
   (let ((gtags-el (expand-file-name "share/gtags/gtags.el" portable-root-dir)))
     (when (file-exists-p gtags-el) (load-file gtags-el)))
-  ;; FIXME: the ~/.spacemacs.env maybe has incorrect PYTHONUSERBASE, correct it.
-  (setenv "PYTHONUSERBASE" portable-root-dir)
+  ;; FIXME: the env PYTHONUSERBASE maybe incorrect in ~/.spacemacs.env, flushing it.
+  ;; (when (executable-find PYTHON_VER_BIN) (setenv "PYTHONUSERBASE" portable-root-dir))
 
   (pcase system-type
     ('windows-nt
@@ -135,7 +134,7 @@
                          xclipboard-enable-cliphist t)
              yaml
              windows-scripts)))
-    (t ;; terminal without X11, a minimum config
+    (_ ;; terminal without X11, a minimum config
      (setq sl-packages-list (append sl-packages-list
                                     '(flycheck-popup-tip))
            sl-packages-excluded '(anaconda-mode
@@ -220,7 +219,7 @@
                 (helm-mode t)))))
 
 (when (not (executable-find invocation-name))
-  (warn "Emacs not in PATH, recommend '[...\mingw64.exe] bash -lc runemacs'"))
+  (warn "Emacs not in PATH, recommend '[...\\mingw64.exe] bash -lc runemacs'"))
 
 (xterm-mouse-mode 0)
 
