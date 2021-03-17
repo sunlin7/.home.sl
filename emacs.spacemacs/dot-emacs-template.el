@@ -174,6 +174,7 @@
   ;; load the spacemacs
   (load-file sl-spacemacs-init)
   (setq dotspacemacs-frame-title-format "%b@%S")
+  ;; (setq dotspacemacs-line-numbers t) ;; not work here, onlywork in .spacemacs
   ;; post-config for spacemacs
   (when (featurep 'pyim)
     (let ((file (expand-file-name "share/pyim-wbdict-v86.rime" portable-root-dir)))
@@ -197,7 +198,7 @@
 
   ;;;; fix the c-basic-offset for google-c-style
   ;; (eval-after-load 'google-c-style
-  ;;   (dolist (v google-c-style)
+  ;;   '(dolist (v google-c-style)
   ;;     (when (and (listp v) (eq (car v) 'c-basic-offset))
   ;;       (setcdr v 4))))
   ;; (add-hook 'c-mode-common-hook

@@ -33,8 +33,11 @@
     (message full-file-name)
     (kill-new full-file-name)))
 
-(add-hook 'after-change-major-mode-hook
-          (lambda () (global-set-key (kbd "C-c . l k") 'sl-copy-full-path)))
+(add-hook 'after-init-hook
+          (lambda ()
+            (global-set-key (kbd "C-c . l k") 'sl-copy-full-path)
+            ;; FIXME: workaround, attaching this function to ede mode map
+            (define-key ede-minor-mode-map (kbd "C-c . l k") 'sl-copy-full-path)))
 
 (provide '20misc)
 ;;; 20misc ends here
