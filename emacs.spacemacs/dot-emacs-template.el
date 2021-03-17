@@ -203,9 +203,9 @@
   ;; (add-hook 'c-mode-common-hook
   ;;           (lambda () (setq-local tab-width c-basic-offset)))
   ;; check the the checkers
-  (when (not (executable-find "gcc"))
+  (unless (executable-find "gcc")
     (custom-set-variables '(flycheck-disabled-checkers '(c/c++-gcc))))
-  (when (not (executable-find "clang"))
+  (unless (executable-find "clang")
     (custom-set-variables '(flycheck-disabled-checkers '(c/c++-clang)))))
 
 (when (daemonp)
@@ -218,7 +218,7 @@
                 (require 'helm-mode)
                 (helm-mode t)))))
 
-(when (not (executable-find invocation-name))
+(unless (executable-find invocation-name)
   (warn "Emacs not in PATH, recommend '[...\\mingw64.exe] bash -lc runemacs'"))
 
 (xterm-mouse-mode 0)

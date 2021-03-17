@@ -92,7 +92,7 @@
 
 (eval-after-load 'python
   '(progn
-     (when (not (fboundp 'python-shell-send-statement))
+     (unless (fboundp 'python-shell-send-statement)
        (defun python-shell-send-statement (&optional beg end)
          "This function should exist after emacs27 and later."
          (interactive)

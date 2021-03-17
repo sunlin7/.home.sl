@@ -58,12 +58,12 @@ Each directory needs a project file to control it.")
   "Return the files in project."
   (require 'ede)
   (let ((cur-proj (ede-current-project)))
-    (when (not cur-proj)
+    (unless cur-proj
       (signal 'error '("ede-project not exist!")))
     (let* ((project-root (ede-project-root-directory cur-proj))
            (files-list   (expand-file-name sl-ede-project-list-all project-root))
            (files-el     (expand-file-name sl-ede-project-file project-root)))
-      (when (not (file-exists-p files-list))
+      (unless (file-exists-p files-list)
         (signal 'file-error '("tags file not exist!")))
       (when (file-newer-than-file-p files-list files-el)
         (with-temp-buffer
@@ -144,7 +144,7 @@ want add all files in project to tags file."
   (require 'ede)
   (require 'grep)
   (let ((cur-proj (ede-current-project)))
-    (when (not cur-proj)
+    (unless cur-proj
       (signal 'error '("Invalid project")))
 
     (let* ((project-root (ede-project-root-directory cur-proj))
