@@ -40,6 +40,22 @@ Starting emacs-x86_64-mingw64 directly maybe got the PATH without mingw32/64; fo
   # for just starting a emacsclient
   c:\msys64\mingw64\bin\emacsclient -c
 #+end_src
+*** an example for .emacs
+A =.emacs= can be copy from =dot-emacs-template=, or simplload it as:
+#+begin_src emacs-lisp :tangle "dot-emacs.el"
+  ;; -*- mode: emacs-lisp; lexical-binding: t -*-
+  (when (equal system-type 'windows-nt)   ; more executables from cygwin
+    (add-to-list 'exec-path "c:/cygwin64/bin")
+    (setenv "PATH" (concat "c:/cygwin64/bin;" (getenv "PATH"))))
+  ;; just following the template configuration.
+  (defvar portable-root-dir (expand-file-name ".." invocation-directory))
+  (defvar portable-home-dir (file-name-directory (or load-file-name (buffer-file-name))))
+
+  (let ((init-template (expand-file-name ".home.sl/emacs.spacemacs/dot-emacs-template.el" portable-home-dir)))
+    (when (file-exists-p init-template)
+      (setq user-init-file init-template)
+      (load (file-name-sans-extension init-template))))
+#+end_src
 ** Addtional Requirest
 If need support python =live-py-mode=, it request the =thinter= package, can install by 
 #+begin_src shell
