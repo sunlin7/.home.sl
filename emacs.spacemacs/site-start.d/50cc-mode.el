@@ -93,6 +93,7 @@
 (eval-after-load 'python
   '(progn
      (unless (fboundp 'python-shell-send-statement)
+       (declare-function 'python-shell-send-region "python")
        (defun python-shell-send-statement (&optional beg end)
          "This function should exist after emacs27 and later."
          (interactive)

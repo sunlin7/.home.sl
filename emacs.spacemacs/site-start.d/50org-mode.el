@@ -103,6 +103,7 @@
 
 (eval-after-load 'ox-html
   '(progn
+     (eval-when-compile (require 'ox-html))
      ;; https://niklasfasching.de/posts/org-html-export-inline-images/
      (defun org-html-export-to-mhtml (async subtree visible body)
        (cl-letf (((symbol-function 'org-html--format-image) 'format-image-inline))

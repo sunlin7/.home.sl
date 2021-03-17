@@ -34,7 +34,9 @@
 (if (file-exists-p sl-modules)
     (load sl-modules)
   (message "No 'modules.el' file in %s, load all modules." sl-modules)
-  (mapc (lambda (x) (load (file-name-sans-extension x))) (directory-files sl-site-start-dir t "^[0-9].*.el$")))
+  (mapc (lambda (x)
+          (require (intern (file-name-base x)) (file-name-sans-extension x)))
+        (directory-files sl-site-start-dir t "^[0-9].*.el$")))
 
 (provide 'sl-init)
 ;;; init.el ends here

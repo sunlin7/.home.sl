@@ -7,7 +7,7 @@
 
 (defvar sl-savefile-dir (expand-file-name ".emacs.save/" portable-home-dir))
 (let ((sl-init-file (expand-file-name ".home.sl/emacs.spacemacs/init.el" portable-home-dir)))
-  (when (file-exists-p sl-init-file) (load-file sl-init-file)))
+  (when (file-exists-p sl-init-file) (load (file-name-sans-extension sl-init-file))))
 
 ;; (defvar PYTHON_VER_BIN "python3")
 
