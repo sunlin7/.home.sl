@@ -100,11 +100,12 @@
                          js2-basic-offset 2
                          javascript-backend 'lsp
                          javascript-lsp-linter nil)
-             lsp
+             (lsp :variables
+                  lsp-clients-lua-language-server-install-dir (expand-file-name "share/lua-language-server" portable-root-dir))
              (lua :variables
                   lua-lsp-server 'lua-language-server
-                  lsp-clients-lua-language-server-bin (expand-file-name "share/lua-language-server/bin/Linux/lua-language-server" portable-root-dir)
-                  lsp-clients-lua-language-server-main-location (expand-file-name "share/lua-language-server/main.lua" portable-root-dir)
+                  ;; lsp-clients-lua-language-server-bin (expand-file-name "share/lua-language-server/bin/Linux/lua-language-server" portable-root-dir)
+                  ;; lsp-clients-lua-language-server-main-location (expand-file-name "share/lua-language-server/main.lua" portable-root-dir)
                   lua-indent-offset 4)
              markdown
              multiple-cursors
