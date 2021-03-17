@@ -9,7 +9,6 @@
 (let ((sl-init-file (expand-file-name ".home.sl/emacs.spacemacs/init.el" portable-home-dir)))
   (when (file-exists-p sl-init-file) (load-file sl-init-file)))
 
-(defvar sl-x11-support (string-match-p " X11 " system-configuration-features))
 ;; (defvar PYTHON_VER_BIN "python3")
 
 ;; remove windows Python from path which has issues for emacs-win32
@@ -60,7 +59,7 @@
              version-control
              windows-scripts
              )))
-    ((guard sl-x11-support)
+    ((guard (fboundp 'image-mask-p))
      (setq sl-packages-list (append sl-packages-list
                                     '(flycheck-popup-tip nov pdf-tools org-pdftools))
            sl-packages-excluded '(anaconda-mode
@@ -183,7 +182,7 @@
                           '(pyim-assistant-scheme-enable t)))
 
   (menu-bar-mode t)
-  (when sl-x11-support
+  (when (fboundp 'image-mask-p)
     (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode))
     (pdf-loader-install)
     (eval-after-load 'pdf-tools
