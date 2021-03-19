@@ -124,15 +124,13 @@ Each directory needs a project file to control it.")
             (hash-table-keys name-uniq) nil t)))
       (find-file (gethash choice name-uniq)))))
 
-(eval-after-load "ede"
-  '(progn
-     (define-key ede-minor-mode-map (kbd "C-c . j") 'sl-ede-find-file)
-     (define-key ede-minor-mode-map (kbd "C-c . w") 'sl-ede-workspace-switch)))
+(with-eval-after-load "ede"
+  (define-key ede-minor-mode-map (kbd "C-c . j") 'sl-ede-find-file)
+  (define-key ede-minor-mode-map (kbd "C-c . w") 'sl-ede-workspace-switch))
 
-(eval-after-load "projectile" ; FIXME: workaround for projectile extremly slow on NFS
-  '(progn
-     (defvar projectile-project-root-files)
-     (add-to-list 'projectile-project-root-files sl-ede-project-file)))
+(with-eval-after-load "projectile" ; FIXME: workaround for projectile extremly slow on NFS
+  (defvar projectile-project-root-files)
+  (add-to-list 'projectile-project-root-files sl-ede-project-file))
 
 (autoload 'rgrep-default-command "grep")
 (defun sl-ede-tags-create()
@@ -190,8 +188,8 @@ want add all files in project to tags file."
          ede-cpp-root-project-list))
   (run-hooks 'sl-ede-project-reload-hook))
 
-(eval-after-load "ede"
-  '(add-hook 'after-init-hook 'sl-ede-project-reload))
+(with-eval-after-load "ede"
+  (add-hook 'after-init-hook 'sl-ede-project-reload))
 
 (defun sl-compilation-start (OLDFUN command &optional mode name-function highlight-regexp)
   "Create tag with sl-ede-project-xtags if it avaliable.

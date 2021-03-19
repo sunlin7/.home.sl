@@ -187,17 +187,17 @@
   (when (fboundp 'image-mask-p)
     (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode))
     (pdf-loader-install)
-    (eval-after-load 'pdf-tools
-      #'(push 'pdf-view-midnight-minor-mode pdf-tools-enabled-modes))
+    (with-eval-after-load 'pdf-tools
+      (push 'pdf-view-midnight-minor-mode pdf-tools-enabled-modes))
     (use-package org-pdftools
       :hook (org-load . org-pdftools-setup-link)))
   ;; (when (not (file-exists-p plantuml-jar-path)) ; download plantuml automatically
   ;;  (plantuml-download-jar))
-  ;; (eval-after-load 'plantuml-mode #'(plantuml-set-output-type "png"))
+  ;; (with-eval-after-load 'plantuml-mode (plantuml-set-output-type "png"))
   (custom-set-variables '(plantuml-default-exec-mode 'jar))
 
   ;;;; fix the c-basic-offset for google-c-style
-  ;; (eval-after-load 'google-c-style
+  ;; (with-eval-after-load 'google-c-style
   ;;   '(dolist (v google-c-style)
   ;;     (when (and (listp v) (eq (car v) 'c-basic-offset))
   ;;       (setcdr v 4))))

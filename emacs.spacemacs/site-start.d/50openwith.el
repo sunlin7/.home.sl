@@ -16,13 +16,12 @@
                         (error "Can't find external tools"))
                     nil nil nil (dired-get-file-for-visit)))))
 
-(eval-after-load 'dired
-  '(progn
-     (defvar dired-mode-map)
-     (define-key dired-mode-map "E" 'sl-dired-open-explorer-file)
-     (define-key dired-mode-map [menu-bar immediate open-explorer-file]
-       '(menu-item "Open with explorer" sl-dired-open-explorer-file
-                   :help "Open the file with explorer"))))
+(with-eval-after-load 'dired
+  (defvar dired-mode-map)
+  (define-key dired-mode-map "E" 'sl-dired-open-explorer-file)
+  (define-key dired-mode-map [menu-bar immediate open-explorer-file]
+    '(menu-item "Open with explorer" sl-dired-open-explorer-file
+                :help "Open the file with explorer")))
 
 (provide '50openwith)
 ;;; 50openwith ends here

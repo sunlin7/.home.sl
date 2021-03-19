@@ -92,18 +92,16 @@
       :publishing-function org-publish-attachment)
      ("website" :components ("orgfiles" "images" "other")))))
 
-(eval-after-load 'org
-  '(progn
-     ;; in a future version of org, use if to avoid errors
-     ;; Change .pdf association directly within the alist
-     (defvar org-file-apps)
-     (setcdr (assoc "\\.pdf\\'" org-file-apps) "evince %s")
-     ;; Save the running clock and all clock history when exiting Emacs, load it on startup
-     (org-clock-persistence-insinuate)))
+(with-eval-after-load 'org
+  ;; in a future version of org, use if to avoid errors
+  ;; Change .pdf association directly within the alist
+  (defvar org-file-apps)
+  (setcdr (assoc "\\.pdf\\'" org-file-apps) "evince %s")
+  ;; Save the running clock and all clock history when exiting Emacs, load it on startup
+  (org-clock-persistence-insinuate))
 
-(eval-after-load 'ox-html
-  '(progn
-     (eval-when-compile (require 'ox-html))
+(with-eval-after-load 'ox-html
+  (eval-when-compile (require 'ox-html))
      ;; https://niklasfasching.de/posts/org-html-export-inline-images/
      (defun org-html-export-to-mhtml (async subtree visible body)
        (cl-letf (((symbol-function 'org-html--format-image) 'format-image-inline))
@@ -122,7 +120,7 @@
          (org-html-close-tag "img" (org-html--make-attribute-string attributes) info)))
      (org-export-define-derived-backend
       'html-inline-images 'html
-      :menu-entry '(?h "Export to HTML" ((?m "As MHTML file and open" org-html-export-to-mhtml))))))
+      :menu-entry '(?h "Export to HTML" ((?m "As MHTML file and open" org-html-export-to-mhtml)))))
 
 (defun gtd ()
   "The gtd function."

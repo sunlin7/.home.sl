@@ -20,20 +20,19 @@
             (semantic-mode  t)
             (global-ede-mode t)))
 
-(eval-after-load 'semantic
-  '(progn
-     (global-semantic-mru-bookmark-mode t) ;; (semantic-mru-bookmark-mode)
-     ;; (global-semantic-idle-summary-mode t)
-     ;; (global-semantic-stickyfunc-mode   t)
-     ;; (ede-enable-generic-projects)
+(with-eval-after-load 'semantic
+  (global-semantic-mru-bookmark-mode t) ;; (semantic-mru-bookmark-mode)
+  ;; (global-semantic-idle-summary-mode t)
+  ;; (global-semantic-stickyfunc-mode   t)
+  ;; (ede-enable-generic-projects)
 
-     ;; make emacs-lisp-mode support.
-     ;; (defvar semantic-new-buffer-setup-functions)
-     ;; (add-to-list 'semantic-new-buffer-setup-functions
-     ;;              '(emacs-lisp-mode . semantic-default-elisp-setup))
-     ;; (add-to-list 'semantic-new-buffer-setup-functions
-     ;;              '(lisp-mode . semantic-default-elisp-setup))
-     ))
+  ;; make emacs-lisp-mode support.
+  ;; (defvar semantic-new-buffer-setup-functions)
+  ;; (add-to-list 'semantic-new-buffer-setup-functions
+  ;;              '(emacs-lisp-mode . semantic-default-elisp-setup))
+  ;; (add-to-list 'semantic-new-buffer-setup-functions
+  ;;              '(lisp-mode . semantic-default-elisp-setup))
+)
 
 ;; FIXME: the semantic-mode with js2-mode will extremly slow, so disable it
 (add-hook 'js2-mode-hook (lambda ()
@@ -122,18 +121,16 @@ TAGS is the tag from semantic."
         (when (semantic-tag-p tag)
           (semantic-ia--fast-jump-helper tag))))))
 
-(eval-after-load 'semantic
-  '(progn
-     (defvar semantic-mode-map)
-     (define-key semantic-mode-map (kbd "C-c , t") 'sl-select-local-tags)
-     (define-key-after
-       (lookup-key cedet-menu-map [navigate-menu])
-       [semantic-select-local-tags]
-       '(menu-item "(SL)Find Local Tags..." sl-select-local-tags
-                   :enable (and (semantic-active-p))
-                   :help "Find tags in current buffer..")
-       'semantic-symref-symbol)
-     ))
+(with-eval-after-load 'semantic
+  (defvar semantic-mode-map)
+  (define-key semantic-mode-map (kbd "C-c , t") 'sl-select-local-tags)
+  (define-key-after
+    (lookup-key cedet-menu-map [navigate-menu])
+    [semantic-select-local-tags]
+    '(menu-item "(SL)Find Local Tags..." sl-select-local-tags
+                :enable (and (semantic-active-p))
+                :help "Find tags in current buffer..")
+    'semantic-symref-symbol))
 
 (defun sl-cedet-directory-name-to-file-name (orig-fun file)
   "Check the return value, if it longer than 255, generate an MD5 value instead.

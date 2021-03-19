@@ -33,35 +33,33 @@
                                     "g++ -g -O0 -x c++ -std=c++11 -o a - && ./a")))
         ((call-interactively 'compile))))
 
-(eval-after-load 'hideshow
-  '(progn
-     (declare-function 'hs-already-hidden-p "hideshow")
-     (declare-function 'hs-show-all "hideshow")
-     (declare-function 'hs-hide-all "hideshow")
-     (defun sl-toggle-hideshow-all ()
-       "Toggle hideshow all."
-       (interactive)
-       (hs-life-goes-on
-        (if (hs-already-hidden-p)
-            (hs-show-all)
-          (hs-hide-all))))
+(with-eval-after-load 'hideshow
+  (declare-function 'hs-already-hidden-p "hideshow")
+  (declare-function 'hs-show-all "hideshow")
+  (declare-function 'hs-hide-all "hideshow")
+  (defun sl-toggle-hideshow-all ()
+    "Toggle hideshow all."
+    (interactive)
+    (hs-life-goes-on
+     (if (hs-already-hidden-p)
+         (hs-show-all)
+       (hs-hide-all))))
 
-     (define-key-after
-       hs-minor-mode-menu
-       [\(SL\)Toggle\ Show/Hide\ all]
-       '(menu-item "(SL)Toggle Show/Hide all..." sl-toggle-hideshow-all
-                   :help "Toggle Show/Hide all in current buffer..")
-       'Toggle\ Hiding)
+  (define-key-after
+    hs-minor-mode-menu
+    [\(SL\)Toggle\ Show/Hide\ all]
+    '(menu-item "(SL)Toggle Show/Hide all..." sl-toggle-hideshow-all
+                :help "Toggle Show/Hide all in current buffer..")
+    'Toggle\ Hiding)
 
-     (define-key hs-minor-mode-map (kbd "C-M-;") 'sl-toggle-hideshow-all)
-     (define-key hs-minor-mode-map (kbd "C-;") 'hs-toggle-hiding)))
+  (define-key hs-minor-mode-map (kbd "C-M-;") 'sl-toggle-hideshow-all)
+  (define-key hs-minor-mode-map (kbd "C-;") 'hs-toggle-hiding))
 
 
-(eval-after-load 'cc-mode
-  '(progn
-     (defvar c-mode-base-map)
-     (define-key c-mode-base-map [(f9)] 'sl-compile-project-or-file)
-     (define-key c-mode-base-map [(f11)] 'gdb)))
+(with-eval-after-load 'cc-mode
+  (defvar c-mode-base-map)
+  (define-key c-mode-base-map [(f9)] 'sl-compile-project-or-file)
+  (define-key c-mode-base-map [(f11)] 'gdb))
 
 
 (add-hook 'c-mode-common-hook
@@ -90,26 +88,25 @@
 (add-hook 'after-change-major-mode-hook
           #'sl-setup-short-keys-for-jumper)
 
-(eval-after-load 'python
-  '(progn
-     (unless (fboundp 'python-shell-send-statement)
-       (declare-function 'python-shell-send-region "python")
-       (defun python-shell-send-statement (&optional beg end)
-         "This function should exist after emacs27 and later."
-         (interactive)
-         (if (region-active-p)
-             (call-interactively #'python-shell-send-region)
-           (python-shell-send-region
-            (save-excursion (python-nav-beginning-of-statement))
-            (save-excursion (python-nav-end-of-statement)))))
-       (defvar python-mode-map)
-       (define-key python-mode-map "\C-c\C-e" 'python-shell-send-statement)
-       (define-key-after
-         (lookup-key python-mode-map [menu-bar Python])
-         [Eval\ statement]
-         '(menu-item "Eval statement/region" python-shell-send-statement
-                     :help "Eval statement or region in inferior Python session.")
-         'Eval\ Statement))))
+(with-eval-after-load 'python
+  (unless (fboundp 'python-shell-send-statement)
+    (declare-function 'python-shell-send-region "python")
+    (defun python-shell-send-statement (&optional beg end)
+      "This function should exist after emacs27 and later."
+      (interactive)
+      (if (region-active-p)
+          (call-interactively #'python-shell-send-region)
+        (python-shell-send-region
+         (save-excursion (python-nav-beginning-of-statement))
+         (save-excursion (python-nav-end-of-statement)))))
+    (defvar python-mode-map)
+    (define-key python-mode-map "\C-c\C-e" 'python-shell-send-statement)
+    (define-key-after
+      (lookup-key python-mode-map [menu-bar Python])
+      [Eval\ statement]
+      '(menu-item "Eval statement/region" python-shell-send-statement
+                  :help "Eval statement or region in inferior Python session.")
+      'Eval\ Statement)))
 
 (provide '50cc-mode)
 ;;; 50cc-mode ends here
