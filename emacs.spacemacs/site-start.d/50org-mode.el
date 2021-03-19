@@ -1,7 +1,6 @@
-;;; 50org-mode --- org settings
+;;; 50org-mode --- org settings      -*- lexical-binding: t; coding: utf-8 -*-
 ;;; Commentary:
 ;;; Code:
-;; -*- coding: utf-8 -*-
 ;; Various preferences
 (custom-set-variables
  '(org-directory (expand-file-name "org/" sl-savefile-dir))
@@ -92,12 +91,8 @@
       :publishing-function org-publish-attachment)
      ("website" :components ("orgfiles" "images" "other")))))
 
+;; Save the running clock and all clock history when exiting Emacs, load it on startup
 (with-eval-after-load 'org
-  ;; in a future version of org, use if to avoid errors
-  ;; Change .pdf association directly within the alist
-  (defvar org-file-apps)
-  (setcdr (assoc "\\.pdf\\'" org-file-apps) "evince %s")
-  ;; Save the running clock and all clock history when exiting Emacs, load it on startup
   (org-clock-persistence-insinuate))
 
 (with-eval-after-load 'ox-html

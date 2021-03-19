@@ -23,22 +23,19 @@
 (when (file-exists-p sl-spacemacs-init)
   (let ((magit-exec (expand-file-name "bin/git" portable-root-dir)))
     (when (file-exists-p magit-exec) (setq-default magit-git-executable magit-exec)))
-  (let ((gtags-el (expand-file-name "share/gtags/gtags.el" portable-root-dir)))
-    (when (file-exists-p gtags-el) (load-file gtags-el)))
   ;; FIXME: the env PYTHONUSERBASE maybe incorrect in ~/.spacemacs.env, flushing it.
   ;; (when (executable-find PYTHON_VER_BIN) (setenv "PYTHONUSERBASE" portable-root-dir))
 
   (pcase system-type
     ('windows-nt
-     (setq sl-packages-list (append sl-packages-list
-                                    '(flycheck-popup-tip))
-           sl-packages-excluded '(ccls
+     (setq sl-packages-excluded '(ccls
                                   rtags
                                   company-rtags
                                   company-ycmd
                                   flycheck-rtags
                                   flycheck-ycmd
                                   helm-rtags
+                                  magit-svn
                                   tern
                                   tide)
            sl-configuration-layers
@@ -61,7 +58,7 @@
              )))
     ((guard (fboundp 'image-mask-p))
      (setq sl-packages-list (append sl-packages-list
-                                    '(flycheck-popup-tip nov pdf-tools org-pdftools))
+                                    '(nov pdf-tools org-pdftools))
            sl-packages-excluded '(anaconda-mode
                                   ccls
                                   rtags
@@ -72,6 +69,9 @@
                                   flycheck-rtags
                                   flycheck-ycmd
                                   helm-rtags
+                                  lsp-pyright
+                                  lsp-python-ms
+                                  magit-svn
                                   tern
                                   tide
                                   xcscope)
@@ -135,9 +135,7 @@
              yaml
              windows-scripts)))
     (_ ;; terminal without X11, a minimum config
-     (setq sl-packages-list (append sl-packages-list
-                                    '(flycheck-popup-tip))
-           sl-packages-excluded '(anaconda-mode
+     (setq sl-packages-excluded '(anaconda-mode
                                   ccls
                                   rtags
                                   ycmd
@@ -152,8 +150,7 @@
                                   tern
                                   tide
                                   yasnippet
-                                  yasnippet-snippets
-                                  xcscope)
+                                  yasnippet-snippets)
            sl-configuration-layers
            '(auto-completion
              better-defaults
