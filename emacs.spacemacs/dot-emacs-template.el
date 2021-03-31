@@ -177,11 +177,16 @@
   ;; (setq dotspacemacs-line-numbers t) ;; not work here, onlywork in .spacemacs
   ;; post-config for spacemacs
   (when (featurep 'pyim)
-    (let ((file (expand-file-name "share/pyim-wbdict-v86.rime" portable-root-dir)))
-      (pyim-extra-dicts-add-dict `(:name "wbdict-v86-rime" :file ,file)))
     (custom-set-variables '(pyim-default-scheme 'wubi)
                           '(default-input-method "pyim")
-                          '(pyim-assistant-scheme-enable t)))
+                          '(pyim-assistant-scheme-enable t))
+    (let ((file (expand-file-name "share/pyim-wbdict-v86.rime" portable-root-dir))
+          (wubi-initialized nil))
+      (advice-add 'pyim-start :before
+                  (lambda ()
+                    (unless wubi-initialized
+                      (pyim-extra-dicts-add-dict `(:name "wbdict-v86-rime" :file ,file))
+                      (setq wubi-initialized t))))))
 
   (menu-bar-mode t)
   (when (fboundp 'image-mask-p)
@@ -191,7 +196,7 @@
       (push 'pdf-view-midnight-minor-mode pdf-tools-enabled-modes))
     (use-package org-pdftools
       :hook (org-load . org-pdftools-setup-link)))
-  ;; (when (not (file-exists-p plantuml-jar-path)) ; download plantuml automatically
+  ;; (unless (file-exists-p plantuml-jar-path) ; download plantuml automatically
   ;;  (plantuml-download-jar))
   ;; (with-eval-after-load 'plantuml-mode (plantuml-set-output-type "png"))
   (custom-set-variables '(plantuml-default-exec-mode 'jar))
