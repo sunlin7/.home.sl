@@ -5,7 +5,10 @@
 (defvar portable-root-dir (expand-file-name ".." invocation-directory))
 (defvar portable-home-dir (file-name-directory (or load-file-name (buffer-file-name))))
 
-(defvar sl-savefile-dir (expand-file-name ".emacs.save/" portable-home-dir))
+(defvar sl-savefile-dir (let ((save-dir (expand-file-name "~/.emacs.save/" )))
+                          (if (file-exists-p save-dir)
+                              save-dir
+                            user-emacs-directory)))
 (let ((sl-init-file (expand-file-name ".home.sl/emacs.spacemacs/init.el" portable-home-dir)))
   (when (file-exists-p sl-init-file) (load (file-name-sans-extension sl-init-file))))
 

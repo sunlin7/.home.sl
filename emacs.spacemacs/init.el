@@ -14,7 +14,7 @@
   "The list of the package used for currrent configuration.")
 (defvar sl-jump-from-user-interactive nil
   "Flag for marking the jumpping action from user interactive.")
-(defcustom sl-savefile-dir (expand-file-name "savefile" user-emacs-directory)
+(defcustom sl-savefile-dir (expand-file-name "save.d" user-emacs-directory)
   "The directory to save data."
   :group 'sl-emacs
   :type 'string)
