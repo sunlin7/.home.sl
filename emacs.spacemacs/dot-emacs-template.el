@@ -84,9 +84,8 @@
              csv
              chinese
              (c-c++ :variables
-                    c-c++-enable-google-style t
-                    c-c++-enable-google-newline t
-                    ;; c-c++-enable-clang-support t
+                    ;; c-c++-enable-google-style t
+                    ;; c-c++-enable-google-newline t
                     c-c++-backend 'lsp-clangd)
              dap
              django
