@@ -100,7 +100,7 @@ alias cd..='cd ../..'
 alias cd...='cd ../../..'
 alias cd....='cd ../../../..'
 alias cd-='cd -'
-for cmd in "gio trash" gvfs-trash trash-put; do
+for cmd in trash-put "gio trash" gvfs-trash; do
     if command -v ${cmd/ */} > /dev/null; then
         eval 'function rm() { '$cmd' "$@" 2>/dev/null || command rm "$@"; };'
         break;
