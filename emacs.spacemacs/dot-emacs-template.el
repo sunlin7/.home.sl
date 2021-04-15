@@ -113,11 +113,12 @@
              markdown
              multiple-cursors
              nginx
-             org
+             (org :variables
+                  org-plantuml-jar-path (expand-file-name "share/plantuml.jar" portable-root-dir))
              octave
              (plantuml :variables
                        plantuml-jar-path (expand-file-name "share/plantuml.jar" portable-root-dir)
-                       org-plantuml-jar-path (expand-file-name "share/plantuml.jar" portable-root-dir))
+                       plantuml-default-exec-mode 'jar)
              python
              php
              rust
@@ -198,8 +199,10 @@
       :hook (org-load . org-pdftools-setup-link)))
   ;; (unless (file-exists-p plantuml-jar-path) ; download plantuml automatically
   ;;  (plantuml-download-jar))
-  ;; (with-eval-after-load 'plantuml-mode (plantuml-set-output-type "png"))
-  (custom-set-variables '(plantuml-default-exec-mode 'jar))
+  (with-eval-after-load 'plantuml-mode
+    (plantuml-set-output-type "png")    ; text in svg image hard to see in dark
+    (custom-set-variables ; disable img resize for helm change window size offen
+     '(image-auto-resize-on-window-resize nil)))
 
   ;;;; fix the c-basic-offset for google-c-style
   ;; (with-eval-after-load 'google-c-style
