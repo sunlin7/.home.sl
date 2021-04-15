@@ -6,12 +6,12 @@
 (defvar sl-ede-project-file (concat sl-ede-project-file-basename ".el") "The file for project.")
 (defvar sl-ede-project-list-all (concat sl-ede-project-file-basename ".all") "The files list for project.")
 (defvar sl-ede-project-xtags (concat sl-ede-project-file-basename ".xtags") "The files list for project.")
-(autoload 'oref "eieio")
-(autoload 'object-of-class-p "eieio")
-(autoload 'ede-name "ede/base")
-(autoload 'ede-current-project "ede/cpp-root")
-(autoload 'ede-project-root-directory "ede/auto")
-(autoload 'hash-table-keys "subr-x")
+(declare-function 'oref "eieio")
+(declare-function 'object-of-class-p "eieio")
+(declare-function 'ede-name "ede/base")
+(declare-function 'ede-current-project "ede/cpp-root")
+(declare-function 'ede-project-root-directory "ede/auto")
+(declare-function 'hash-table-keys "subr-x")
 (eieio-defclass-autoload 'sl-ede-cpp-root-project '(ede-cpp-root-project)
                          "sl-cpp-root"
                          "SL EDE cpp-root project class,
@@ -132,7 +132,7 @@ Each directory needs a project file to control it.")
   (defvar projectile-project-root-files)
   (add-to-list 'projectile-project-root-files sl-ede-project-file))
 
-(autoload 'rgrep-default-command "grep")
+(declare-function 'rgrep-default-command "grep")
 (defun sl-ede-tags-create()
   "Create the cscope & gnu global tags from `ede-cpp-root-project' settings.
 NOTICE: the \"/\" in :include-path and :source-path mean the project root
@@ -151,17 +151,17 @@ want add all files in project to tags file."
                       (lambda (prj-inc)
                         (when (string-prefix-p "/" prj-inc) ; drop the "/", then append to path
                           (substring prj-inc 1)))
-                      (append (oref cur-proj :include-path)
+                      (append (oref cur-proj include-path)
                               (when (object-of-class-p cur-proj 'sl-ede-cpp-root-project)
-                                (oref cur-proj :source-path)))
+                                (oref cur-proj source-path)))
                       " ")))
-      ;; (setq rpath-all (concat rpath-all " " (mapconcat 'identity (oref (ede-current-project) :system-include-path) " "))) ;; use GTAGSLIBPATH instead
+      ;; (setq rpath-all (concat rpath-all " " (mapconcat 'identity (oref (ede-current-project) system-include-path) " "))) ;; use GTAGSLIBPATH instead
       (defvar grep-find-ignored-directories)
       (defvar grep-find-ignored-files)
       (let ((grep-find-ignored-directories ;; prepare the 'exclude-path'
              (append grep-find-ignored-directories
                      (when (object-of-class-p cur-proj 'sl-ede-cpp-root-project)
-                       (oref cur-proj :exclude-path)) ))
+                       (oref cur-proj exclude-path)) ))
             (grep-find-ignored-files grep-find-ignored-files))
         (grep-compute-defaults)
         (let ((grep-find-template (format "find <D> <X> -type f <F>  -print > %s" proj-name-tmp)))
@@ -172,7 +172,7 @@ want add all files in project to tags file."
             (shell-command-to-string (format "sort -u %s > %s" proj-name-tmp sl-ede-project-list-all))
             (shell-command-to-string (format "grep -E '\\.[cChH](pp)?$|\\.cc$|\\.hh$' %s > %s" sl-ede-project-list-all sl-ede-project-xtags))
             ;; (call-process-shell-command (concat "time cscope -b -f cscope.out -i " sl-ede-project-xtags) nil 0) 
-            (setenv "GTAGSLIBPATH" (mapconcat 'identity (oref (ede-current-project) :system-include-path) ":"))
+            (setenv "GTAGSLIBPATH" (mapconcat 'identity (oref (ede-current-project) system-include-path) ":"))
             (call-process-shell-command (concat "time gtags -f " sl-ede-project-xtags) nil 0)
             (delete-file proj-name-tmp)))))))
 

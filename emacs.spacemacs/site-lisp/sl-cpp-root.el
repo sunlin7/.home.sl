@@ -41,7 +41,7 @@ Each directory needs a project file to control it.")
 				&rest fields)
   "Make sure the :file is fully expanded."
   ;; Add ourselves to the master list
-  (call-next-method))
+  (cl-call-next-method))
 
 (provide 'sl-cpp-root)
 ;;; sl-cpp-root ends here

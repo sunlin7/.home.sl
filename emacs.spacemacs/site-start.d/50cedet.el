@@ -1,19 +1,19 @@
 ;;; CEDET --- cedet configure
 ;;; Commentary:
 ;;; Code:
-(autoload 'xref-pop-marker-stack "xref")
-(autoload 'xref-push-marker-stack "xref")
-(autoload 'semantic-tag-p "semantic/tag")
-(autoload 'semantic-tag-name "semantic/tag")
-(autoload 'semantic-tag-type "semantic/tag")
-(autoload 'semantic-tag-class "semantic/tag")
-(autoload 'semantic-tag-get-attribute "semantic/tag")
-(autoload 'semantic-fetch-tags "semantic/tag")
-(autoload 'semantic-ia-fast-jump "semantic/ia")
-(autoload 'semantic-ia--fast-jump-helper "semantic/ia")
-(autoload 'global-semantic-mru-bookmark-mode "semantic/mru-bookmark")
-;; (autoload 'global-semantic-idle-summary-mode "semantic/idle")
-;; (autoload 'global-semantic-stickyfunc-mode   "semantic/util-modes")
+(declare-function 'xref-pop-marker-stack "xref")
+(declare-function 'xref-push-marker-stack "xref")
+(declare-function 'semantic-tag-p "semantic/tag")
+(declare-function 'semantic-tag-name "semantic/tag")
+(declare-function 'semantic-tag-type "semantic/tag")
+(declare-function 'semantic-tag-class "semantic/tag")
+(declare-function 'semantic-tag-get-attribute "semantic/tag")
+(declare-function 'semantic-fetch-tags "semantic/tag")
+(declare-function 'semantic-ia-fast-jump "semantic/ia")
+(declare-function 'semantic-ia--fast-jump-helper "semantic/ia")
+(declare-function 'global-semantic-mru-bookmark-mode "semantic/mru-bookmark")
+;; (declare-function 'global-semantic-idle-summary-mode "semantic/idle")
+;; (declare-function 'global-semantic-stickyfunc-mode   "semantic/util-modes")
 
 (add-hook 'after-init-hook
           (lambda ()

@@ -12,8 +12,8 @@
 
 ;; don't punctuation characters such as ‘;’ or ‘{’
 ;; (setq-default c-electric-flag nil)
-(autoload 'ede-current-project "ede")
-(autoload 'ede-compile-target  "ede")
+(declare-function 'ede-current-project "ede")
+(declare-function 'ede-compile-target  "ede")
 (defun sl-compile-project-or-file ()
   "Compile current file just smart."
   (interactive)
@@ -88,6 +88,7 @@
 (add-hook 'after-change-major-mode-hook
           #'sl-setup-short-keys-for-jumper)
 
+(declare-function 'python-nav-beginning-of-statement "python")
 (with-eval-after-load 'python
   (unless (fboundp 'python-shell-send-statement)
     (declare-function 'python-shell-send-region "python")

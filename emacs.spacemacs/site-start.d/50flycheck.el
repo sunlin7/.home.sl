@@ -1,15 +1,11 @@
 ;;; flycheck -- settings for flycheck
 ;;; Commentary:
 ;;; Code:
-(autoload 'oref "eieio")
-(autoload 'class-p "eieio-core")
-(autoload 'object-of-class-p "eieio")
-(autoload 'ede-current-project "ede/cpp-root")
-(autoload 'ede-project-root-directory "ede/auto")
-(autoload 'get-command-line "ede-compdb")
-(autoload 'get-defines "ede-compdb")
-(autoload 'get-includes "ede-compdb")
-(autoload 'get-include-path "ede-compdb")
+(declare-function 'oref "eieio")
+(declare-function 'class-p "eieio-core")
+(declare-function 'object-of-class-p "eieio")
+(declare-function 'ede-current-project "ede/cpp-root")
+(declare-function 'ede-project-root-directory "ede/auto")
 
 (defvar flycheck-clang-args)
 (defvar flycheck-clang-blocks)
@@ -31,26 +27,32 @@
                (object-of-class-p cur-proj 'ede-cpp-root-project))
       (setq-local flycheck-clang-include-path
                   (append flycheck-clang-include-path
-                          (oref cur-proj :system-include-path)
+                          (oref cur-proj system-include-path)
                           (mapcar
                            (lambda (prj-inc)
                              (if (string-prefix-p "/" prj-inc)
                                  ;; drop the "/" from an :include-path
                                  (expand-file-name (substring prj-inc 1) project-root)
                                prj-inc))
-                           (oref cur-proj :include-path))))
+                           (oref cur-proj include-path))))
 
       (setq-local flycheck-clang-definitions
                   (mapcar (lambda(defs)
                             (cond ((zerop (length (cdr defs))) (car defs))
                                   (t (concat (car defs) "=" (cdr defs)))))
-                          (oref cur-proj :spp-table))))))
+                          (oref cur-proj spp-table))))))
 
+(declare-function 'get-command-line "ede-compdb")
+(declare-function 'get-defines "ede-compdb")
+(declare-function 'get-includes "ede-compdb")
+(declare-function 'get-include-path "ede-compdb")
 (defun sl-ede-compdb-flycheck-init ()
   "Setup the flycheck for ede-compdb."
   (defvar ede-object)
-  (when (and ede-object (oref ede-object :compilation))
-    (let* ((comp (oref ede-object :compilation))
+  (when (and ede-object
+             (class-p 'ede-compdb-project)
+             (object-of-class-p ede-object 'ede-compdb-project))
+    (let* ((comp (oref ede-object compilation))
            (cmd (get-command-line comp)))
       ;; Configure flycheck clang checker.
       ;; TODO: configure gcc checker also

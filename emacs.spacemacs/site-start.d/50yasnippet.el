@@ -1,7 +1,7 @@
 ;;; yasnippet --- settings  -*-emacs-lisp-*-
 ;;; Commentary:
 ;;; Code:
-(autoload 'yas-load-directory "yasnippet")
+(declare-function 'yas-load-directory "yasnippet")
 (defun sl-disable-yas-minor-mode ()
   "Disable the `yas-minor-mode' for not well unsupport major-mode."
   (when (fboundp 'yas-minor-mode)
