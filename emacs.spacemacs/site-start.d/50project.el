@@ -171,7 +171,7 @@ want add all files in project to tags file."
             (shell-command-to-string str-command)
             (shell-command-to-string (format "sort -u %s > %s" proj-name-tmp sl-ede-project-list-all))
             (shell-command-to-string (format "grep -E '\\.[cChH](pp)?$|\\.cc$|\\.hh$' %s > %s" sl-ede-project-list-all sl-ede-project-xtags))
-            ;; (call-process-shell-command (concat "time cscope -b -f cscope.out -i " sl-ede-project-xtags) nil 0) 
+            ;; (call-process-shell-command (concat "time cscope -b -f cscope.out -i " sl-ede-project-xtags) nil 0)
             (setenv "GTAGSLIBPATH" (mapconcat 'identity (oref (ede-current-project) system-include-path) ":"))
             (call-process-shell-command (concat "time gtags -f " sl-ede-project-xtags) nil 0)
             (delete-file proj-name-tmp)))))))
