@@ -183,7 +183,7 @@
     (let ((file (expand-file-name "share/pyim-wbdict-v86.rime" portable-root-dir))
           (wubi-initialized nil))
       (advice-add 'pyim-start :before
-                  (lambda ()
+                  (lambda (&optional _)
                     (unless wubi-initialized
                       (pyim-extra-dicts-add-dict `(:name "wbdict-v86-rime" :file ,file))
                       (setq wubi-initialized t))))))
