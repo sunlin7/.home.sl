@@ -203,6 +203,13 @@
     (custom-set-variables ; disable img resize for helm change window size offen
      '(image-auto-resize-on-window-resize nil)))
 
+  (with-eval-after-load 'quickrun
+    (quickrun-add-command "c++11"
+      '((:command . "g++")
+        (:exec    . ("%c -std=c++11 %o -o %e %s"
+		                 "%e %a"))
+        (:remove  . ("%e")))
+      :default "c++"))
   ;;;; fix the c-basic-offset for google-c-style
   ;; (with-eval-after-load 'google-c-style
   ;;   '(dolist (v google-c-style)
