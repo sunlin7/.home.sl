@@ -88,26 +88,5 @@
 (add-hook 'after-change-major-mode-hook
           #'sl-setup-short-keys-for-jumper)
 
-(declare-function 'python-nav-beginning-of-statement "python")
-(with-eval-after-load 'python
-  (unless (fboundp 'python-shell-send-statement)
-    (declare-function 'python-shell-send-region "python")
-    (defun python-shell-send-statement (&optional beg end)
-      "This function should exist after emacs27 and later."
-      (interactive)
-      (if (region-active-p)
-          (call-interactively #'python-shell-send-region)
-        (python-shell-send-region
-         (save-excursion (python-nav-beginning-of-statement))
-         (save-excursion (python-nav-end-of-statement)))))
-    (defvar python-mode-map)
-    (define-key python-mode-map "\C-c\C-e" 'python-shell-send-statement)
-    (define-key-after
-      (lookup-key python-mode-map [menu-bar Python])
-      [Eval\ statement]
-      '(menu-item "Eval statement/region" python-shell-send-statement
-                  :help "Eval statement or region in inferior Python session.")
-      'Eval\ Statement)))
-
 (provide '50cc-mode)
 ;;; 50cc-mode ends here
