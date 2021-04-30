@@ -49,9 +49,16 @@ A =.emacs= can be copy from =dot-emacs-template=, or simplload it as:
     (setenv "PATH" (concat "c:/cygwin64/bin;" (getenv "PATH"))))
   ;; just following the template configuration.
   (defvar portable-root-dir (expand-file-name ".." invocation-directory))
-  (defvar portable-home-dir (file-name-directory (or load-file-name (buffer-file-name))))
+  (defvar portable-home-dir
+    (file-name-directory (file-truename (or load-file-name (buffer-file-name)))))
 
-  (let ((init-template (expand-file-name ".home.sl/emacs.spacemacs/dot-emacs-template.el" portable-home-dir)))
+  (let* ((init-file (expand-file-name ".emacs" portable-root-dir))
+         (init-template
+          (expand-file-name
+           ".home.sl/emacs.spacemacs/dot-emacs-template.el" portable-home-dir)))
+    (when (and (not (fboundp 'image-mask-p)) (file-exists-p init-file))
+      ;; for noX build, try ~/.rootm-*/.emacs first
+      (setq portable-home-dir portable-root-dir))
     (when (file-exists-p init-template)
       (setq user-init-file init-template)
       (load (file-name-sans-extension init-template))))

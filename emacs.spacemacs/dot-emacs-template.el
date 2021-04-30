@@ -3,12 +3,14 @@
 ;; It's a good start for custom dot-emacs file.
 
 (defvar portable-root-dir (expand-file-name ".." invocation-directory))
-(defvar portable-home-dir (file-name-directory (or load-file-name (buffer-file-name))))
+(defvar portable-home-dir
+  (file-name-directory (file-truename (or load-file-name (buffer-file-name)))))
 
-(defvar sl-savefile-dir (let ((save-dir (expand-file-name "~/.emacs.save/" )))
+(defvar sl-savefile-dir (let ((save-dir (expand-file-name "~/.emacs.save/")))
                           (if (file-exists-p save-dir)
                               save-dir
                             user-emacs-directory)))
+
 (let ((sl-init-file (expand-file-name ".home.sl/emacs.spacemacs/init.el" portable-home-dir)))
   (when (file-exists-p sl-init-file) (load (file-name-sans-extension sl-init-file))))
 
@@ -199,9 +201,11 @@
   ;; (unless (file-exists-p plantuml-jar-path) ; download plantuml automatically
   ;;  (plantuml-download-jar))
   (with-eval-after-load 'plantuml-mode
-    (plantuml-set-output-type "png")    ; text in svg image hard to see in dark
-    (custom-set-variables ; disable img resize for helm change window size offen
-     '(image-auto-resize-on-window-resize nil)))
+    (declare-function plantuml-set-output-type "plantuml-mode")
+    (plantuml-set-output-type "png")) ; text in svg image hard to see in dark theme
+
+  ;; disable img resize for window size is changed by HELM windows
+  (custom-set-variables '(image-auto-resize-on-window-resize nil))
 
   (with-eval-after-load 'quickrun
     (quickrun-add-command "c++11"
