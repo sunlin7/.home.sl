@@ -115,8 +115,7 @@
                           (if (string= (file-name-base python-shell-interpreter) "ipython")
                               ;; (string-trim (shell-command-to-string (concat python-shell-interpreter " -c 'from __future__ import print_function; import sys; print(sys.executable)'")))
                               (or (executable-find "python3") (executable-find "python2") "python")
-                            python-shell-interpreter))
-              )))
+                            python-shell-interpreter)))))
 
 ;; fix that the pipenv only find pylint in virtual evnvironment
 ;; (with-eval-after-load 'pipenv

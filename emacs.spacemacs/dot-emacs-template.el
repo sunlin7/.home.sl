@@ -263,11 +263,9 @@
 (global-set-key (kbd "\e[127:6u") [C-S-backspace])
 
 ;; (custom-set-variables
-;;  '(default-frame-alist
-;;     '((top . 1)
-;;       (left . 0)
-;;       (width . 149) ; (message "%s %s" (frame-width) (frame-height))
-;;       (height . 37))))
+;; '(default-frame-alist
+;;    '(((top . 0) (left . 0) (width . 110) (height . 40) ; get by `(frame-height)', `(frame-width)' when frame is maximum
+;;      (background-color . "black") (foreground-color . "white")))))
 
 ;; (let ((my-project-init (expand-file-name "projects.el" sl-savefile-dir)))
 ;;   (when (file-exists-p my-project-init)
