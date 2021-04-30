@@ -222,10 +222,10 @@
   ;; (add-hook 'c-mode-common-hook
   ;;           (lambda () (setq-local tab-width c-basic-offset)))
   ;; check the the checkers
-  (unless (executable-find "gcc")
-    (custom-set-variables '(flycheck-disabled-checkers '(c/c++-gcc))))
-  (unless (executable-find "clang")
-    (custom-set-variables '(flycheck-disabled-checkers '(c/c++-clang)))))
+  (with-eval-after-load "flycheck"
+    (dolist (x '(("gcc" . c/c++-gcc) ("clang" . c/c++-clang)))
+      (unless (executable-find (car x))
+        (add-to-list 'flycheck-disabled-checkers (cdr x))))))
 
 (when (daemonp)
   (add-hook 'after-init-hook

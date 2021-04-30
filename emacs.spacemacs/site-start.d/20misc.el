@@ -18,11 +18,10 @@
 (defun sl-toggle-color ()
   "Toggle the background/foreground color."
   (interactive)
-  (let* ((fgcolor (assoc 'foreground-color default-frame-alist))
-         (bgcolor (assoc 'background-color default-frame-alist)))
-    (cl-rotatef (cdr fgcolor) (cdr bgcolor))
-    (set-foreground-color (cdr fgcolor))
-    (set-background-color (cdr bgcolor))))
+  (let* ((fgcolor (face-attribute 'default :foreground))
+         (bgcolor (face-attribute 'default :background)))
+    (set-foreground-color bgcolor)
+    (set-background-color fgcolor)))
 
 (defun sl-copy-full-path(&optional dir_only)
   (interactive "P")
