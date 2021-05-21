@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# cd %home%
+# C:\cygwin64\bin\cygstart.exe --hide /usr/bin/bash -i %home%\.home.sl\tools\sync-remote-to-local dev .ssh/ .ssh/
+echo "$@"
+if [[ $# != 3 ]]; then
+    echo "Usage: $(basename $0) <remote-host> <remote-dir> <local-dir>"
+    exit 1
+fi
+
+MSG_TIMEOUT=5
+function err_msg {
+    MSG="error happend, will try again."
+    [[ -n "$1" ]] && MSG="$1"
+    if command -v msg; then
+        msg "$USERNAME" /v /w /time:$MSG_TIMEOUT $MSG
+    else
+        write "$USER" $MSG
+        sleep $MSG_TIMEOUT
+    fi
+}
+
+# trap ctrl-c
+# function ctrl_c() {
+#     exit 1
+# }
+# trap ctrl_c INT
+
+REMOTE="$1"
+RDIR="$2"
+LDIR="$3"
+export PATH=/usr/bin:$PATH
+# exec 1>"/tmp/sync-remote-to-local-$$.log"
+# exec 2>&1
+if [[ $(basename "$LDIR") == '.' || $(basename "$LDIR") == '..' ]]; then
+    err_msg 'please special the exatcly subdir to avoid incorrectly parameter'
+    exit 1
+fi
+if [[ ! -d "$LDIR" ]]; then
+    err_msg 'non-exist dir: ' "$LDIR"
+    exit 1
+fi
+
+while true; do
+    # the exclude regex should be escaped forin bash file while execute in remote
+    ssh -x "$REMOTE" /usr/bin/inotifywait -m --exclude $(printf '%q' '(/\.[^/]+|.+~)$') \
+        -e close_write,move,delete "$RDIR" | \
+        while read fpath action file; do
+            rsync -vaurHld --exclude=\.* --exclude='*~' --delete "$REMOTE":"$fpath" "$LDIR" 2>&1 || err_msg
+        done
+    err_msg
+done
