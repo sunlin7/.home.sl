@@ -178,7 +178,7 @@
   (setq dotspacemacs-frame-title-format "%b@%S")
   ;; (setq dotspacemacs-line-numbers t) ;; not work here, onlywork in .spacemacs
   ;; post-config for spacemacs
-  (when (featurep 'pyim)
+  (when (fboundp 'pyim-start)
     (custom-set-variables '(pyim-default-scheme 'wubi)
                           '(default-input-method "pyim")
                           '(pyim-assistant-scheme-enable t))
@@ -193,7 +193,8 @@
   (menu-bar-mode t)
   (when (fboundp 'image-mask-p)
     (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode))
-    (pdf-loader-install)
+    (when (functionp 'pdf-loader-install)
+      (pdf-loader-install))
     (with-eval-after-load 'pdf-tools
       (push 'pdf-view-midnight-minor-mode pdf-tools-enabled-modes))
     (use-package org-pdftools
