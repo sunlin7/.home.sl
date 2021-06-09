@@ -194,11 +194,11 @@
   (when (fboundp 'image-mask-p)
     (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode))
     (when (functionp 'pdf-loader-install)
-      (pdf-loader-install))
+      (pdf-loader-install)
+      (use-package org-pdftools
+        :hook (org-load . org-pdftools-setup-link)))
     (with-eval-after-load 'pdf-tools
-      (push 'pdf-view-midnight-minor-mode pdf-tools-enabled-modes))
-    (use-package org-pdftools
-      :hook (org-load . org-pdftools-setup-link)))
+      (push 'pdf-view-midnight-minor-mode pdf-tools-enabled-modes)))
   ;; (unless (file-exists-p plantuml-jar-path) ; download plantuml automatically
   ;;  (plantuml-download-jar))
   (with-eval-after-load 'plantuml-mode
