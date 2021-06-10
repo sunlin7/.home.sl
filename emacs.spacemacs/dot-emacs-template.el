@@ -238,7 +238,7 @@
                 (require 'helm-mode)
                 (helm-mode t)))))
 
-(unless (executable-find invocation-name)
+(when (and (eq system-type 'windows-nt) (not (executable-find invocation-name)))
   (warn "Emacs not in PATH, recommend '[...\\mingw64.exe] bash -lc runemacs'"))
 
 (xterm-mouse-mode 0)
