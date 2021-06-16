@@ -17,8 +17,10 @@
 
 (add-hook 'after-init-hook
           (lambda ()
-            (semantic-mode  t)
-            (global-ede-mode t)))
+            (when (locate-file "cedet/semantic" load-path (get-load-suffixes))
+              (semantic-mode  t))
+            (when (locate-file "cedet/ede" load-path (get-load-suffixes))
+              (global-ede-mode t))))
 
 (with-eval-after-load 'semantic
   (global-semantic-mru-bookmark-mode t) ;; (semantic-mru-bookmark-mode)

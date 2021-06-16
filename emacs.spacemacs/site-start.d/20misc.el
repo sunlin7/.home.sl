@@ -35,9 +35,11 @@
 
 (add-hook 'after-init-hook
           (lambda ()
-            (global-set-key (kbd "C-c . l k") 'sl-copy-full-path)
-            ;; FIXME: workaround, attaching this function to ede mode map
-            (define-key ede-minor-mode-map (kbd "C-c . l k") 'sl-copy-full-path)))
+            (global-set-key (kbd "C-c . l k") 'sl-copy-full-path)))
+
+;; FIXME: workaround, attaching this function to ede mode map
+(with-eval-after-load 'ede
+  (define-key ede-minor-mode-map (kbd "C-c . l k") 'sl-copy-full-path))
 
 (declare-function dired-get-file-for-visit "dired" nil)
 (defun sl-dired-open-explorer-file ()

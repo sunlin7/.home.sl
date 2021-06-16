@@ -1,6 +1,13 @@
 ;; -*- mode: emacs-lisp; lexical-binding: t -*-
 ;; This is template for dot-emacs.
 ;; It's a good start for custom dot-emacs file.
+(when-let (OHOME (getenv "OHOME"))
+  (setq user-home-directory OHOME)
+  (setenv "HOME" OHOME)
+  (setenv "OHOME" nil))
+(when-let (EMACS_INIT (getenv "EMACS_INIT"))
+  (setenv "EMACS_INIT" nil)
+  (load EMACS_INIT))
 
 (defvar portable-root-dir (expand-file-name ".." invocation-directory))
 (defvar portable-home-dir
