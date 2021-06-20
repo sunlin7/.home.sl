@@ -12,6 +12,9 @@
 
 (defvar portable-root-dir (expand-file-name ".." invocation-directory))
 (defvar portable-home-dir
+  (if (and (null (fboundp 'image-mask-p)) ; try .rootm-*/.emacs for noX build
+	         (locate-file ".emacs" (list portable-root-dir)))
+      portable-root-dir)
   (file-name-directory (file-truename (or load-file-name (buffer-file-name)))))
 
 (defvar sl-savefile-dir (let ((save-dir (expand-file-name "~/.emacs.save/")))
