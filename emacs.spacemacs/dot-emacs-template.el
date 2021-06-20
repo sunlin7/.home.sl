@@ -1,6 +1,7 @@
 ;; -*- mode: emacs-lisp; lexical-binding: t -*-
 ;; This is template for dot-emacs.
 ;; It's a good start for custom dot-emacs file.
+(autoload 'when-let "subr-x")
 (when-let (OHOME (getenv "OHOME"))
   (setq user-home-directory OHOME)
   (setenv "HOME" OHOME)
@@ -18,8 +19,7 @@
                               save-dir
                             user-emacs-directory)))
 
-(let ((sl-init-file (expand-file-name ".home.sl/emacs.spacemacs/init.el" portable-home-dir)))
-  (when (file-exists-p sl-init-file) (load (file-name-sans-extension sl-init-file))))
+(load (expand-file-name ".home.sl/emacs.spacemacs/init" portable-home-dir))
 
 ;; (defvar PYTHON_VER_BIN "python3")
 
@@ -31,10 +31,9 @@
 
 ;; assume the spacemaces was installed.
 (setq spacemacs-start-directory (expand-file-name ".emacs.spacemacs/" portable-home-dir))
-(defvar sl-spacemacs-init (expand-file-name "init.el" spacemacs-start-directory))
-(when (file-exists-p sl-spacemacs-init)
-  (let ((magit-exec (expand-file-name "bin/git" portable-root-dir)))
-    (when (file-exists-p magit-exec) (setq-default magit-git-executable magit-exec)))
+(when-let (sl-spacemacs-init (locate-file "init" (list spacemacs-start-directory) load-suffixes))
+  (when-let (magit-exec (let ((exec-path (list portable-root-dir))) (executable-find "bin/git")))
+    (setq-default magit-git-executable magit-exec))
   ;; FIXME: the env PYTHONUSERBASE maybe incorrect in ~/.spacemacs.env, flushing it.
   ;; (when (executable-find PYTHON_VER_BIN) (setenv "PYTHONUSERBASE" portable-root-dir))
 
@@ -178,8 +177,8 @@
              yaml
              vimscript))))
 
-  (let ((dotspath (expand-file-name ".spacemacs" portable-home-dir)))
-    (when (file-exists-p dotspath) (defvar dotspacemacs-filepath dotspath)))
+  (when-let (dotspath (locate-file ".spacemacs" (list portable-home-dir)))
+    (defvar dotspacemacs-filepath dotspath))
   ;; load the spacemacs
   (load-file sl-spacemacs-init)
   (setq dotspacemacs-frame-title-format "%b@%S")
@@ -279,10 +278,9 @@
 ;;    '(((top . 0) (left . 0) (width . 110) (height . 40) ; get by `(frame-height)', `(frame-width)' when frame is maximum
 ;;      (background-color . "black") (foreground-color . "white")))))
 
-;; (let ((my-project-init (expand-file-name "projects.el" sl-savefile-dir)))
-;;   (when (file-exists-p my-project-init)
-;;     (add-hook 'after-init-hook (lambda () (load-file my-project-init)))
-;;     (defun sl-ede-project-reload ()
-;;       (interactive)
-;;       (setq ede-cpp-root-project-list nil)
-;;       (load-file my-project-init))))
+;; (when-let (my-project-init (locate-file "projects" (list sl-savefile-dir)))
+;;   (add-hook 'after-init-hook (lambda () (load-file my-project-init)))
+;;   (defun sl-ede-project-reload ()
+;;     (interactive)
+;;     (setq ede-cpp-root-project-list nil)
+;;     (load-file my-project-init)))

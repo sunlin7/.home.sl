@@ -50,18 +50,15 @@ A =.emacs= can be copy from =dot-emacs-template=, or simplload it as:
   ;; just following the template configuration.
   (defvar portable-root-dir (expand-file-name ".." invocation-directory))
   (defvar portable-home-dir
-    (file-name-directory (file-truename (or load-file-name (buffer-file-name)))))
-
-  (let* ((init-file (expand-file-name ".emacs" portable-root-dir))
-         (init-template
-          (expand-file-name
-           ".home.sl/emacs.spacemacs/dot-emacs-template.el" portable-home-dir)))
-    (when (and (not (fboundp 'image-mask-p)) (file-exists-p init-file))
-      ;; for noX build, try ~/.rootm-*/.emacs first
-      (setq portable-home-dir portable-root-dir))
-    (when (file-exists-p init-template)
-      (setq user-init-file init-template)
-      (load (file-name-sans-extension init-template))))
+    (if (and (null (fboundp 'image-mask-p)) ; try .rootm-*/.emacs for noX build
+             (file-exists-p (expand-file-name ".emacs" portable-root-dir)))
+        portable-root-dir
+      (file-name-directory (file-truename (or load-file-name (buffer-file-name))))))
+  
+  (let ((init-template
+         (expand-file-name ".home.sl/emacs.spacemacs/dot-emacs-template" portable-home-dir)))
+    ;; (load init-template)
+    (setq user-init-file (locate-file init-template nil '(".el" ".el.gz"))))
 #+end_src
 ** Addtional Requirest
 If need support python =live-py-mode=, it request the =thinter= package, can install by 
