@@ -100,6 +100,9 @@ Then add keymap in =~/.emacs=:
    wsl.exe -u sunlin7 -e /bin/bash -lc "~/.root/bin/emacsclient -c -n --alternate-editor="
    
    *shortcut for mingw64*
-   C:\msys64\mingw64.exe bash -lc "runemacs --daemon"
-   C:\msys64\mingw64\bin\emacsclientw.exe -c
+   \msys64\mingw64.exe bash -lc "runemacs --daemon"
+   \msys64\mingw64\bin\emacsclientw.exe -c
 
+   *shortcut for standalone*
+   \emacs-master-x86_64-full\bin\runemacs.exe --daemon
+   \emacs-master-x86_64-full\bin\emacsclientw.exe -c
