@@ -6,9 +6,6 @@
   (setq user-home-directory OHOME)
   (setenv "HOME" OHOME)
   (setenv "OHOME" nil))
-(when-let (EMACS_INIT (getenv "EMACS_INIT"))
-  (setenv "EMACS_INIT" nil)
-  (load EMACS_INIT))
 
 (defvar portable-root-dir (expand-file-name ".." invocation-directory))
 (defvar portable-home-dir
