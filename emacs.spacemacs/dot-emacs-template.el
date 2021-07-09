@@ -68,8 +68,7 @@
              windows-scripts
              )))
     ((guard (fboundp 'image-mask-p))
-     (setq sl-packages-list (append sl-packages-list
-                                    '(nov pdf-tools org-pdftools))
+     (setq sl-packages-list (append sl-packages-list '(org-pdftools))
            sl-packages-excluded '(anaconda-mode
                                   ccls
                                   rtags
@@ -98,6 +97,7 @@
              dap
              django
              emacs-lisp
+             epub
              git
              graphviz
              gtags
@@ -123,6 +123,7 @@
              (org :variables
                   org-plantuml-jar-path (expand-file-name "share/plantuml.jar" portable-root-dir))
              octave
+             pdf
              (plantuml :variables
                        plantuml-jar-path (expand-file-name "share/plantuml.jar" portable-root-dir)
                        plantuml-default-exec-mode 'jar)
@@ -198,11 +199,8 @@
 
   (menu-bar-mode t)
   (when (fboundp 'image-mask-p)
-    (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode))
-    (when (functionp 'pdf-loader-install)
-      (pdf-loader-install)
-      (use-package org-pdftools
-        :hook (org-load . org-pdftools-setup-link)))
+    (use-package org-pdftools
+      :hook (org-load . org-pdftools-setup-link))
     (with-eval-after-load 'pdf-tools
       (push 'pdf-view-midnight-minor-mode pdf-tools-enabled-modes)))
   ;; (unless (file-exists-p plantuml-jar-path) ; download plantuml automatically
