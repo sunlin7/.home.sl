@@ -130,6 +130,7 @@
              python
              php
              rust
+             shell
              syntax-checking
              systemd
              smex
