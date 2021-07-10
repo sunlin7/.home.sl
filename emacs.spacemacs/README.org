@@ -48,6 +48,8 @@ A =.emacs= can be copy from =dot-emacs-template=, or simplload it as:
     (add-to-list 'exec-path "c:/cygwin64/bin")
     (setenv "PATH" (concat "c:/cygwin64/bin;" (getenv "PATH"))))
   ;; just following the template configuration.
+  (locate-user-emacs-file ".cache/") ; FIXME: workaround for `spacemacs-cache-directory'
+  
   (defvar portable-root-dir (expand-file-name ".." invocation-directory))
   (defvar portable-home-dir
     (if (and (null (fboundp 'image-mask-p)) ; try .rootm-*/.emacs for noX build
