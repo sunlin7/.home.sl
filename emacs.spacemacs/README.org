@@ -57,10 +57,12 @@ A =.emacs= can be copy from =dot-emacs-template=, or simplload it as:
         portable-root-dir
       (file-name-directory (file-truename (or load-file-name (buffer-file-name))))))
   
+  (autoload 'when-let "subr-x")
   (let ((init-template
          (expand-file-name ".home.sl/emacs.spacemacs/dot-emacs-template" portable-home-dir)))
-    ;; (load init-template)
-    (setq user-init-file (locate-file init-template nil '(".el" ".el.gz"))))
+    (load init-template)
+    (when-let (init-file (locate-file init-template nil '(".el" ".el.gz")))
+      (setq user-init-file init-file)))
 #+end_src
 ** Addtional Requirest
 If need support python =live-py-mode=, it request the =thinter= package, can install by 
