@@ -88,12 +88,13 @@
            sl-configuration-layers
            '(auto-completion
              better-defaults
-             csv
-             chinese
              (c-c++ :variables
                     ;; c-c++-enable-google-style t
                     ;; c-c++-enable-google-newline t
                     c-c++-backend 'lsp-clangd)
+             chinese
+             cmake
+             csv
              dap
              django
              emacs-lisp
