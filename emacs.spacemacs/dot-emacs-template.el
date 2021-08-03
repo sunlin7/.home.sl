@@ -198,7 +198,9 @@
                     (unless wubi-initialized
                       (pyim-extra-dicts-add-dict `(:name "wbdict-v86-rime" :file ,file))
                       (setq wubi-initialized t))))))
-
+  (unless (package-installed-p 'org '(2021 8 2))
+    (dolist (desc-item (cdr (assq 'org package-archive-contents)))
+      (package-install desc-item)))
   (menu-bar-mode t)
   (when (fboundp 'image-mask-p)
     (use-package org-pdftools
