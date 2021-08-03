@@ -205,8 +205,10 @@
   (when (fboundp 'image-mask-p)
     (use-package org-pdftools
       :hook (org-load . org-pdftools-setup-link))
-    (with-eval-after-load 'pdf-tools
-      (push 'pdf-view-midnight-minor-mode pdf-tools-enabled-modes)))
+    (add-hook 'pdf-view-mode-hook
+              (lambda ()
+                (when (string-match-p "-dark" (format "%s" custom-enabled-themes))
+                  (pdf-view-midnight-minor-mode t)))))
   ;; (unless (file-exists-p plantuml-jar-path) ; download plantuml automatically
   ;;  (plantuml-download-jar))
   (with-eval-after-load 'plantuml-mode
