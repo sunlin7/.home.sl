@@ -202,7 +202,7 @@
     (dolist (desc-item (cdr (assq 'org package-archive-contents)))
       (package-install desc-item)))
   (menu-bar-mode t)
-  (when (fboundp 'image-mask-p)
+  (when (and (fboundp 'image-mask-p) (eq window-system 'x))
     (use-package org-pdftools
       :hook (org-load . org-pdftools-setup-link))
     (add-hook 'pdf-view-mode-hook
