@@ -100,21 +100,22 @@ alias cd..='cd ../..'
 alias cd...='cd ../../..'
 alias cd....='cd ../../../..'
 alias cd-='cd -'
-for cmd in trash-put "gio trash" gvfs-trash; do
-    if command -v ${cmd/ */} > /dev/null; then
-        eval 'function rm() { '$cmd' "$@" 2>/dev/null || command rm "$@"; };'
-        break;
-    fi
-done
+function rm() {
+    for cmd in trash-put "gio trash" gvfs-trash /bin/rm /usr/bin/rm; do
+        if command -v ${cmd/ */} > /dev/null; then
+            $cmd "$@" 2>/dev/null && break
+        fi
+    done
+}
 
-for cmd in "gio open" explorer xdg-open gvfs-open gnome-open; do
-    if command -v ${cmd/ */} > /dev/null; then
-        eval 'function o() {
-            [[ -n "$1" ]] && (command cd "$(dirname $1)" && '$cmd' "$(basename $1)")
-        }'
-        break
-    fi
-done
+function o() {
+    for cmd in "gio open" explorer xdg-open gvfs-open gnome-open; do
+        if command -v ${cmd/ */} > /dev/null; then
+            [[ -n "$1" ]] && command cd "$(dirname $1)" && $cmd "$(basename $1)"
+            break
+        fi
+    done
+}
 
 if command -v "mintty" > /dev/null; then
     alias mintty='mintty.exe -i /Cygwin-Terminal.ico -o Blue=84,84,252 -o BoldBlue=127,127,252 -'
