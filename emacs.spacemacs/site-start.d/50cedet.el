@@ -9,7 +9,6 @@
 (declare-function 'semantic-tag-class "semantic/tag")
 (declare-function 'semantic-tag-get-attribute "semantic/tag")
 (declare-function 'semantic-fetch-tags "semantic/tag")
-(declare-function 'semantic-ia-fast-jump "semantic/ia")
 (declare-function 'semantic-ia--fast-jump-helper "semantic/ia")
 (declare-function 'global-semantic-mru-bookmark-mode "semantic/mru-bookmark")
 ;; (declare-function 'global-semantic-idle-summary-mode "semantic/idle")
