@@ -39,7 +39,8 @@
 
   (pcase system-type
     ('windows-nt
-     (setq sl-packages-excluded '(ccls
+     (setq sl-packages-excluded '(anaconda-mode
+                                  ccls
                                   rtags
                                   company-rtags
                                   company-ycmd
@@ -73,6 +74,7 @@
                                   ccls
                                   rtags
                                   ycmd
+                                  gtags
                                   company-rtags
                                   company-ycmd
                                   company-anaconda
@@ -101,7 +103,6 @@
              epub
              git
              graphviz
-             gtags
              helm
              html
              ibuffer
@@ -129,7 +130,6 @@
                        plantuml-jar-path (expand-file-name "share/plantuml.jar" portable-root-dir)
                        plantuml-default-exec-mode 'jar)
              python
-             php
              rust
              shell
              syntax-checking
