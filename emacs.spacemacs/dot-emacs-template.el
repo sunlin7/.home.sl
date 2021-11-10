@@ -270,10 +270,15 @@
         (funcall orig command)))))
 (advice-add 'gud-basic-call :around #'sl-adv-gud-basic-call)
 
-(global-set-key (kbd "\e[127;5u") [C-backspace])
-(global-set-key (kbd "\e[127:5u") [C-backspace])
-(global-set-key (kbd "\e[127;6u") [C-S-backspace])
-(global-set-key (kbd "\e[127:6u") [C-S-backspace])
+(add-hook 'after-make-frame-functions
+          #'(lambda (frame)
+              "Update key binding in terminal, `$showkey -a` for key sequence."
+              (with-selected-frame frame
+                (when (eq (terminal-live-p (frame-terminal frame)) t)
+                  (define-key input-decode-map (kbd "\e[127;5u") [C-backspace])
+                  (define-key input-decode-map (kbd "\e[127:5u") [C-backspace])
+                  (define-key input-decode-map (kbd "\e[127;6u") [C-S-backspace])
+                  (define-key input-decode-map (kbd "\e[127:6u") [C-S-backspace])))))
 
 ;; (custom-set-variables
 ;; '(default-frame-alist

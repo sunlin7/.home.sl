@@ -83,9 +83,10 @@ The fonts depends by ~all-the-icons~ can downloaded with elisp `all-the-icons-in
   "Scancode Map"=hex:00,00,00,00,00,00,00,00,02,00,00,00,38,00,38,e0,00,00,00,00
 #+end_src
 *** Ctrl+Backspace and Ctrl+Shift+Backspace for mintty
-According https://github.com/mintty/mintty/issues/1082, remap both =Ctrl+Back= and =Ctrl+Shift+Back= in =~/.minttyrc=:
+According https://github.com/mintty/mintty/issues/1082, remap both =Ctrl+Back= and =Ctrl+Shift+Back= in =~/.minttyrc=,
+and C+?(C+S+/) remap to "M+_" (use `$ showkey -a` to show key sequence).
 #+begin_src conf
-  KeyFunctions=C+Back:"[127:5u";C+S+Back:"[127:6u";
+  KeyFunctions=C+Back:"[127:5u";C+S+Back:"[127:6u;C+S+/:"_";
 #+end_src
 
 Then add keymap in =~/.emacs=:
