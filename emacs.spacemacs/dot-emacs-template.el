@@ -176,6 +176,7 @@
              imenu-list
              markdown
              nginx
+             shell
              smex
              ;; ivy
              (semantic :disabled-for emacs-lisp) ; company-backend for elisp has problem with semantic
