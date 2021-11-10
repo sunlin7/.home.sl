@@ -171,6 +171,7 @@
              better-defaults
              emacs-lisp
              helm
+             (lua :variables lua-indent-offset 4)
              ibuffer
              imenu-list
              markdown
