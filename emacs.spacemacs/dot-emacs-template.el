@@ -190,13 +190,13 @@
   (setq dotspacemacs-frame-title-format "%b@%S")
   ;; (setq dotspacemacs-line-numbers t) ;; not work here, onlywork in .spacemacs
   ;; post-config for spacemacs
-  (when (fboundp 'pyim-active)
+  (when (fboundp 'pyim-activate)
     (custom-set-variables '(pyim-default-scheme 'wubi)
                           '(default-input-method "pyim")
                           '(pyim-assistant-scheme-enable t))
     (let ((file (expand-file-name "share/pyim-wbdict-v86.rime" portable-root-dir))
           (wubi-initialized nil))
-      (advice-add 'pyim-active :before
+      (advice-add 'pyim-activate :before
                   (lambda (&optional _)
                     (unless wubi-initialized
                       (pyim-extra-dicts-add-dict `(:name "wbdict-v86-rime" :file ,file))
