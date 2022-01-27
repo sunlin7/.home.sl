@@ -1,5 +1,5 @@
 # -*- mode: shell-script -*-
-# some functions
+# shell functions
 
 ## the follow clip maybe useful when get a new environment.
 # case $- in
@@ -9,18 +9,18 @@
 # esac
 # env -i PWD=$PWD LOGNAME=$LOGNAME USER=$USER LANG=$LANG HOME=$HOME SHELL=$SHELL TERM=$TERM MAIL=$MAIL /bin/bash -l -i -v -c "eval $*"
 
-# custome MYCD_PROJECT_INDICATOR, MYCD_PROJECT_CDPATH in .bashrc
+# setting MYCD_PROJECT_INDICATOR, MYCD_PROJECT_CDPATH in .bashrc for similar projects in difference dicrectory.
 # Project indicator is an array as (sub01 sub02 ...)
 MYCD_DEFAULT_HOME=~
 MYCD_DEFAULT_CDPATH=$HOME:$file_dir
 MYCD_DEFAULT_PROJECT_ROOT=
-MYCD_PROJECT_INDICATOR=(inc src)
-MYCD_PROJECT_CDPATH=(inc src)
+MYCD_PROJECT_INDICATOR= # (inc src)
+MYCD_PROJECT_CDPATH= # (inc src)
 
 function find_project_indicator() {
     [ ! -d "$1" ] && return 0
 
-    command cd "$1"
+    builtin cd "$1"
     if [ $? -eq 0 ]; then
         shift
         not_exist=
@@ -50,18 +50,21 @@ function _modify_cd_path_with_prj() {
     export CDPATH MYCD_PROJECT_ROOT
 }
 
-function mycd_buildin() {
+function mycd_builtin() {
+    if [ -n "$MYCD_PROJECT_INDICATOR" ]; then
+        return builtin cd "$@"
+    fi
     if [ $# -eq 0 ]; then
-        command cd "$MYCD_DEFAULT_HOME"
+        builtin cd "$MYCD_DEFAULT_HOME"
         return $?
-    elif [ "." == "$1" ]; then
+    elif [[ "." == "$1" ]]; then
         shift
-        command cd "$MYCD_PROJECT_ROOT" "$@"
+        builtin cd "$MYCD_PROJECT_ROOT" "$@"
         return $?
     else
-        if command cd "$@"; then
+        if builtin cd "$@"; then
             NEW_PRJ_ROOT=$(find_project_indicator "$(pwd)" "${MYCD_PROJECT_INDICATOR[@]}")
-            if [ -n "$NEW_PRJ_ROOT" ] && [ "$NEW_PRJ_ROOT" != "$MYCD_PROJECT_ROOT" ]; then
+            if [ -n "$NEW_PRJ_ROOT" ] && [[ "$NEW_PRJ_ROOT" != "$MYCD_PROJECT_ROOT" ]]; then
                 _modify_cd_path_with_prj "$NEW_PRJ_ROOT"
             fi
         fi
@@ -94,7 +97,7 @@ export LIBGL_ALWAYS_INDIRECT=1
 alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
-alias cd=mycd_buildin
+alias cd=mycd_builtin
 alias cd.='cd ..'
 alias cd..='cd ../..'
 alias cd...='cd ../../..'
@@ -111,7 +114,7 @@ function rm() {
 function o() {
     for cmd in "gio open" explorer xdg-open gvfs-open gnome-open; do
         if command -v ${cmd/ */} > /dev/null; then
-            [[ -n "$1" ]] && command cd "$(dirname $1)" && $cmd "$(basename $1)"
+            [[ -n "$1" ]] && builtin cd "$(dirname $1)" && $cmd "$(basename $1)"
             break
         fi
     done
