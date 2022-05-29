@@ -56,8 +56,9 @@
              csv
              emacs-lisp
              git
-             helm
+             (helm :variables helm-use-fuzzy 'source)
              ibuffer
+             ietf
              javascript
              lua
              multiple-cursors
@@ -68,9 +69,8 @@
              version-control
              windows-scripts
              )))
-    ((guard (fboundp 'image-mask-p))
-     (setq sl-packages-list (append sl-packages-list '(org-pdftools))
-           sl-packages-excluded '(anaconda-mode
+    ((guard (native-comp-available-p))
+     (setq sl-packages-excluded '(anaconda-mode
                                   ccls
                                   rtags
                                   ycmd
@@ -102,8 +102,7 @@
              emacs-lisp
              epub
              git
-             graphviz
-             helm
+             (helm :variables helm-use-fuzzy 'source)
              html
              ibuffer
              imenu-list
@@ -128,10 +127,6 @@
              (org :variables
                   org-plantuml-jar-path (expand-file-name "share/plantuml.jar" portable-root-dir))
              octave
-             pdf
-             (plantuml :variables
-                       plantuml-jar-path (expand-file-name "share/plantuml.jar" portable-root-dir)
-                       plantuml-default-exec-mode 'jar)
              python
              rust
              shell
@@ -146,9 +141,8 @@
              treemacs
              typescript
              vimscript
-             version-control     ; depends on git-gutter
-             (xclipboard :variables
-                         xclipboard-enable-cliphist t)
+             version-control            ; depends on git-gutter
+             (xclipboard :variables xclipboard-enable-cliphist t)
              yaml
              windows-scripts)))
     (_ ;; terminal without X11, a minimum config
@@ -173,7 +167,7 @@
            '(auto-completion
              better-defaults
              emacs-lisp
-             helm
+             (helm :variables helm-use-fuzzy 'source)
              (lua :variables lua-indent-offset 4)
              ibuffer
              imenu-list
@@ -185,6 +179,16 @@
              (semantic :disabled-for emacs-lisp) ; company-backend for elisp has problem with semantic
              yaml
              vimscript))))
+
+  (when (fboundp 'image-mask-p)
+    (setq  sl-packages-list (append sl-packages-list '(org-pdftools))
+           sl-configuration-layers
+           (append sl-configuration-layers
+                   '(graphviz
+                     pdf
+                     (plantuml :variables
+                               plantuml-jar-path (expand-file-name "share/plantuml.jar" portable-root-dir)
+                               plantuml-default-exec-mode 'jar)))))
 
   (when-let (dotspath (locate-file ".spacemacs" (list portable-home-dir)))
     (defvar dotspacemacs-filepath dotspath))
