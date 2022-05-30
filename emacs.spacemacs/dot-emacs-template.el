@@ -210,8 +210,8 @@
                       (setq wubi-initialized t))))))
   (menu-bar-mode t)
   (when (and (fboundp 'image-mask-p) (eq window-system 'x))
-    (use-package org-pdftools
-      :hook (org-load . org-pdftools-setup-link))
+    (use-package org-pdftools ; make sure the function org-pdftools-setup-link exists
+      :hook ((org-load . org-pdftools-setup-link)))
     (add-hook 'pdf-view-mode-hook
               (lambda ()
                 (when (string-match-p "-dark" (format "%s" custom-enabled-themes))
