@@ -279,6 +279,12 @@
         (funcall orig command)))))
 (advice-add 'gud-basic-call :around #'sl-adv-gud-basic-call)
 
+(defun sl-adv-git-gutter-mode (ORIG &optional ARG)
+  (if (< (point-max) (* 512 1024))
+      (funcall ORIG ARG)
+    (message "disable git-gutter for large file")))
+(advice-add 'git-gutter-mode :around #'sl-adv-git-gutter-mode)
+
 (add-hook 'after-make-frame-functions
           #'(lambda (frame)
               "Update key binding in terminal, `$showkey -a` for key sequence."
