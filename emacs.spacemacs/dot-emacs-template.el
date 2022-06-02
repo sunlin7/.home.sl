@@ -94,7 +94,7 @@
                     ;; c-c++-enable-google-style t
                     ;; c-c++-enable-google-newline t
                     c-c++-backend 'lsp-clangd)
-             chinese
+             (chinese :variables chinese-default-input-method t)
              cmake
              csv
              dap
@@ -197,17 +197,16 @@
   (setq dotspacemacs-frame-title-format "%b@%S")
   ;; (setq dotspacemacs-line-numbers t) ;; not work here, onlywork in .spacemacs
   ;; post-config for spacemacs
-  (when (fboundp 'pyim-activate)
-    (custom-set-variables '(pyim-default-scheme 'wubi)
-                          '(default-input-method "pyim")
-                          '(pyim-assistant-scheme-enable t))
-    (let ((file (expand-file-name "share/pyim-wbdict-v86.rime" portable-root-dir))
-          (wubi-initialized nil))
-      (advice-add 'pyim-activate :before
-                  (lambda (&optional _)
-                    (unless wubi-initialized
-                      (pyim-extra-dicts-add-dict `(:name "wbdict-v86-rime" :file ,file))
-                      (setq wubi-initialized t))))))
+  (when-let ((fboundp 'pyim-activate)
+             (file (expand-file-name "share/pyim-wbdict-v86.rime" portable-root-dir))
+             (wubi-wait-initializing t))
+    (custom-set-variables '(pyim-default-scheme 'wubi))
+    (autoload 'pyim-extra-dicts-add-dict "pyim-dict" "add dict to pyim extra dicts")
+    (advice-add 'pyim-activate :before
+                (lambda (&optional _)
+                  (when wubi-wait-initializing
+                    (pyim-extra-dicts-add-dict `(:name "wbdict-v86-rime" :file ,file))
+                    (setq wubi-wait-initializing nil)))))
   (menu-bar-mode t)
   (when (and (fboundp 'image-mask-p) (eq window-system 'x))
     (use-package org-pdftools ; make sure the function org-pdftools-setup-link exists
@@ -259,25 +258,6 @@
   (warn "Emacs not in PATH, recommend '[...\\mingw64.exe] bash -lc runemacs'"))
 
 (xterm-mouse-mode 0)
-
-(advice-add 'pyvenv-activate :around
-            #'(lambda (ORIG directory)
-                (let ((sl-calling-pyvenv-activate t))
-                  (funcall ORIG directory))))
-(advice-add 'pyvenv-deactivate :around
-            #'(lambda (ORIG)
-                (if (and (boundp 'sl-calling-pyvenv-activate)
-                         sl-calling-pyvenv-activate)
-                    (ignore-errors (funcall ORIG))
-                  (funcall ORIG))))
-
-(defun sl-adv-gud-basic-call (orig command)
-  "addvice for `gud-basic-call'"
-  (with-current-buffer (current-buffer)
-    (save-excursion
-      (save-restriction
-        (funcall orig command)))))
-(advice-add 'gud-basic-call :around #'sl-adv-gud-basic-call)
 
 (defun sl-adv-git-gutter-mode (ORIG &optional ARG)
   (if (< (point-max) (* 512 1024))
