@@ -83,5 +83,15 @@ Please refer http://wikipedia.org/wiki/Comparison_of_file_systems for detail."
 
 (advice-add 'undo-tree-make-history-save-file-name :around #'sl-undo-tree-make-history-save-file-name)
 
+(defmacro sl-url-hex-macro (fsym func)
+  "Run the function `func' over the region between START and END in current buffer."
+  `(defun ,fsym (start end)
+     "Run the url-hexify-string/url-unhex-string interactively."
+     (interactive "r")
+     (save-excursion
+       (insert (funcall ,func (delete-and-extract-region start end))))))
+(sl-url-hex-macro sl-url-hex #'url-hexify-string)
+(sl-url-hex-macro sl-url-unhex #'url-unhex-string)
+
 (provide '20misc)
 ;;; 20misc ends here
