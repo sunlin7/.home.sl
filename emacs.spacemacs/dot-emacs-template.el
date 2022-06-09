@@ -222,8 +222,11 @@
     (plantuml-set-output-type "png")) ; text in svg image hard to see in dark theme
 
   ;; disable img resize for window size is changed by HELM windows
-  (custom-set-variables '(image-auto-resize-on-window-resize nil))
-
+  (custom-set-variables '(image-auto-resize-on-window-resize nil)
+                        '(image-auto-resize ; resize image for HiDPI
+                          (if-let ((scale (getenv "GDK_DPI_SCALE")))
+                              (string-to-number scale)
+                            t)))
   (with-eval-after-load 'quickrun
     (quickrun-add-command "c++11"
       '((:command . "g++")
