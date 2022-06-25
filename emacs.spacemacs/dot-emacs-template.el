@@ -10,6 +10,14 @@
   (setenv "HOME" OHOME)
   (setenv "OHOME" nil))
 
+;; async-compile will invoke "emacs --batch -l /tmp/xxx.el", then the libgccjit
+;; will search the crtbegin*.o, change native-comp-driver-options to help
+;; libgccjit to locate the essential files.
+(custom-set-variables
+ '(native-comp-async-jobs-number (when (fboundp 'num-processors) (num-processors)))
+ '(native-comp-async-env-modifier-form  ; dirver or compiler options
+   `(setq native-comp-driver-options '(,(concat "-B" (expand-file-name "../lib64/" invocation-directory))))))
+
 (defvar portable-root-dir (expand-file-name ".." invocation-directory))
 (defvar portable-home-dir
   (if (and (null (fboundp 'image-mask-p)) ; try .rootm-*/.emacs for noX build
