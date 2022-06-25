@@ -31,8 +31,6 @@
 ;; assume the spacemaces was installed.
 (setq spacemacs-start-directory (expand-file-name ".emacs.spacemacs/" portable-home-dir))
 (when-let (sl-spacemacs-init (locate-file "init" (list spacemacs-start-directory) load-suffixes))
-  (when-let (magit-exec (let ((exec-path (list portable-root-dir))) (executable-find "bin/git")))
-    (setq-default magit-git-executable magit-exec))
   ;; FIXME: the env PYTHONUSERBASE maybe incorrect in ~/.spacemacs.env, flushing it.
   ;; (when (executable-find python3) (setenv "PYTHONUSERBASE" portable-root-dir))
 
