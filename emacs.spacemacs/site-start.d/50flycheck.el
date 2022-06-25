@@ -4,7 +4,7 @@
 (declare-function 'oref "eieio")
 (declare-function 'class-p "eieio-core")
 (declare-function 'object-of-class-p "eieio")
-(declare-function 'ede-current-project "ede/cpp-root")
+(declare-function 'ede-current-project "ede")
 (declare-function 'ede-project-root-directory "ede/auto")
 
 (defvar flycheck-clang-args)

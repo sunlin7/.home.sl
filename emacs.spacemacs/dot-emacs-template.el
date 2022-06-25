@@ -2,6 +2,7 @@
 ;; This is template for dot-emacs.
 ;; It's a good start for custom dot-emacs file.
 (autoload 'when-let "subr-x")
+(autoload 'if-let* "subr-x")
 (when-let (OHOME (getenv "OHOME"))
   (setq user-home-directory OHOME)
   (setenv "HOME" OHOME)
@@ -14,14 +15,12 @@
       portable-root-dir)
   (file-name-directory (file-truename (or load-file-name (buffer-file-name)))))
 
-(defvar sl-savefile-dir (let ((save-dir (expand-file-name "~/.emacs.save/")))
-                          (if (file-exists-p save-dir)
-                              save-dir
-                            user-emacs-directory)))
+(defvar sl-savefile-dir (if-let* ((save-dir (expand-file-name "~/.emacs.save/"))
+                                  (_ (file-exists-p save-dir)))
+                            save-dir
+                          user-emacs-directory))
 
 (load (expand-file-name ".home.sl/emacs.spacemacs/init" portable-home-dir))
-
-;; (defvar PYTHON_VER_BIN "python3")
 
 ;; remove windows Python from path which has issues for emacs-win32
 (setq exec-path
@@ -35,7 +34,7 @@
   (when-let (magit-exec (let ((exec-path (list portable-root-dir))) (executable-find "bin/git")))
     (setq-default magit-git-executable magit-exec))
   ;; FIXME: the env PYTHONUSERBASE maybe incorrect in ~/.spacemacs.env, flushing it.
-  ;; (when (executable-find PYTHON_VER_BIN) (setenv "PYTHONUSERBASE" portable-root-dir))
+  ;; (when (executable-find python3) (setenv "PYTHONUSERBASE" portable-root-dir))
 
   (pcase system-type
     ('windows-nt
@@ -69,7 +68,7 @@
              version-control
              windows-scripts
              )))
-    ((guard (native-comp-available-p))
+    ((guard (or (fboundp 'image-mask-p) (native-comp-available-p)))
      (setq sl-packages-excluded '(anaconda-mode
                                   ccls
                                   rtags
@@ -197,11 +196,11 @@
   (setq dotspacemacs-frame-title-format "%b@%S")
   ;; (setq dotspacemacs-line-numbers t) ;; not work here, onlywork in .spacemacs
   ;; post-config for spacemacs
-  (when-let ((fboundp 'pyim-activate)
+  (when-let ((_ (fboundp 'pyim-activate))
              (file (expand-file-name "share/pyim-wbdict-v86.rime" portable-root-dir))
              (wubi-wait-initializing t))
     (custom-set-variables '(pyim-default-scheme 'wubi))
-    (autoload 'pyim-extra-dicts-add-dict "pyim-dict" "add dict to pyim extra dicts")
+    (declare-function 'pyim-extra-dicts-add-dict "pyim-dict")
     (advice-add 'pyim-activate :before
                 (lambda (&optional _)
                   (when wubi-wait-initializing
@@ -250,8 +249,7 @@
 (when (daemonp)
   (add-hook 'after-init-hook
             (lambda () (cd "~")
-              ;; try to preload these on mingw64/cygwin
-              (with-temp-buffer
+              (with-temp-buffer ;; try to preload these on mingw64/cygwin
                 (require 'helm-files)
                 (require 'helm-external)
                 (require 'helm-mode)
