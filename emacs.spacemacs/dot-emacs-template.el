@@ -4,6 +4,8 @@
 (autoload 'when-let "subr-x")
 (autoload 'if-let* "subr-x")
 (when-let (OHOME (getenv "OHOME"))
+  ;; set the default-directory to full path before change HOME (or "~/bin" is invalid after change HOME)
+  (setq default-directory (file-truename default-directory))
   (setq user-home-directory OHOME)
   (setenv "HOME" OHOME)
   (setenv "OHOME" nil))
