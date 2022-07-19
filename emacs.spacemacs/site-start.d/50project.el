@@ -191,19 +191,17 @@ want add all files in project to tags file."
 (with-eval-after-load "ede"
   (add-hook 'after-init-hook 'sl-ede-project-reload))
 
-(defun sl-compilation-start (OLDFUN command &optional mode name-function highlight-regexp)
-  "Create tag with sl-ede-project-xtags if it avaliable.
+(define-advice compilation-start (:around (OLDFUN command &optional mode name-function highlight-regexp) create-tag)
+            "Create tag with sl-ede-project-xtags if it avaliable.
 OLDFUN is the original function, COMMAND MODE NAME-FUNCTION HIGHLIGHT-REGEXP are bypass"
-  (let* ((project-root (and (string= command "global -u")
-                            (ggtags-process-string "global" "-p")))
-         (project-xtags (expand-file-name sl-ede-project-xtags project-root)))
-    (if (and project-root
-             (file-exists-p project-xtags))
-        (let ((default-directory project-root))
-          (apply OLDFUN (concat "gtags -i -f " sl-ede-project-xtags) mode name-function highlight-regexp))
-      (apply OLDFUN command mode name-function highlight-regexp))))
-
-(advice-add 'compilation-start :around #'sl-compilation-start)
+            (let* ((project-root (and (string= command "global -u")
+                                      (ggtags-process-string "global" "-p")))
+                   (project-xtags (expand-file-name sl-ede-project-xtags project-root)))
+              (if (and project-root
+                       (file-exists-p project-xtags))
+                  (let ((default-directory project-root))
+                    (apply OLDFUN (concat "gtags -i -f " sl-ede-project-xtags) mode name-function highlight-regexp))
+                (apply OLDFUN command mode name-function highlight-regexp))))
 
 
 ;;; A sample for ede-cpp-root-project

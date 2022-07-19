@@ -209,11 +209,10 @@
              (wubi-wait-initializing t))
     (custom-set-variables '(pyim-default-scheme 'wubi))
     (declare-function 'pyim-extra-dicts-add-dict "pyim-dict")
-    (advice-add 'pyim-activate :before
-                (lambda (&optional _)
+    (define-advice pyim-activate (:before (&optional _) add-wubi-dict)
                   (when wubi-wait-initializing
                     (pyim-extra-dicts-add-dict `(:name "wbdict-v86-rime" :file ,file))
-                    (setq wubi-wait-initializing nil)))))
+                    (setq wubi-wait-initializing nil))))
   (menu-bar-mode t)
   (when (and (fboundp 'image-mask-p) (eq window-system 'x))
     (use-package org-pdftools ; make sure the function org-pdftools-setup-link exists
@@ -268,11 +267,10 @@
 
 (xterm-mouse-mode 0)
 
-(defun sl-adv-git-gutter-mode (ORIG &optional ARG)
-  (if (< (point-max) (* 512 1024))
-      (funcall ORIG ARG)
-    (message "disable git-gutter for large file")))
-(advice-add 'git-gutter-mode :around #'sl-adv-git-gutter-mode)
+(define-advice git-gutter-mode (:around (ORIG &optional ARG) large-file)
+               (if (< (point-max) (* 512 1024))
+                   (funcall ORIG ARG)
+                 (message "disable git-gutter for large file")))
 
 (add-hook 'after-make-frame-functions
           #'(lambda (frame)

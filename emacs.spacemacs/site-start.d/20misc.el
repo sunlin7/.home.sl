@@ -69,7 +69,7 @@
     (when (file-exists-p snippets-dir)
       (add-to-list 'yas-snippet-dirs snippets-dir))))
 
-(defun sl-undo-tree-make-history-save-file-name (orig-fun file)
+(define-advice undo-tree-make-history-save-file-name (:around (orig-fun file) sl-adv)
   "Check the return value, if it longer than 255, generate an MD5 value instead.
 ORIG-FUN is the original function.
 FILE is the filename.
@@ -80,8 +80,6 @@ Please refer http://wikipedia.org/wiki/Comparison_of_file_systems for detail."
     (if (< (length ret) 255)
         ret
       (funcall orig-fun (concat (md5 (file-name-directory file)) "/" (file-name-nondirectory file))))))
-
-(advice-add 'undo-tree-make-history-save-file-name :around #'sl-undo-tree-make-history-save-file-name)
 
 (defmacro sl-url-hex-macro (fsym func)
   "Run the function `func' over the region between START and END in current buffer."

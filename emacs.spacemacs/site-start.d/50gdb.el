@@ -15,7 +15,7 @@
              (define-key gud-minor-mode-map [(S-f9)] 'gud-remove)
              (define-key gud-minor-mode-map [(C-f9)] 'gud-tbreak)))
 
-;; (defun sl-gud-display-line-centered (true-file line)
+;; (define-advice gud-display-line (:after (true-file line) display-line-centered)
 ;;   "Center the line in the source frame"
 ;;   (when (and gud-overlay-arrow-position gdb-source-window)
 ;;     (with-selected-window gdb-source-window
@@ -23,8 +23,6 @@
 ;;       (save-restriction
 ;;         ;; (forward-line (ad-get-arg 1))
 ;;         (recenter)))))
-
-;; (advice-add 'gud-display-line :after #'sl-gud-display-line-centered)
 
 (provide '50gdb)
 ;;; 50gdb ends here

@@ -66,7 +66,7 @@
 ;; (setq-mode-local c-mode semanticdb-find-default-throttle
 ;;                  '(project unloaded system recursive))
 
-(defun sl-semantic-go-to-tag-adv (orig tag &optional parent)
+(define-advice semantic-go-to-tag (:around (orig tag &optional parent) sl-adv)
   "Work with xref marker, and Center the tag after jumping.
 ORIG is the original function.
 TAG, PARENT is the param."
@@ -81,7 +81,6 @@ TAG, PARENT is the param."
          (xref-pop-marker-stack)
          (signal (car err) (cdr err))))
     (apply orig tag parent)))
-(advice-add 'semantic-go-to-tag :around #'sl-semantic-go-to-tag-adv)
 
 (defun sl-semantic-get-tags (prefix tags)
   "Construct candidates from the list inside of tags.
@@ -133,7 +132,7 @@ TAGS is the tag from semantic."
                 :help "Find tags in current buffer..")
     'semantic-symref-symbol))
 
-(defun sl-cedet-directory-name-to-file-name (orig-fun file)
+(define-advice cedet-directory-name-to-file-name (:around (orig-fun file) sl-adv)
   "Check the return value, if it longer than 255, generate an MD5 value instead.
 ORIG-FUN is the original function.
 FILE is the filename.
@@ -146,8 +145,6 @@ Please refer http://wikipedia.org/wiki/Comparison_of_file_systems for detail."
     (if (< (+ flen (length ret)) 255)
         ret
       (concat (md5 (file-name-directory file)) "!" (file-name-nondirectory file)))))
-
-(advice-add 'cedet-directory-name-to-file-name :around #'sl-cedet-directory-name-to-file-name)
 
 (provide '50cedet)
 ;;; 50cedet ends here
