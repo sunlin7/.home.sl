@@ -37,7 +37,7 @@ The `exclude-path' can be a regexp within `find' style."
   "SL EDE cpp-root project class.
 Each directory needs a project file to control it.")
 
-(defmethod initialize-instance ((this sl-ede-cpp-root-project)
+(cl-defmethod initialize-instance ((this sl-ede-cpp-root-project)
 				&rest fields)
   "Make sure the :file is fully expanded."
   ;; Add ourselves to the master list
