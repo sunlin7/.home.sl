@@ -1,4 +1,4 @@
-;; -*- mode: emacs-lisp; lexical-binding: t -*-
+;; -*- mode: emacs-lisp; lexical-binding: t; no-byte-compile: t -*-
 ;; This is template for dot-emacs.
 ;; It's a good start for custom dot-emacs file.
 (autoload 'when-let "subr-x")
