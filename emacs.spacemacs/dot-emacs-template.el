@@ -3,12 +3,6 @@
 ;; It's a good start for custom dot-emacs file.
 (autoload 'when-let "subr-x")
 (autoload 'if-let* "subr-x")
-(when-let (OHOME (getenv "OHOME"))
-  ;; set the default-directory to full path before change HOME (or "~/bin" is invalid after change HOME)
-  (setq default-directory (file-truename default-directory))
-  (setq user-home-directory OHOME)
-  (setenv "HOME" OHOME)
-  (setenv "OHOME" nil))
 
 ;; async-compile will invoke "emacs --batch -l /tmp/xxx.el", then the libgccjit
 ;; will search the crtbegin*.o, change native-comp-driver-options to help
@@ -23,7 +17,7 @@
   (if (and (null (fboundp 'image-mask-p)) ; try .rootm-*/.emacs for noX build
 	         (locate-file ".emacs" (list portable-root-dir)))
       portable-root-dir)
-  (file-name-directory (file-truename (or load-file-name (buffer-file-name)))))
+  (file-name-directory (file-truename (or load-file-name buffer-file-name))))
 
 (defvar sl-savefile-dir (if-let* ((save-dir (expand-file-name "~/.emacs.save/"))
                                   (_ (file-exists-p save-dir)))
@@ -196,11 +190,13 @@
                      (plantuml :variables
                                plantuml-jar-path (expand-file-name "share/plantuml.jar" portable-root-dir)
                                plantuml-default-exec-mode 'jar)))))
-
-  (when-let (dotspath (locate-file ".spacemacs" (list portable-home-dir)))
-    (defvar dotspacemacs-filepath dotspath))
   ;; load the spacemacs
   (load-file sl-spacemacs-init)
+  (when-let (OHOME (getenv "OHOME"))
+    ;; set the default-directory to full path before change HOME (or "~/bin" is invalid after change HOME)
+    (setq default-directory (file-truename default-directory))
+    (setenv "HOME" OHOME)
+    (setenv "OHOME" nil))
   (setq dotspacemacs-frame-title-format "%b@%S")
   ;; (setq dotspacemacs-line-numbers t) ;; not work here, onlywork in .spacemacs
   ;; post-config for spacemacs
