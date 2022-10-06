@@ -84,7 +84,7 @@ pa () {
     fi
 }
 
-if [[ -n "$EMACS" ]]; then      # a Emacs term
+if [[ -n "$INSIDE_EMACS" ]]; then      # an Emacs term
     export EDITOR="emacsclient --alternate-editor= ";
 else                            # NOT a Emacs term
     export EDITOR="emacsclient --alternate-editor= -t";
