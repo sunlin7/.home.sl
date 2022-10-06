@@ -1,8 +1,6 @@
 ;;; CEDET --- cedet configure
 ;;; Commentary:
 ;;; Code:
-(declare-function 'xref-pop-marker-stack "xref")
-(declare-function 'xref-push-marker-stack "xref")
 
 (add-hook 'after-init-hook
           (lambda ()
@@ -28,21 +26,6 @@
               ;; (global-srecode-minor-mode t)
               )))
 
-(define-advice semantic-go-to-tag (:around (orig tag &optional parent) sl-adv)
-  "Work with xref marker, and Center the tag after jumping.
-ORIG is the original function.
-TAG, PARENT is the param."
-  (if sl-jump-from-user-interactive     ; the `semantic-change-function' will trigger `semantic-go-to-tag' also
-      (condition-case err
-          (progn
-            (xref-push-marker-stack)
-            (apply orig tag parent)
-            (recenter find-function-recenter-line)
-            (run-hooks 'find-function-after-hook))
-        (error ;;if not found remove the tag saved in the ring
-         (xref-pop-marker-stack)
-         (signal (car err) (cdr err))))
-    (apply orig tag parent)))
 (declare-function 'semantic-tag-p "semantic/tag")
 (declare-function 'semantic-tag-name "semantic/tag")
 (declare-function 'semantic-tag-type "semantic/tag")

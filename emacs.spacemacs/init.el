@@ -12,21 +12,11 @@
   "The modules for personal, if this file not exit, all modules will load.")
 (defvar sl-packages-list '()
   "The list of the package used for currrent configuration.")
-(defvar sl-jump-from-user-interactive nil
-  "Flag for marking the jumpping action from user interactive.")
 (defcustom sl-savefile-dir (expand-file-name "save.d" user-emacs-directory)
   "The directory to save data."
   :group 'sl-emacs
   :type 'string)
 
-(defcustom sl-complation-engine (if (and (boundp 'global-company-mode) global-company-mode)
-                                    'company 'auto-complete)
-  "Choose the complation engine, `auto-complete' or `company'."
-  :group 'sl-emacs
-  :type '(choice
-          (const :tag "(None)" nil)
-          (const :tag "auto-complete" 'auto-complete)
-          (const :tag "company" 'company)))
 
 ;;;;; default plugins directories
 (add-to-list 'load-path sl-site-lisp-dir)
