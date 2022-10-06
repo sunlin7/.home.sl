@@ -3,68 +3,30 @@
 ;;; Code:
 (declare-function 'xref-pop-marker-stack "xref")
 (declare-function 'xref-push-marker-stack "xref")
-(declare-function 'semantic-tag-p "semantic/tag")
-(declare-function 'semantic-tag-name "semantic/tag")
-(declare-function 'semantic-tag-type "semantic/tag")
-(declare-function 'semantic-tag-class "semantic/tag")
-(declare-function 'semantic-tag-get-attribute "semantic/tag")
-(declare-function 'semantic-fetch-tags "semantic/tag")
-(declare-function 'semantic-ia--fast-jump-helper "semantic/ia")
-(declare-function 'global-semantic-mru-bookmark-mode "semantic/mru-bookmark")
-;; (declare-function 'global-semantic-idle-summary-mode "semantic/idle")
-;; (declare-function 'global-semantic-stickyfunc-mode   "semantic/util-modes")
 
 (add-hook 'after-init-hook
           (lambda ()
-            (when (locate-file "cedet/semantic" load-path (get-load-suffixes))
-              (semantic-mode  t))
-            (when (locate-file "cedet/ede" load-path (get-load-suffixes))
-              (global-ede-mode t))))
-
-(with-eval-after-load 'semantic
-  (global-semantic-mru-bookmark-mode t) ;; (semantic-mru-bookmark-mode)
-  ;; (global-semantic-idle-summary-mode t)
-  ;; (global-semantic-stickyfunc-mode   t)
-  ;; (ede-enable-generic-projects)
-
-  ;; make emacs-lisp-mode support.
-  ;; (defvar semantic-new-buffer-setup-functions)
-  ;; (add-to-list 'semantic-new-buffer-setup-functions
-  ;;              '(emacs-lisp-mode . semantic-default-elisp-setup))
-  ;; (add-to-list 'semantic-new-buffer-setup-functions
-  ;;              '(lisp-mode . semantic-default-elisp-setup))
-)
-
-;; FIXME: the semantic-mode with js2-mode will extremly slow, so disable it
-(add-hook 'js2-mode-hook (lambda ()
-                           (message "disable semantic-mode in js2-mode.")
-                           (setq forward-sexp-function nil)
-                           (set (make-local-variable 'semantic-mode) nil)))
-(add-hook 'json-mode-hook (lambda ()
-                            (message "disable semantic-mode in json-mode")
-                            (set (make-local-variable 'semantic-mode) nil)))
-
-;; (require 'srecode/loaddefs) ; the `global-srecode-minor-mode` not loaded by default.
-;; (global-srecode-minor-mode t)
-
-;; (semantic-add-system-include "/usr/include/c++/4.6/bits" 'c++-mode)
-;; (add-to-list 'semantic-lex-c-preprocessor-symbol-file "/usr/include/sys/cdefs.h")
-;; (semantic-c-reset-preprocessor-symbol-map)
-
-;;(when (cedet-gnu-global-version-check t) ; follow function is autoload in bounded cedet
-;; WARRING: the semantic search :include-dir recursive, that really slow in large project
-;; (semanticdb-enable-gnu-global-databases 'c-mode)
-;; (semanticdb-enable-gnu-global-databases 'c++-mode)
-
-;;(defalias 'cedet-called-interactively-p 'called-interactively-p)
-;;(mapc 'load (directory-files "~/.emacs.sl/site-lisp/cedet-bzr/lisp/cedet/semantic/ectags/" t "^[0-9].*.el$"))
-;;(when (semantic-ectags-test-version) ;; (cedet-ectag-version-check)
-;;   (cons (semantic-load-enable-primary-ectags-support)
-;;         (message "Exuberent CTags %s  - Good enough for CEDET." (car (semantic-ectags-version)))))
-
-;; follow setting can optimize the search speed.
-;; (setq-mode-local c-mode semanticdb-find-default-throttle
-;;                  '(project unloaded system recursive))
+            (when (locate-library "cedet/semantic")
+              (global-ede-mode t)
+              ;; (ede-enable-generic-projects)
+              (semantic-mode  t)
+              ;; (semantic-add-system-include "/usr/include/c++/4.6/bits" 'c++-mode)
+              ;; (semantic-c-reset-preprocessor-symbol-map)
+              ;;;; optimize the search speed
+              ;; (setq-mode-local c-mode semanticdb-find-default-throttle
+              ;;                  '(project unloaded system recursive))
+              ;; (add-to-list 'semantic-default-submodes
+              ;;              'global-semantic-mru-bookmark-mode)
+              ;;;; FIXME: disable semantic-mode in js2-mode for it's extremly slow
+              (with-eval-after-load 'js2-mode
+                (setq-mode-local js2-mode
+                                 semantic-mode nil
+                                 forward-sexp-function nil))
+              (with-eval-after-load 'json-mode
+                (setq-mode-local json-mode semantic-mode nil))
+              ;; (require 'srecode)
+              ;; (global-srecode-minor-mode t)
+              )))
 
 (define-advice semantic-go-to-tag (:around (orig tag &optional parent) sl-adv)
   "Work with xref marker, and Center the tag after jumping.
@@ -81,6 +43,13 @@ TAG, PARENT is the param."
          (xref-pop-marker-stack)
          (signal (car err) (cdr err))))
     (apply orig tag parent)))
+(declare-function 'semantic-tag-p "semantic/tag")
+(declare-function 'semantic-tag-name "semantic/tag")
+(declare-function 'semantic-tag-type "semantic/tag")
+(declare-function 'semantic-tag-class "semantic/tag")
+(declare-function 'semantic-tag-get-attribute "semantic/tag")
+(declare-function 'semantic-fetch-tags "semantic/tag")
+(autoload 'semantic-ia--fast-jump-helper "semantic/ia")
 
 (defun sl-semantic-get-tags (prefix tags)
   "Construct candidates from the list inside of tags.
@@ -130,7 +99,12 @@ TAGS is the tag from semantic."
     '(menu-item "(SL)Find Local Tags..." sl-select-local-tags
                 :enable (and (semantic-active-p))
                 :help "Find tags in current buffer..")
-    'semantic-symref-symbol))
+    'semantic-symref-symbol)
+  ;;;; to setup the emacs-lisp-mode
+  ;; (defvar semantic-new-buffer-setup-functions)
+  ;; (add-to-list 'semantic-new-buffer-setup-functions
+  ;;              '(emacs-lisp-mode . semantic-default-elisp-setup))
+  )
 
 (define-advice cedet-directory-name-to-file-name (:around (orig-fun file) sl-adv)
   "Check the return value, if it longer than 255, generate an MD5 value instead.
