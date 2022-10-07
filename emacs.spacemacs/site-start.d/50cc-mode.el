@@ -5,7 +5,7 @@
 (defun sl-toggle-tab-width-setting ()
   "Toggle setting tab widths between 4 and 8."
   (interactive)
-  (setq-local tab-width (pcase tab-width (2 4) (4 8) (t 2)))
+  (setq-local tab-width (pcase tab-width (2 4) (4 8) (_ 2)))
   (setq-local c-basic-offset tab-width)
   (redraw-display)
   (message "tab-width is %s now" tab-width))

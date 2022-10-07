@@ -152,7 +152,7 @@ want add all files in project to tags file."
                         (when (string-prefix-p "/" prj-inc) ; drop the "/", then append to path
                           (substring prj-inc 1)))
                       (append (oref cur-proj include-path)
-                              (when (object-of-class-p cur-proj 'sl-ede-cpp-root-project)
+                              (when (slot-exists-p cur-proj 'source-path)
                                 (oref cur-proj source-path)))
                       " ")))
       ;; (setq rpath-all (concat rpath-all " " (mapconcat 'identity (oref (ede-current-project) system-include-path) " "))) ;; use GTAGSLIBPATH instead
@@ -160,7 +160,7 @@ want add all files in project to tags file."
       (defvar grep-find-ignored-files)
       (let ((grep-find-ignored-directories ;; prepare the 'exclude-path'
              (append grep-find-ignored-directories
-                     (when (object-of-class-p cur-proj 'sl-ede-cpp-root-project)
+                     (when (slot-boundp cur-proj 'exclude-path)
                        (oref cur-proj exclude-path)) ))
             (grep-find-ignored-files grep-find-ignored-files))
         (grep-compute-defaults)
@@ -193,8 +193,9 @@ want add all files in project to tags file."
 
 (define-advice compilation-start (:around (OLDFUN command &optional mode name-function highlight-regexp) create-tag)
             "Create tag with sl-ede-project-xtags if it avaliable.
-OLDFUN is the original function, COMMAND MODE NAME-FUNCTION HIGHLIGHT-REGEXP are bypass"
+OLDFUN is the original function, all the parameters are bypassed"
             (let* ((project-root (and (string= command "global -u")
+                                      (fboundp 'ggtags-process-string)
                                       (ggtags-process-string "global" "-p")))
                    (project-xtags (expand-file-name sl-ede-project-xtags project-root)))
               (if (and project-root
