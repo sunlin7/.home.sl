@@ -7,7 +7,7 @@
             (when (locate-library "cedet/semantic")
               (global-ede-mode t)
               ;; (ede-enable-generic-projects)
-              (semantic-mode  t)
+              (semantic-mode t)
               ;; (semantic-add-system-include "/usr/include/c++/4.6/bits" 'c++-mode)
               ;; (semantic-c-reset-preprocessor-symbol-map)
               ;;;; optimize the search speed
@@ -40,6 +40,13 @@
   ;; (add-to-list 'semantic-new-buffer-setup-functions
   ;;              '(emacs-lisp-mode . semantic-default-elisp-setup))
   )
+
+(with-eval-after-load 'ede
+  (define-key ede-minor-mode-map [(f11)] #'gdb) ; in the menu-bar-tools-menu
+  (define-key ede-minor-mode-map [(f9)] #'quickrun)
+  (define-key cedet-menu-map [ede-quick-run]
+              '(menu-item "Quick Run" quickrun
+	                        :visible global-ede-mode)))
 
 (define-advice cedet-directory-name-to-file-name (:around (orig-fun file) sl-adv)
   "Check the return value, if it longer than 255, generate an MD5 value instead.

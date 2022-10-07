@@ -12,26 +12,6 @@
 
 ;; don't punctuation characters such as ‘;’ or ‘{’
 ;; (setq-default c-electric-flag nil)
-(declare-function 'ede-current-project "ede")
-(declare-function 'ede-compile-target  "ede")
-(defun sl-compile-project-or-file ()
-  "Compile current file just smart."
-  (interactive)
-  (cond ((and (boundp 'ede-minor-mode) ede-minor-mode (ede-current-project))
-         (ede-compile-target))
-        ((file-readable-p "Makefile")
-         (compile compile-command))
-        ((file-readable-p "makefile")
-         (compile compile-command))
-        ((string= "c-mode" major-mode)
-         (let ((default-directory temporary-file-directory))
-           (shell-command-on-region (point-min) (point-max)
-                                    "gcc -g -O0 -x c -std=gnu11 -o a - && ./a")))
-        ((string= "c++-mode" major-mode)
-         (let ((default-directory temporary-file-directory))
-           (shell-command-on-region (point-min) (point-max)
-                                    "g++ -g -O0 -x c++ -std=c++11 -o a - && ./a")))
-        ((call-interactively 'compile))))
 
 (with-eval-after-load 'hideshow
   (declare-function 'hs-already-hidden-p "hideshow")
@@ -54,12 +34,6 @@
 
   (define-key hs-minor-mode-map (kbd "C-M-;") 'sl-toggle-hideshow-all)
   (define-key hs-minor-mode-map (kbd "C-;") 'hs-toggle-hiding))
-
-
-(with-eval-after-load 'cc-mode
-  (defvar c-mode-base-map)
-  (define-key c-mode-base-map [(f9)] 'sl-compile-project-or-file)
-  (define-key c-mode-base-map [(f11)] 'gdb))
 
 
 (add-hook 'c-mode-common-hook
