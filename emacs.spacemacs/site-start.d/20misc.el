@@ -10,10 +10,7 @@
  '(diary-file (expand-file-name "diary" sl-savefile-dir)) ;; the diary-file name
  '(dired-omit-files "^\\.?#\\|^\\.$\\|^\\.\\.$\\|^\\..*"))
 
-(add-hook 'dired-mode-hook
-          (lambda ()
-            (declare-function dired-omit-mode "dired-x.el")
-            (dired-omit-mode t)))
+(add-hook 'dired-mode-hook #'dired-omit-mode)
 
 (defun sl-toggle-color ()
   "Toggle the background/foreground color."
@@ -41,26 +38,12 @@
 (with-eval-after-load 'ede
   (define-key ede-minor-mode-map (kbd "C-c . l k") 'sl-copy-full-path))
 
-(declare-function dired-get-file-for-visit "dired" nil)
-(defun sl-dired-open-explorer-file ()
-  "Opens the current file in a Dired buffer."
-  (interactive)
-  (if (fboundp 'w32-shell-execute)
-      (w32-shell-execute
-       "open" (replace-regexp-in-string "/" "\\"
-                                        (dired-get-file-for-visit) t t))
-    (let ((process-connection-type nil))
-      (call-process (or (executable-find "gvfs-open")
-                        (executable-find "xdg-open")
-                        (error "Can't find external tools"))
-                    nil nil nil (dired-get-file-for-visit)))))
-
 (with-eval-after-load 'dired
   (defvar dired-mode-map)
-  (define-key dired-mode-map "E" 'sl-dired-open-explorer-file)
-  (define-key dired-mode-map [menu-bar immediate open-explorer-file]
-    '(menu-item "Open with explorer" sl-dired-open-explorer-file
-                :help "Open the file with explorer")))
+  (define-key dired-mode-map "E" #'spacemacs/open-file-or-directory-in-external-app)
+  (define-key dired-mode-map [open-file-or-directory-in-external-app]
+              '(menu-item "Open with external app" spacemacs/open-file-or-directory-in-external-app
+                          :help "Open the file with external application")))
 
 ;; yasnippet is disabled for term by 'spacemacs/force-yasnippet-off' in
 ;; spacemacs "layers/+completion/auto-completion/packages.el".
