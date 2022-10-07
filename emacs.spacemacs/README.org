@@ -73,6 +73,47 @@ apt-get install python36-tkinter
 Spacemacs use some symbols fonts in ~spacemacs--diminished-minor-modes~, install ~ttf-ancient-fonts-symbola~ or ~adobe-source-han-sans-cn-fonts~ for them.
 The fonts depends by ~all-the-icons~ can downloaded with elisp `all-the-icons-install-fonts'.
 ** Misc notes
+*** Use the emacsclient as the default git difftool and mergetool
+Edit ~/.gitconfig file, add follow sections to invoke the emacsclient.
+#+begin_src conf
+  [difftool]
+    tool = ediff
+    prompt = false
+  [difftool "ediff"]
+    cmd = emacsclient $([ -z "$INSIDE_EMACS" ]&&echo -t) --eval \"      \
+    (let ((fn (lambda ()                                                \
+              (add-hook (quote ediff-after-quit-hook-internal)          \
+                        (backquote (lambda ()                           \
+                           (dolist (buf (list ,ediff-buffer-A           \
+                                              ,ediff-buffer-B           \
+                                              ,ediff-buffer-C           \
+                                              ,ediff-ancestor-buffer))  \
+                             (when (bufferp buf) (kill-buffer buf)))    \
+                           (delete-frame nil 1)))                       \
+                        nil (quote local)))))                           \
+    (ediff-files \\\"$LOCAL\\\" \\\"$REMOTE\\\" (list fn)))\"
+  [mergetool]
+    tool = ediff
+    prompt = false
+  [mergetool "ediff"]
+    cmd = emacsclient $([ -z "$INSIDE_EMACS" ]&&echo -t) --eval \"      \
+    (let ((fn (lambda ()                                                \
+              (add-hook (quote ediff-after-quit-hook-internal)          \
+                        (backquote (lambda ()                           \
+                           (dolist (buf (list ,ediff-buffer-A           \
+                                              ,ediff-buffer-B           \
+                                              ,ediff-buffer-C           \
+                                              ,ediff-ancestor-buffer))  \
+                             (when (bufferp buf) (kill-buffer buf)))    \
+                           (delete-frame nil 1)))                       \
+                        nil (quote local)))))                           \
+    (if (> (length \\\"$BASE\\\") 0)                                    \
+          (ediff-merge-files \\\"$LOCAL\\\" \\\"$REMOTE\\\"             \
+             (list fn) \\\"$MERGED\\\")                                 \
+        (ediff-merge-files-with-ancestor                                \
+            \\\"$LOCAL\\\" \\\"$REMOTE\\\" \\\"$BASE\\\"                \
+            (list fn) \\\"$MERGED\\\")))\"
+#+end_src
 *** Ctrl+Alt_R+X not working for mintty (xterm)
    Report to [[https://github.com/mintty/mintty/issues/1034][mintty#1034 CTRL + ALT_R + F combination does not work]], workaround is following
    [[https://github.com/mintty/mintty/issues/1034#issuecomment-693930315][mintty1034#issuecomment-693930315]] to map ALT_R to ALT_L.
