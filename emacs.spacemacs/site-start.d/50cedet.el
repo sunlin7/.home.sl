@@ -26,60 +26,12 @@
               ;; (global-srecode-minor-mode t)
               )))
 
-(declare-function 'semantic-tag-p "semantic/tag")
-(declare-function 'semantic-tag-name "semantic/tag")
-(declare-function 'semantic-tag-type "semantic/tag")
-(declare-function 'semantic-tag-class "semantic/tag")
-(declare-function 'semantic-tag-get-attribute "semantic/tag")
-(declare-function 'semantic-fetch-tags "semantic/tag")
-(autoload 'semantic-ia--fast-jump-helper "semantic/ia")
-
-(defun sl-semantic-get-tags (prefix tags)
-  "Construct candidates from the list inside of tags.
-PREFIX is for namespace or class.
-TAGS is the tag from semantic."
-  (require 'semantic/tag)
-  (let ((ret nil))
-    (mapc (lambda (tag)
-            (when (listp tag)
-              (let ((name (semantic-tag-name tag))
-                    (type (semantic-tag-type tag))
-                    (class (semantic-tag-class tag)))
-                (cond ((and (stringp type)
-                            (or (string= type "class")
-                                (string= type "namespace")))
-                       (setq ret
-                             (append ret (sl-semantic-get-tags
-                                      (concat prefix name "::")
-                                      (semantic-tag-get-attribute tag :members)))))
-                      ((or (eq class 'function) (eq class 'variable))
-                       (let* ((parent (semantic-tag-get-attribute tag :parent))
-                              (prefix (if parent (concat prefix parent "::") prefix))
-                              (postfix (if (semantic-tag-get-attribute tag :prototype-flag)
-                                           "@" "")))
-                         (add-to-list 'ret (cons (concat prefix name postfix) tag))))))))
-          tags)
-    ret))
-
-(defun sl-select-local-tags ()
-  "Select the local tags."
-  (interactive)
-  (let* ((tag-list (sl-semantic-get-tags "" (semantic-fetch-tags))))
-    (when tag-list
-      (let* ((tag-name (completing-read "Tags: " (mapcar 'car tag-list)))
-             ;; (tag (semantic-complete-read-tag-buffer-deep
-             ;;       "Jump to symbol: " (assoc tag-name tag-list)))
-             (tag (cdr (assoc tag-name tag-list))))
-        (when (semantic-tag-p tag)
-          (semantic-ia--fast-jump-helper tag))))))
-
 (with-eval-after-load 'semantic
-  (defvar semantic-mode-map)
-  (define-key semantic-mode-map (kbd "C-c , t") 'sl-select-local-tags)
+  (define-key semantic-mode-map (kbd "C-c , t") #'spacemacs/helm-jump-in-buffer)
   (define-key-after
     (lookup-key cedet-menu-map [navigate-menu])
     [semantic-select-local-tags]
-    '(menu-item "(SL)Find Local Tags..." sl-select-local-tags
+    '(menu-item "(SL)Find Local Tags..." spacemacs/helm-jump-in-buffer
                 :enable (and (semantic-active-p))
                 :help "Find tags in current buffer..")
     'semantic-symref-symbol)
