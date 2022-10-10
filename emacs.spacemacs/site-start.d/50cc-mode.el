@@ -27,7 +27,7 @@
 
   (define-key-after
     hs-minor-mode-menu
-    [\(SL\)Toggle\ Show/Hide\ all]
+    [sl-toggle-hideshow-all]
     '(menu-item "(SL)Toggle Show/Hide all..." sl-toggle-hideshow-all
                 :help "Toggle Show/Hide all in current buffer..")
     'Toggle\ Hiding)
@@ -43,11 +43,6 @@
             (c-toggle-hungry-state 1)
             ;; (c-toggle-auto-hungry-state 1) ; hungry-delete and auto-newline
             ;; (c-set-offset 'case-label '+) ; indent the case
-
-            ;; for c++11 as default
-            (when (eq major-mode 'c++-mode)
-              (when (boundp 'company-clang-arguments)
-                (setq-local company-clang-arguments (add-to-list 'company-clang-arguments "--std=c++11"))))
             ))
 
 
