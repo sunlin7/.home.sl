@@ -20,23 +20,6 @@
     (set-foreground-color bgcolor)
     (set-background-color fgcolor)))
 
-(defun sl-copy-full-path(&optional dir_only)
-  (interactive "P")
-  (let ((full-file-name (file-truename
-                         (cond ((and dir_only buffer-file-name)
-                                (file-name-directory (buffer-file-name)))
-                               (buffer-file-name)
-                               (default-directory)))))
-    (message full-file-name)
-    (kill-new full-file-name)))
-
-(add-hook 'after-init-hook
-          (lambda ()
-            (global-set-key (kbd "C-c . l k") 'sl-copy-full-path)))
-
-;; FIXME: workaround, attaching this function to ede mode map
-(with-eval-after-load 'ede
-  (define-key ede-minor-mode-map (kbd "C-c . l k") 'sl-copy-full-path))
 
 (with-eval-after-load 'dired
   (defvar dired-mode-map)
