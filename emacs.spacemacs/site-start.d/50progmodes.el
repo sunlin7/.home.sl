@@ -85,6 +85,14 @@
   ;;              '(emacs-lisp-mode . semantic-default-elisp-setup))
   )
 
+(with-eval-after-load 'quickrun
+  (quickrun-add-command "c++11"
+    '((:command . "g++")
+      (:exec    . ("%c -std=c++11 %o -o %e %s"
+		               "%e %a"))
+      (:remove  . ("%e")))
+    :default "c++"))
+
 (with-eval-after-load 'ede
   (define-key ede-minor-mode-map [(f9)] #'quickrun)
   (define-key cedet-menu-map [ede-quick-run]
@@ -183,9 +191,6 @@ Please refer http://wikipedia.org/wiki/Comparison_of_file_systems for detail."
 
 (defun sl-ede-flycheck-init ()
   "Setup the flycheck for ede projects."
-  ;; FIXME: disable clang warning on struct init syntax "struct a = {0}".
-  (add-to-list 'flycheck-clang-args "-Wno-missing-field-initializers")
-
   (when (equal major-mode 'c++-mode)
     (when (and (boundp 'flycheck-clang-language-standard)
                (not (string-empty-p flycheck-clang-language-standard)))
@@ -205,7 +210,9 @@ Please refer http://wikipedia.org/wiki/Comparison_of_file_systems for detail."
 (with-eval-after-load 'flycheck
   (add-hook 'ede-compdb-project-rescan-hook #'sl-ede-compdb-flycheck-init)
   (add-hook 'ede-minor-mode-hook #'sl-ede-flycheck-init)
-  (add-hook 'flycheck-mode-hook #'sl-ede-flycheck-init))
+  (add-hook 'flycheck-mode-hook #'sl-ede-flycheck-init)
+  ;; FIXME: disable clang warning on struct init syntax "struct a = {0}".
+  (add-to-list 'flycheck-clang-args "-Wno-missing-field-initializers"))
 
 ;; fix the pycompile-checker executable
 (add-hook 'python-mode-hook
