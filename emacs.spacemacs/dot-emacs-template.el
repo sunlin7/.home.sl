@@ -254,13 +254,15 @@
                    (funcall ORIG ARG)
                  (message "disable git-gutter for large file")))
 
-(add-hook 'after-make-frame-functions
-          #'(lambda (frame)
-              "Update key binding in terminal, `$showkey -a` for key sequence."
-              (with-selected-frame frame
-                (when (eq (terminal-live-p (frame-terminal frame)) t)
-                  (define-key input-decode-map (kbd "\e[127:5u") [C-backspace])
-                  (define-key input-decode-map (kbd "\e[127:6u") [C-S-backspace])))))
+(defun sl-term-kdb-patch (frame)
+  "Update key binding in terminal, `$showkey -a` for key sequence."
+  (when (terminal-live-p (frame-terminal frame))
+    (with-selected-frame frame
+      (define-key input-decode-map (kbd "\e[127:5u") [C-backspace])
+      (define-key input-decode-map (kbd "\e[127:6u") [C-S-backspace]))))
+
+(add-hook 'after-make-frame-functions #'sl-term-kdb-patch)
+(sl-term-kdb-patch (selected-frame)) ; patch 'after-make-frame-functions for initial term
 
 ;; (custom-set-variables
 ;; '(default-frame-alist
