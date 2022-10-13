@@ -141,40 +141,38 @@ want add all files in project to tags file."
   (interactive)
   (require 'ede)
   (require 'grep)
-  (let ((cur-proj (ede-current-project)))
-    (unless cur-proj
-      (signal 'error '("Invalid project")))
-
-    (let* ((project-root (ede-project-root-directory cur-proj))
-           (proj-name-tmp  (concat sl-ede-project-file-basename ".tmp"));;tags-file-tmp (shell-command-to-string "mktemp")
-           (rpath-all (mapconcat
-                      (lambda (prj-inc)
-                        (when (string-prefix-p "/" prj-inc) ; drop the "/", then append to path
-                          (substring prj-inc 1)))
-                      (append (oref cur-proj include-path)
-                              (when (slot-exists-p cur-proj 'source-path)
-                                (oref cur-proj source-path)))
-                      " ")))
-      ;; (setq rpath-all (concat rpath-all " " (mapconcat 'identity (oref (ede-current-project) system-include-path) " "))) ;; use GTAGSLIBPATH instead
-      (defvar grep-find-ignored-directories)
-      (defvar grep-find-ignored-files)
-      (let ((grep-find-ignored-directories ;; prepare the 'exclude-path'
-             (append grep-find-ignored-directories
-                     (when (slot-boundp cur-proj 'exclude-path)
-                       (oref cur-proj exclude-path)) ))
-            (grep-find-ignored-files grep-find-ignored-files))
-        (grep-compute-defaults)
-        (let ((grep-find-template (format "find <D> <X> -type f <F>  -print > %s" proj-name-tmp)))
-          (let ((default-directory project-root)
-                (str-command (rgrep-default-command "" "* .*" rpath-all))) ; cd to project-root
-            ;; use find | sort | (cscope && global) step by step for esase debug
-            (shell-command-to-string str-command)
-            (shell-command-to-string (format "sort -u %s > %s" proj-name-tmp sl-ede-project-list-all))
-            (shell-command-to-string (format "grep -E '\\.[cChH](pp)?$|\\.cc$|\\.hh$' %s > %s" sl-ede-project-list-all sl-ede-project-xtags))
-            ;; (call-process-shell-command (concat "time cscope -b -f cscope.out -i " sl-ede-project-xtags) nil 0)
-            (setenv "GTAGSLIBPATH" (mapconcat 'identity (oref (ede-current-project) system-include-path) ":"))
-            (call-process-shell-command (concat "time gtags -f " sl-ede-project-xtags) nil 0)
-            (delete-file proj-name-tmp)))))))
+  (let* ((cur-proj (ede-current-project))
+         (_ (unless cur-proj (signal 'error '("Invalid project"))))
+         (project-root (ede-project-root-directory cur-proj))
+         (proj-name-tmp  (concat sl-ede-project-file-basename ".tmp"));;tags-file-tmp (shell-command-to-string "mktemp")
+         (rpath-all (mapconcat
+                     (lambda (prj-inc)
+                       (when (string-prefix-p "/" prj-inc) ; drop the "/", then append to path
+                         (substring prj-inc 1)))
+                     (append (oref cur-proj include-path)
+                             (when (slot-exists-p cur-proj 'source-path)
+                               (oref cur-proj source-path)))
+                     " ")))
+    ;; (setq rpath-all (concat rpath-all " " (mapconcat 'identity (oref (ede-current-project) system-include-path) " "))) ;; use GTAGSLIBPATH instead
+    (defvar grep-find-ignored-directories)
+    (defvar grep-find-ignored-files)
+    (let ((grep-find-ignored-directories ;; prepare the 'exclude-path'
+           (append grep-find-ignored-directories
+                   (when (slot-boundp cur-proj 'exclude-path)
+                     (oref cur-proj exclude-path)) ))
+          (grep-find-ignored-files grep-find-ignored-files))
+      (grep-compute-defaults)
+      (let* ((default-directory project-root) ; cd to project-root
+             (grep-find-template (format "find <D> <X> -type f <F>  -print > %s" proj-name-tmp))
+             (str-command (rgrep-default-command "" "* .*" rpath-all)))
+        ;; use find | sort | (cscope && global) step by step for esase debug
+        (shell-command-to-string str-command)
+        (shell-command-to-string (format "sort -u %s > %s" proj-name-tmp sl-ede-project-list-all))
+        (shell-command-to-string (format "grep -E '\\.[cChH](pp)?$|\\.cc$|\\.hh$' %s > %s" sl-ede-project-list-all sl-ede-project-xtags))
+        ;; (call-process-shell-command (concat "time cscope -b -f cscope.out -i " sl-ede-project-xtags) nil 0)
+        (setenv "GTAGSLIBPATH" (mapconcat 'identity (oref (ede-current-project) system-include-path) ":"))
+        (call-process-shell-command (concat "time gtags -f " sl-ede-project-xtags) nil 0)
+        (delete-file proj-name-tmp)))))
 
 (defvar sl-ede-project-reload-hook nil "Hook called for reload project.")
 

@@ -208,15 +208,14 @@
                     (pyim-extra-dicts-add-dict `(:name "wbdict-v86-rime" :file ,file))
                     (setq wubi-wait-initializing nil))))
   (menu-bar-mode t)
-  (when (and (fboundp 'image-mask-p) (eq window-system 'x))
+  (when (eq window-system 'x)
     (use-package org-pdftools ; make sure the function org-pdftools-setup-link exists
       :hook ((org-load . org-pdftools-setup-link)))
     (add-hook 'pdf-view-mode-hook
               (lambda ()
                 (when (string-match-p "-dark" (format "%s" custom-enabled-themes))
                   (pdf-view-midnight-minor-mode t)))))
-  ;; (unless (file-exists-p plantuml-jar-path) ; download plantuml automatically
-  ;;  (plantuml-download-jar))
+  ;; (or (file-exists-p plantuml-jar-path) (plantuml-download-jar)); download plantuml.jar
   (with-eval-after-load 'plantuml-mode
     (declare-function plantuml-set-output-type "plantuml-mode")
     (plantuml-set-output-type "png")) ; text in svg image hard to see in dark theme
@@ -241,11 +240,7 @@
   ;;       (setcdr v 4))))
   ;; (add-hook 'c-mode-common-hook
   ;;           (lambda () (setq-local tab-width c-basic-offset)))
-  ;; check the the checkers
-  (with-eval-after-load "flycheck"
-    (dolist (x '(("gcc" . c/c++-gcc) ("clang" . c/c++-clang)))
-      (unless (executable-find (car x))
-        (add-to-list 'flycheck-disabled-checkers (cdr x))))))
+  )
 
 (when (daemonp)
   (add-hook 'after-init-hook

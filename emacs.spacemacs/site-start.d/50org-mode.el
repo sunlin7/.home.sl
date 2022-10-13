@@ -39,7 +39,6 @@
        ("j" "Journal" entry (file+datetree "journal.org")
         "* %?\nEntered on %U\n  %i\n  %a")))
    '(org-confirm-babel-evaluate nil)
-   '(org-src-tab-acts-natively t)
    ;; '(org-babel-load-languages
    ;;   '((shell . t)
    ;;     (js . t)
@@ -119,8 +118,7 @@
   (interactive)
   (defvar org-agenda-files)
   (let ((default-directory org-directory))
-    (dolist (file org-agenda-files)
-      (find-file file))))
+    (mapc #'find-file org-agenda-files)))
 
 (provide '50org-mode)
 ;;; 50org-mode ends here

@@ -8,8 +8,6 @@
   "The site-lisp dir'.")
 (defvar sl-site-start-dir (expand-file-name  "site-start.d" sl-root-dir)
   "This site-start.d dir.")
-(defvar sl-modules (expand-file-name "modules" sl-root-dir)
-  "The modules for personal, if this file not exit, all modules will load.")
 (defvar sl-packages-list '()
   "The list of the package used for currrent configuration.")
 (defcustom sl-savefile-dir (expand-file-name "save.d" user-emacs-directory)
@@ -17,16 +15,9 @@
   :group 'sl-emacs
   :type 'string)
 
-
-;;;;; default plugins directories
 (add-to-list 'load-path sl-site-lisp-dir)
-;; Load the plugins. The 90custom-variables.el will set the custom variables.
-(if (locate-file sl-modules nil load-suffixes)
-    (load sl-modules)
-  (message "No 'modules.el' file in %s, load all modules." sl-modules)
-  (mapc (lambda (x)
-          (require (intern (file-name-base x)) (file-name-sans-extension x)))
-        (directory-files sl-site-start-dir t "^[0-9].*.el$")))
-
+(mapc (lambda (x)
+        (require (intern (file-name-base x)) (file-name-sans-extension x)))
+      (directory-files sl-site-start-dir t "^[0-9].*.el$"))
 (provide 'sl-init)
 ;;; init.el ends here

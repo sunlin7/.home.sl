@@ -67,7 +67,6 @@
                                  forward-sexp-function nil))
               (with-eval-after-load 'json-mode
                 (setq-mode-local json-mode semantic-mode nil))
-              ;; (require 'srecode)
               ;; (global-srecode-minor-mode t)
               )))
 
@@ -89,8 +88,7 @@
 (with-eval-after-load 'ede
   (define-key ede-minor-mode-map [(f9)] #'quickrun)
   (define-key cedet-menu-map [ede-quick-run]
-              '(menu-item "Quick Run" quickrun
-	                        :visible global-ede-mode)))
+              '(menu-item "Quick Run" quickrun :visible global-ede-mode)))
 
 (define-advice cedet-directory-name-to-file-name (:around (orig-fun file) sl-adv)
   "Check the return value, if it longer than 255, generate an MD5 value instead.
@@ -196,27 +194,23 @@ Please refer http://wikipedia.org/wiki/Comparison_of_file_systems for detail."
                (not (string-empty-p flycheck-gcc-language-standard)))
       (setq-local flycheck-gcc-language-standard "c++11")))
 
-  (let ((cur-proj (ede-current-project)))
-    (when cur-proj
-      (when (and (class-p 'ede-cpp-root-project)
-                 (object-of-class-p cur-proj 'ede-cpp-root-project))
-        (sl-ede-cpp-root-project-flycheck-init))
-      (when (and (class-p 'ede-compdb-project)
-                 (object-of-class-p cur-proj 'ede-compdb-project))
-        (sl-ede-compdb-flycheck-init)))))
+  (when-let ((cur-proj (ede-current-project)))
+    (when (and (class-p 'ede-cpp-root-project)
+               (object-of-class-p cur-proj 'ede-cpp-root-project))
+      (sl-ede-cpp-root-project-flycheck-init))
+    (when (and (class-p 'ede-compdb-project)
+               (object-of-class-p cur-proj 'ede-compdb-project))
+      (sl-ede-compdb-flycheck-init))))
 
 (with-eval-after-load 'flycheck
   (add-hook 'ede-compdb-project-rescan-hook #'sl-ede-compdb-flycheck-init)
   (add-hook 'ede-minor-mode-hook #'sl-ede-flycheck-init)
-  (add-hook 'flycheck-mode-hook #'sl-ede-flycheck-init)
-
-  (when (functionp 'flycheck-pos-tip-mode)
-    (flycheck-pos-tip-mode)))
+  (add-hook 'flycheck-mode-hook #'sl-ede-flycheck-init))
 
 ;; fix the pycompile-checker executable
 (add-hook 'python-mode-hook
           (lambda ()
-            (when (and (boundp flycheck-python-pycompile-executable)
+            (when (and (boundp 'flycheck-python-pycompile-executable)
                        (not flycheck-python-pycompile-executable))
               (setq-local flycheck-python-pycompile-executable
                           (if (string= (file-name-base python-shell-interpreter) "ipython")
