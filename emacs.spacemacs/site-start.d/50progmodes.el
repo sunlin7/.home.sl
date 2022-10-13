@@ -52,7 +52,6 @@
             (when (locate-library "cedet/semantic")
               (global-ede-mode t)
               ;; (ede-enable-generic-projects)
-              (semantic-mode t)
               ;; (semantic-add-system-include "/usr/include/c++/4.6/bits" 'c++-mode)
               ;; (semantic-c-reset-preprocessor-symbol-map)
               ;;;; optimize the search speed
@@ -60,15 +59,13 @@
               ;;                  '(project unloaded system recursive))
               ;; (add-to-list 'semantic-default-submodes
               ;;              'global-semantic-mru-bookmark-mode)
-              ;;;; FIXME: disable semantic-mode in js2-mode for it's extremly slow
-              (with-eval-after-load 'js2-mode
-                (setq-mode-local js2-mode
-                                 semantic-mode nil
-                                 forward-sexp-function nil))
-              (with-eval-after-load 'json-mode
-                (setq-mode-local json-mode semantic-mode nil))
+              (semantic-mode t)
               ;; (global-srecode-minor-mode t)
-              )))
+              ;; Disable the semantic-mode in js2/json mode for it's extremly slow
+              (setq-mode-local js2-mode
+                               semantic-mode nil
+                               forward-sexp-function nil)
+              (setq-mode-local json-mode semantic-mode nil))))
 
 (with-eval-after-load 'semantic
   (define-key semantic-mode-map (kbd "C-c , t") #'spacemacs/helm-jump-in-buffer)
@@ -133,27 +130,25 @@ Please refer http://wikipedia.org/wiki/Comparison_of_file_systems for detail."
 
 (defun sl-ede-cpp-root-project-flycheck-init ()
   "Setup the flycheck for ede-cpp-root-project."
-  (let* ((cur-proj (ede-current-project))
-         (project-root (when cur-proj (ede-project-root-directory cur-proj))))
-    (when (and cur-proj
-               project-root
-               (object-of-class-p cur-proj 'ede-cpp-root-project))
-      (setq-local flycheck-clang-include-path
-                  (append flycheck-clang-include-path
-                          (oref cur-proj system-include-path)
-                          (mapcar
-                           (lambda (prj-inc)
-                             (if (string-prefix-p "/" prj-inc)
-                                 ;; drop the "/" from an :include-path
-                                 (expand-file-name (substring prj-inc 1) project-root)
-                               prj-inc))
-                           (oref cur-proj include-path))))
+  (when-let* ((cur-proj (ede-current-project))
+              (project-root (ede-project-root-directory cur-proj))
+              (_ (object-of-class-p cur-proj 'ede-cpp-root-project)))
+    (setq-local flycheck-clang-include-path
+                (append flycheck-clang-include-path
+                        (oref cur-proj system-include-path)
+                        (mapcar
+                         (lambda (prj-inc)
+                           (if (string-prefix-p "/" prj-inc)
+                               ;; drop the "/" from an :include-path
+                               (expand-file-name (substring prj-inc 1) project-root)
+                             prj-inc))
+                         (oref cur-proj include-path))))
 
-      (setq-local flycheck-clang-definitions
-                  (mapcar (lambda(defs)
-                            (cond ((zerop (length (cdr defs))) (car defs))
-                                  (t (concat (car defs) "=" (cdr defs)))))
-                          (oref cur-proj spp-table))))))
+    (setq-local flycheck-clang-definitions
+                (mapcar (lambda(defs)
+                          (cond ((zerop (length (cdr defs))) (car defs))
+                                (t (concat (car defs) "=" (cdr defs)))))
+                        (oref cur-proj spp-table)))))
 
 (declare-function 'get-command-line "ede-compdb")
 (declare-function 'get-defines "ede-compdb")
@@ -167,36 +162,29 @@ Please refer http://wikipedia.org/wiki/Comparison_of_file_systems for detail."
              (object-of-class-p ede-object 'ede-compdb-project))
     (let* ((comp (oref ede-object compilation))
            (cmd (get-command-line comp)))
-      ;; Configure flycheck clang checker.
-      ;; TODO: configure gcc checker also
-      (when (string-match " \\(-O[0-9]\\) " cmd)
-        (add-to-list 'flycheck-clang-args (match-string 1 cmd)))
-      (when (string-match " \\(-fPIC\\) " cmd)
-        (add-to-list 'flycheck-clang-args (match-string 1 cmd)))
+      ;; Configure flycheck clang checker. TODO: configure gcc checker also
+      (dolist (s '(" \\(-O[0-9]\\) " " \\(-fPIC\\) " ))
+        (when (string-match s cmd)
+          (add-to-list 'flycheck-clang-args (match-string 1 cmd))))
       (when (string-match " -std=\\([^ ]+\\)" cmd)
         (setq-local flycheck-clang-language-standard (match-string 1 cmd)))
       (when (string-match " -stdlib=\\([^ ]+\\)" cmd)
         (setq-local flycheck-clang-standard-library (match-string 1 cmd)))
-      (when (string-match " -fms-extensions " cmd)
-        (setq-local flycheck-clang-ms-extensions t))
-      (when (string-match " -fno-exceptions " cmd)
-        (setq-local flycheck-clang-no-exceptions t))
-      (when (string-match " -fno-rtti " cmd)
-        (setq-local flycheck-clang-no-rtti t))
-      (when (string-match " -fblocks " cmd)
-        (setq-local flycheck-clang-blocks t))
-      (setq-local flycheck-clang-includes (get-includes comp))
-      (setq-local flycheck-clang-definitions (get-defines comp))
-      (setq-local flycheck-clang-include-path (get-include-path comp t)))))
+      (setq-local
+       flycheck-clang-ms-extensions (and (string-match-p " -fms-extensions " cmd) t)
+       flycheck-clang-no-exceptions (and (string-match-p " -fno-exceptions " cmd) t)
+       flycheck-clang-no-rtti (and (string-match-p " -fno-rtti " cmd) t)
+       flycheck-clang-blocks (and (string-match-p " -fblocks " cmd) t)
+       flycheck-clang-includes (get-includes comp)
+       flycheck-clang-definitions (get-defines comp)
+       flycheck-clang-include-path (get-include-path comp t)))))
 
 (defun sl-ede-flycheck-init ()
   "Setup the flycheck for ede projects."
   (when (equal major-mode 'c++-mode)
-    (when (and (boundp 'flycheck-clang-language-standard)
-               (not (string-empty-p flycheck-clang-language-standard)))
+    (when (not (string-empty-p flycheck-clang-language-standard))
       (setq-local flycheck-clang-language-standard "c++11"))
-    (when (and (boundp 'flycheck-gcc-language-standard)
-               (not (string-empty-p flycheck-gcc-language-standard)))
+    (when (not (string-empty-p flycheck-gcc-language-standard))
       (setq-local flycheck-gcc-language-standard "c++11")))
 
   (when-let ((cur-proj (ede-current-project)))
