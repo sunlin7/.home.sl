@@ -249,6 +249,9 @@
 
 (xterm-mouse-mode 0)
 
+(define-advice undo-tree-save-history-from-hook (:around (ORIG))
+  (when (buffer-modified-p) (funcall ORIG)))
+
 (define-advice git-gutter-mode (:around (ORIG &optional ARG) large-file)
                (if (< (point-max) (* 512 1024))
                    (funcall ORIG ARG)
