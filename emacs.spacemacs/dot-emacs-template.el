@@ -57,7 +57,7 @@
              csv
              emacs-lisp
              git
-             (helm :variables helm-use-fuzzy 'source)
+             helm
              ibuffer
              ietf
              javascript
@@ -103,7 +103,7 @@
              emacs-lisp
              epub
              git
-             (helm :variables helm-use-fuzzy 'source)
+             helm
              html
              ibuffer
              imenu-list
@@ -166,7 +166,7 @@
            '(auto-completion
              better-defaults
              emacs-lisp
-             (helm :variables helm-use-fuzzy 'source)
+             helm
              (lua :variables lua-indent-offset 4)
              ibuffer
              imenu-list
