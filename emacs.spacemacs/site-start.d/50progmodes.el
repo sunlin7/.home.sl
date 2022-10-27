@@ -111,11 +111,11 @@ Please refer http://wikipedia.org/wiki/Comparison_of_file_systems for detail."
 
 
 ;;; flycheck -- settings for flycheck
-(declare-function 'oref "eieio")
-(declare-function 'class-p "eieio-core")
-(declare-function 'object-of-class-p "eieio")
-(declare-function 'ede-current-project "ede")
-(declare-function 'ede-project-root-directory "ede/auto")
+(autoload 'oref "eieio")
+(autoload 'class-p "eieio-core")
+(autoload 'object-of-class-p "eieio")
+(autoload 'ede-current-project "ede")
+(autoload 'ede-project-root-directory "ede/auto")
 
 (defvar flycheck-clang-args)
 (defvar flycheck-clang-blocks)

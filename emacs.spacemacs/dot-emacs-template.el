@@ -247,8 +247,6 @@
 (when (and (eq system-type 'windows-nt) (not (executable-find invocation-name)))
   (warn "Emacs not in PATH, recommend '[...\\mingw64.exe] bash -lc runemacs'"))
 
-(xterm-mouse-mode 0)
-
 (define-advice undo-tree-save-history-from-hook (:around (ORIG))
   (when (buffer-modified-p) (funcall ORIG)))
 
@@ -265,7 +263,9 @@
       (define-key input-decode-map (kbd "\e[127:6u") [C-S-backspace]))))
 
 (add-hook 'after-make-frame-functions #'sl-term-kdb-patch)
-(sl-term-kdb-patch (selected-frame)) ; patch 'after-make-frame-functions for initial term
+(sl-term-kdb-patch (selected-frame)) ; patch 'after-make-frame-functions for the initialed term
+
+(xterm-mouse-mode 0)
 
 ;; (custom-set-variables
 ;; '(default-frame-alist
