@@ -4,3 +4,5 @@ Some tools list here
 | [[./show_mintty_stacked.py]]   | show the mintty window stacked                 |
 | [[./sync-remote-to-local]]     | sync remote dir to local dir when it's changed |
 | [[./update-host-ip-to-remote]] | update host ip to remote                       |
+| [[./sshfsw][./sshfsw]]                   | run sshfs on windows                           |
+
