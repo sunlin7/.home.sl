@@ -20,6 +20,15 @@
     (set-foreground-color bgcolor)
     (set-background-color fgcolor)))
 
+(defmacro sl-url-hex-macro (fsym func)
+  "Run the function `func' over the region between START and END in current buffer."
+  `(defun ,fsym (start end)
+     "Run the url-hexify-string/url-unhex-string interactively."
+     (interactive "r")
+     (save-excursion
+       (insert (funcall ,func (delete-and-extract-region start end))))))
+(sl-url-hex-macro sl-url-hex #'url-hexify-string)
+(sl-url-hex-macro sl-url-unhex #'url-unhex-string)
 
 (with-eval-after-load 'dired
   (defvar dired-mode-map)
@@ -46,16 +55,6 @@ Please refer http://wikipedia.org/wiki/Comparison_of_file_systems for detail."
     (if (< (length ret) 255)
         ret
       (funcall orig-fun (concat (md5 (file-name-directory file)) "/" (file-name-nondirectory file))))))
-
-(defmacro sl-url-hex-macro (fsym func)
-  "Run the function `func' over the region between START and END in current buffer."
-  `(defun ,fsym (start end)
-     "Run the url-hexify-string/url-unhex-string interactively."
-     (interactive "r")
-     (save-excursion
-       (insert (funcall ,func (delete-and-extract-region start end))))))
-(sl-url-hex-macro sl-url-hex #'url-hexify-string)
-(sl-url-hex-macro sl-url-unhex #'url-unhex-string)
 
 (provide '20misc)
 ;;; 20misc ends here

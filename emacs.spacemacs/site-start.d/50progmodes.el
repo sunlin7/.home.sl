@@ -47,25 +47,25 @@
 
 
 ;;; CEDET configure
-(add-hook 'after-init-hook
-          (lambda ()
-            (when (locate-library "cedet/semantic")
-              (global-ede-mode t)
-              ;; (ede-enable-generic-projects)
-              ;; (semantic-add-system-include "/usr/include/c++/4.6/bits" 'c++-mode)
-              ;; (semantic-c-reset-preprocessor-symbol-map)
-              ;;;; optimize the search speed
-              ;; (setq-mode-local c-mode semanticdb-find-default-throttle
-              ;;                  '(project unloaded system recursive))
-              ;; (add-to-list 'semantic-default-submodes
-              ;;              'global-semantic-mru-bookmark-mode)
-              (semantic-mode t)
-              ;; (global-srecode-minor-mode t)
-              ;; Disable the semantic-mode in js2/json mode for it's extremly slow
-              (setq-mode-local js2-mode
-                               semantic-mode nil
-                               forward-sexp-function nil)
-              (setq-mode-local json-mode semantic-mode nil))))
+;; (add-hook 'after-init-hook
+;;           (lambda ()
+;;             (when (locate-library "cedet/semantic")
+;;               (global-ede-mode t)
+;;               ;; (ede-enable-generic-projects)
+;;               ;; (semantic-add-system-include "/usr/include/c++/4.6/bits" 'c++-mode)
+;;               ;; (semantic-c-reset-preprocessor-symbol-map)
+;;               ;;;; optimize the search speed
+;;               ;; (setq-mode-local c-mode semanticdb-find-default-throttle
+;;               ;;                  '(project unloaded system recursive))
+;;               ;; (add-to-list 'semantic-default-submodes
+;;               ;;              'global-semantic-mru-bookmark-mode)
+;;               (semantic-mode t)
+;;               ;; (global-srecode-minor-mode t)
+;;               ;; Disable the semantic-mode in js2/json mode for it's extremly slow
+;;               (setq-mode-local js2-mode
+;;                                semantic-mode nil
+;;                                forward-sexp-function nil)
+;;               (setq-mode-local json-mode semantic-mode nil))))
 
 (with-eval-after-load 'semantic
   (define-key semantic-mode-map (kbd "C-c , t") #'spacemacs/helm-jump-in-buffer)

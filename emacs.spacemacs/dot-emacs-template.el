@@ -136,7 +136,6 @@
                   sql-capitalize-keywords t
                   sql-capitalize-keywords-blacklist '("name" "varchar"))
              ;; ivy
-             (semantic :disabled-for emacs-lisp) ; company-backend for elisp has problem with semantic
              treemacs
              typescript
              vimscript
@@ -175,7 +174,6 @@
              (shell :variables shell-default-shell 'vterm)
              smex
              ;; ivy
-             (semantic :disabled-for emacs-lisp) ; company-backend for elisp has problem with semantic
              yaml
              vimscript))))
 
