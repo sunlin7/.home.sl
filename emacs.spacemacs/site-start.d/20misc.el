@@ -3,7 +3,7 @@
 ;;; Code:
 
 ;; prefer chinese-gbk
-(set-locale-environment "zh_CN.UTF-8")
+;; (set-locale-environment "zh_CN.UTF-8")
 
 (custom-set-variables
  '(delete-selection-mode t)

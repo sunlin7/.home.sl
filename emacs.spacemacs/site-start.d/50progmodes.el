@@ -83,17 +83,19 @@
   )
 
 (with-eval-after-load 'quickrun
-  (quickrun-add-command "c++11"
-    '((:command . "g++")
-      (:exec    . ("%c -std=c++11 %o -o %e %s"
-		               "%e %a"))
-      (:remove  . ("%e")))
-    :default "c++"))
+  (dolist (lang '("c++/g++" "c++/clang++"))
+    (if-let* ((cmd_list (alist-get lang quickrun--language-alist nil nil #'string=))
+              (exec (alist-get ':exec cmd_list))
+              (compile (car exec)))
+        (when (not (string-match "-std=" compile))
+          (setf (car exec) (concat compile " -std=c++11"))))))
 
-(with-eval-after-load 'ede
-  (define-key ede-minor-mode-map [(f9)] #'quickrun)
-  (define-key cedet-menu-map [ede-quick-run]
-              '(menu-item "Quick Run" quickrun :visible global-ede-mode)))
+(with-eval-after-load 'menu-bar
+  (easy-menu-add-item
+   nil '("Tools")
+   '["Quick Run..." quickrun :help "Quick run the code"]
+   "Compile...")
+  (global-set-key [(f9)] #'quickrun))
 
 (define-advice cedet-directory-name-to-file-name (:around (orig-fun file) sl-adv)
   "Check the return value, if it longer than 255, generate an MD5 value instead.
