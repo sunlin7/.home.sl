@@ -171,7 +171,7 @@
              imenu-list
              markdown
              nginx
-             (shell :variables shell-default-shell 'vterm)
+             shell
              smex
              ;; ivy
              yaml
