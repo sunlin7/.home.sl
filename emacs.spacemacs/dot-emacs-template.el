@@ -185,6 +185,9 @@
                      (plantuml :variables
                                plantuml-jar-path (expand-file-name "share/plantuml.jar" portable-root-dir)
                                plantuml-default-exec-mode 'jar)))))
+  (when-let* ((jarpath "~/.local/LanguageTool-6.0-SNAPSHOT/languagetool-commandline.jar")
+              (_ (file-exists-p jarpath)))
+    (add-to-list 'sl-configuration-layers `(languagetool :variables langtool-language-tool-jar ,jarpath)))
   ;; load the spacemacs
   (load-file sl-spacemacs-init)
   (when-let (OHOME (getenv "OHOME"))
