@@ -68,8 +68,7 @@
              sql
              treemacs
              version-control
-             windows-scripts
-             )))
+             windows-scripts)))
     ((guard (or (fboundp 'image-mask-p) (native-comp-available-p)))
      (setq sl-packages-excluded '(anaconda-mode
                                   ccls

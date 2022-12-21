@@ -26,7 +26,7 @@ ln -s ~/.home.sl/vim.sl/.vimrc.local ~/.vimrc.local
 Upgrade with one of follow step:
 - ~git -C ~/.SpaceVim pull.```~
 - Add ~automatic_update = 1~ to your custom configuration file, or
-- Use ~:SPUpdate SpaceVim~ in SpaceVim buffer. 
+- Use ~:SPUpdate SpaceVim~ in SpaceVim buffer.
 For more information, please refer the https://spacevim.org/.
 NOTE: vimproc didn't build automatically, run follow command to build it:
 make -C ~/.SpaceVim/bundle/vimproc.vim/
