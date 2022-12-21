@@ -184,10 +184,9 @@ Please refer http://wikipedia.org/wiki/Comparison_of_file_systems for detail."
 (defun sl-ede-flycheck-init ()
   "Setup the flycheck for ede projects."
   (when (equal major-mode 'c++-mode)
-    (when (not (string-empty-p flycheck-clang-language-standard))
-      (setq-local flycheck-clang-language-standard "c++11"))
-    (when (not (string-empty-p flycheck-gcc-language-standard))
-      (setq-local flycheck-gcc-language-standard "c++11")))
+    (dolist (x '(flycheck-clang-language-standard flycheck-gcc-language-standard))
+      (when (not (string-empty-p x))
+        (setq-local x "c++11"))))
 
   (when-let ((cur-proj (ede-current-project)))
     (when (and (class-p 'ede-cpp-root-project)

@@ -20,7 +20,7 @@ Each directory needs a project file to control it.")
 (defun sl-ede-read-file-lines (filename)
   "Return the list of lines of a file in `filename', FILENAME should no be nil."
   (with-temp-buffer
-    (insert-file-contents filename)
+    (insert-file-contents-literally filename)
     (split-string (buffer-string) "\n" t)))
 
 (defun sl-get-uniq-path (path-list)

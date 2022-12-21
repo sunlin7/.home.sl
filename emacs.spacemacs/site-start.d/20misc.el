@@ -40,9 +40,9 @@
 ;; yasnippet is disabled for term by 'spacemacs/force-yasnippet-off' in
 ;; spacemacs "layers/+completion/auto-completion/packages.el".
 (with-eval-after-load 'yasnippet
-  (let ((snippets-dir (expand-file-name "snippets/" sl-savefile-dir)))
-    (when (file-exists-p snippets-dir)
-      (add-to-list 'yas-snippet-dirs snippets-dir))))
+  (when-let* ((snippets-dir (expand-file-name "snippets/" sl-savefile-dir))
+              (file-exists-p snippets-dir))
+    (add-to-list 'yas-snippet-dirs snippets-dir)))
 
 (define-advice undo-tree-make-history-save-file-name (:around (orig-fun file) sl-adv)
   "Check the return value, if it longer than 255, generate an MD5 value instead.
@@ -52,9 +52,9 @@ FILE is the filename.
 For many file system, the file name (without dir) should less than 255.
 Please refer http://wikipedia.org/wiki/Comparison_of_file_systems for detail."
   (let ((ret (funcall orig-fun file)))
-    (if (< (length ret) 255)
-        ret
-      (funcall orig-fun (concat (md5 (file-name-directory file)) "/" (file-name-nondirectory file))))))
+    (if (< 255 (length ret))
+        (funcall orig-fun (concat (md5 (file-name-directory file)) "/" (file-name-nondirectory file)))
+      ret)))
 
 (provide '20misc)
 ;;; 20misc ends here
