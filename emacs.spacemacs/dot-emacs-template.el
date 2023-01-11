@@ -1,6 +1,9 @@
-;; -*- mode: emacs-lisp; lexical-binding: t; no-byte-compile: t -*-
-;; This is template for dot-emacs.
+;;; dot-emacs-template --- a template for .emacs -*- lexical-binding: t; no-byte-compile: t -*-
+;;; Commentary:
 ;; It's a good start for custom dot-emacs file.
+;; And Emacs 28.1+ is required.
+;;; Code:
+
 (autoload 'when-let "subr-x")
 (autoload 'if-let* "subr-x")
 
@@ -35,22 +38,21 @@
 ;; assume the spacemaces was installed.
 (setq spacemacs-start-directory (expand-file-name ".emacs.spacemacs/" portable-home-dir))
 (when-let (sl-spacemacs-init (locate-file "init" (list spacemacs-start-directory) load-suffixes))
-  ;; FIXME: the env PYTHONUSERBASE maybe incorrect in ~/.spacemacs.env, flushing it.
-  ;; (when (executable-find python3) (setenv "PYTHONUSERBASE" portable-root-dir))
 
   (pcase system-type
     ('windows-nt
-     (setq sl-packages-excluded '(anaconda-mode
-                                  ccls
-                                  rtags
-                                  company-rtags
-                                  company-ycmd
-                                  flycheck-rtags
-                                  flycheck-ycmd
-                                  helm-rtags
-                                  magit-svn
-                                  tern
-                                  tide)
+     (setq sl-packages-excluded
+           '(anaconda-mode
+             ccls
+             rtags
+             company-rtags
+             company-ycmd
+             flycheck-rtags
+             flycheck-ycmd
+             helm-rtags
+             magit-svn
+             tern
+             tide)
            sl-configuration-layers
            '(auto-completion
              better-defaults
@@ -70,23 +72,24 @@
              version-control
              windows-scripts)))
     ((guard (or (fboundp 'image-mask-p) (native-comp-available-p)))
-     (setq sl-packages-excluded '(anaconda-mode
-                                  ccls
-                                  rtags
-                                  ycmd
-                                  gtags
-                                  company-rtags
-                                  company-ycmd
-                                  company-anaconda
-                                  flycheck-rtags
-                                  flycheck-ycmd
-                                  helm-rtags
-                                  lsp-pyright
-                                  lsp-python-ms
-                                  magit-svn
-                                  tern
-                                  tide
-                                  xcscope)
+     (setq sl-packages-excluded
+           '(anaconda-mode
+             ccls
+             rtags
+             ycmd
+             gtags
+             company-rtags
+             company-ycmd
+             company-anaconda
+             flycheck-rtags
+             flycheck-ycmd
+             helm-rtags
+             lsp-pyright
+             lsp-python-ms
+             magit-svn
+             tern
+             tide
+             xcscope)
            sl-configuration-layers
            '(auto-completion
              better-defaults
@@ -117,8 +120,8 @@
                   ;; lsp-lua-runtime-path ["?.lua" "?/init.lua" "?/?.lua" "../?/?.lua"]
                   lsp-lua-workspace-preload-file-size 500)
              (lua :variables
-                  lua-lsp-server 'lua-language-server
-                  lua-indent-offset 4)
+                  lua-indent-offset 4
+                  lua-lsp-server 'lua-language-server)
              markdown
              multiple-cursors
              nginx
@@ -131,10 +134,8 @@
              syntax-checking
              systemd
              smex
-             (sql :variables
-                  sql-capitalize-keywords t
+             (sql :variables sql-capitalize-keywords t
                   sql-capitalize-keywords-blacklist '("name" "varchar"))
-             ;; ivy
              treemacs
              typescript
              vimscript
@@ -144,22 +145,23 @@
              windows-scripts)))
     (_ ;; terminal without X11, a minimum config
      (with-eval-after-load "files" (delete '("\\.org\\'" . org-mode) auto-mode-alist))
-     (setq sl-packages-excluded '(anaconda-mode
-                                  ccls
-                                  rtags
-                                  ycmd
-                                  company-rtags
-                                  company-ycmd
-                                  company-anaconda
-                                  flycheck-rtags
-                                  flycheck-ycmd
-                                  helm-rtags
-                                  pdf-tools
-                                  org-pdftools
-                                  tern
-                                  tide
-                                  yasnippet
-                                  yasnippet-snippets)
+     (setq sl-packages-excluded
+           '(anaconda-mode
+             ccls
+             rtags
+             ycmd
+             company-rtags
+             company-ycmd
+             company-anaconda
+             flycheck-rtags
+             flycheck-ycmd
+             helm-rtags
+             pdf-tools
+             org-pdftools
+             tern
+             tide
+             yasnippet
+             yasnippet-snippets)
            sl-configuration-layers
            '(auto-completion
              better-defaults
@@ -172,7 +174,6 @@
              nginx
              shell
              smex
-             ;; ivy
              yaml
              vimscript))))
 
@@ -182,9 +183,8 @@
            (append sl-configuration-layers
                    '(graphviz
                      pdf
-                     (plantuml :variables
-                               plantuml-jar-path (expand-file-name "share/plantuml.jar" portable-root-dir)
-                               plantuml-default-exec-mode 'jar)))))
+                     (plantuml :variables plantuml-default-exec-mode 'jar
+                               plantuml-jar-path (expand-file-name "share/plantuml.jar" portable-root-dir))))))
   (when-let* ((jarpath "~/.local/LanguageTool-6.0-SNAPSHOT/languagetool-commandline.jar")
               (_ (file-exists-p jarpath)))
     (add-to-list 'sl-configuration-layers `(languagetool :variables langtool-language-tool-jar ,jarpath)))
@@ -282,3 +282,5 @@
 ;;     (interactive)
 ;;     (setq ede-cpp-root-project-list nil)
 ;;     (load-file my-project-init)))
+
+;;; dot-emacs-template.el ends here
