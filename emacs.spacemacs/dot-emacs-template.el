@@ -69,7 +69,7 @@
              python
              sql
              treemacs
-             version-control
+             (version-control :variables version-control-diff-tool 'diff-hl) ; avoid depending the git-gutter
              windows-scripts)))
     ((guard (or (fboundp 'image-mask-p) (native-comp-available-p)))
      (setq sl-packages-excluded
@@ -139,7 +139,7 @@
              treemacs
              typescript
              vimscript
-             version-control            ; depends on git-gutter
+             (version-control :variables version-control-diff-tool 'diff-hl) ; avoid depending the git-gutter
              (xclipboard :variables xclipboard-enable-cliphist t)
              yaml
              windows-scripts)))
