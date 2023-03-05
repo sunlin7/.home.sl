@@ -76,6 +76,8 @@
      (setq sl-packages-excluded
            '(anaconda-mode
              ccls
+             chinese-conv
+             rainbow-delimiters
              rtags
              ycmd
              gtags
@@ -98,7 +100,8 @@
                     ;; c-c++-enable-google-style t
                     ;; c-c++-enable-google-newline t
                     c-c++-backend 'lsp-clangd)
-             (chinese :variables chinese-default-input-method t)
+             (chinese :variables chinese-default-input-method t
+                      chinese-enable-avy-pinyin nil)
              cmake
              csv
              dap
@@ -207,15 +210,15 @@
   (setq dotspacemacs-frame-title-format "%b@%S")
   ;; (setq dotspacemacs-line-numbers t) ;; not work here, onlywork in .spacemacs
   ;; post-config for spacemacs
-  (when-let ((_ (fboundp 'pyim-activate))
-             (file (expand-file-name "share/pyim-wbdict-v86.rime" portable-root-dir))
-             (wubi-wait-initializing t))
+  (when (fboundp 'pyim-activate)
     (custom-set-variables '(pyim-default-scheme 'wubi))
     (declare-function 'pyim-extra-dicts-add-dict "pyim-dict")
-    (define-advice pyim-activate (:before (&optional _) add-wubi-dict)
-                  (when wubi-wait-initializing
-                    (pyim-extra-dicts-add-dict `(:name "wbdict-v86-rime" :file ,file))
-                    (setq wubi-wait-initializing nil))))
+    (define-advice pyim-activate (:before (&optional _) mydicts)
+      (advice-remove 'pyim-activate 'pyim-activate@add-wubi-dict)
+      (dolist (x '("share/pyim-wbdict-rime.rime")) ;"share/pyim-wbdict-v86.pyim"
+        (pyim-extra-dicts-add-dict
+         `(:name ,(file-name-base x) :file ,(expand-file-name x portable-root-dir))))))
+
   (menu-bar-mode t)
   (when (eq window-system 'x)
     (use-package org-pdftools ; make sure the function org-pdftools-setup-link exists
