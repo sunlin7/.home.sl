@@ -44,25 +44,63 @@ Starting emacs-x86_64-mingw64 directly maybe got the PATH without mingw32/64; fo
 A =.emacs= can be copied from =dot-emacs-template=, or simplload it as:
 #+begin_src emacs-lisp :tangle "dot-emacs.el"
   ;; -*- mode: emacs-lisp; lexical-binding: t -*-
-  (when (equal system-type 'windows-nt)   ; more executables from cygwin
-    (add-to-list 'exec-path "c:/cygwin64/bin")
-    (setenv "PATH" (concat "c:/cygwin64/bin;" (getenv "PATH"))))
-  ;; just following the template configuration.
-  (locate-user-emacs-file ".cache/") ; FIXME: workaround for `spacemacs-cache-directory'
 
+  (when (equal system-type 'windows-nt)   ; more executables from cygwin, should before other path
+    (dolist (x '("c:/temp/cygwin64/bin" "~/.local/bin"))
+      (add-to-list 'exec-path x))
+    (setenv "PATH" (concat (getenv "HOME") "\\.local\\bin;" (getenv "PATH") ";c:\\temp\\cygwin64\\bin")))
+  ;; just following the template configuration.
   (defvar portable-root-dir (expand-file-name ".." invocation-directory))
   (defvar portable-home-dir
-    (if (and (null (fboundp 'image-mask-p)) ; try .rootm-*/.emacs for noX build
+    (if (and (null (fboundp 'image-mask-p)) ; try .root[im]-*/.emacs for noX build
              (file-exists-p (expand-file-name ".emacs" portable-root-dir)))
         portable-root-dir
       (file-name-directory (file-truename (or load-file-name (buffer-file-name))))))
 
-  (autoload 'when-let "subr-x")
-  (let ((init-template
-         (expand-file-name ".home.sl/emacs.spacemacs/dot-emacs-template" portable-home-dir)))
+  (autoload 'when-let* "subr-x")
+  ;; FIXME: `spacemacs-cache-directory' is required on initialize
+  (dolist (x (remove nil (list (getenv "OHOME") (getenv "HOME"))))
+    (let ((noninteractive nil)            ; for -batch mode
+          (user-emacs-directory (expand-file-name ".emacs.d" x)))
+      (locate-user-emacs-file ".cache/")))
+
+  (autoload 'org-store-link "ol") ; patch for emacs lisp/loaddefs.el didn't mark it as autoload
+  (when-let* ((init-template
+               (expand-file-name ".home.sl/emacs.spacemacs/dot-emacs-template" portable-home-dir)))
     (load init-template)
-    (when-let (init-file (locate-file init-template nil '(".el" ".el.gz")))
+    (when-let* ((init-file (locate-file init-template nil '(".el" ".el.gz"))))
       (setq user-init-file init-file)))
+
+  (custom-set-variables
+   '(window-system-default-frame-alist
+     '((x . ((top . 72) (left . 2) (width . 190) (height . 50)))
+       (w32 . ((top . 1) (left . (+ -10)) (width . 190) (height . 52)))))
+   '(global-hungry-delete-mode t)
+   '(dired-compress-directory-default-suffix ".tar.xz")
+   '(dired-compress-file-default-suffix ".tar.xz")
+   '(display-time-mode 1)
+   '(browse-url-browser-function 'eww)
+   '(bookmark-default-file (expand-file-name "bookmarks" sl-savefile-dir))
+   '(ietf-docs-rfc-url-directory "https://ietf.org/rfc/") ; FIXME: https://github.com/choppsv1/ietf-docs/pull/4
+   '(ietf-docs-draft-url-directory "http://ietf.org/id/")
+   '(helm-ff-use-notify (and file-notify--library t))
+   '(warning-suppress-log-types '((use-package) (comp) (lsp-mode))))
+
+  (custom-set-faces
+   '(irfc-reference-face ((t (:foreground "RoyalBlue4" :weight bold)))))
+
+  ;; the X frame will shrink after apply the Spacemacs default font
+  ;; (add-to-list 'frame-inhibit-implied-resize 'font)
+  (spacemacs|do-after-display-system-init
+   (modify-frame-parameters nil (alist-get (framep (selected-frame)) window-system-default-frame-alist)))
+
+  (with-eval-after-load 'vterm
+    (define-key vterm-mode-map (kbd "C-y") 'vterm--self-insert))
+
+  (with-eval-after-load 'multi-term
+    (nconc term-bind-key-alist '(("<M-backspace>" . term-send-backward-kill-word))))
+
+  (run-with-idle-timer 36000 nil 'kill-emacs) ; auto exit
 #+end_src
 ** Addtional Requirest
 If you need support python =live-py-mode=, it requests the =thinter= package, can install by
