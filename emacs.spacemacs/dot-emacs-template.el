@@ -4,8 +4,8 @@
 ;; And Emacs 28.1+ is required.
 ;;; Code:
 
-(autoload 'when-let "subr-x")
 (autoload 'if-let* "subr-x")
+(autoload 'when-let* "subr-x")
 
 ;; async-compile will invoke "emacs --batch -l /tmp/xxx.el", then the libgccjit
 ;; will search the crtbegin*.o, change native-comp-driver-options to help
@@ -32,12 +32,13 @@
 ;; remove windows Python from path which has issues for emacs-win32
 (setq exec-path
       (seq-remove
-       (lambda (x) (string-match-p "AppData/Local/Programs/Python" x))
+       (apply-partially 'string-match-p "AppData/Local/Programs/Python")
        exec-path))
 
 ;; assume the spacemaces was installed.
-(setq spacemacs-start-directory (expand-file-name ".emacs.spacemacs/" portable-home-dir))
-(when-let (sl-spacemacs-init (locate-file "init" (list spacemacs-start-directory) load-suffixes))
+(when-let* ((spacemacs-dir (expand-file-name ".emacs.spacemacs/" portable-home-dir))
+            (_ (file-exists-p spacemacs-dir))
+            (sl-spacemacs-init (locate-file "init" (list spacemacs-dir) load-suffixes)))
 
   (pcase system-type
     ('windows-nt
@@ -188,6 +189,14 @@
   (when-let* ((jarpath "~/.local/LanguageTool-6.0-SNAPSHOT/languagetool-commandline.jar")
               (_ (file-exists-p jarpath)))
     (add-to-list 'sl-configuration-layers `(languagetool :variables langtool-language-tool-jar ,jarpath)))
+
+  (define-advice dotspacemacs/layers (:after ())
+    (setq-default dotspacemacs-configuration-layers sl-configuration-layers
+                  dotspacemacs-additional-packages sl-packages-list
+                  dotspacemacs-excluded-packages sl-packages-excluded
+                  dotspacemacs-editing-style 'emacs
+                  dotspacemacs-maximized-at-startup nil
+                  dotspacemacs-line-numbers '(:disabled-for-modes org-mode)))
   ;; load the spacemacs
   (load-file sl-spacemacs-init)
   (when-let (OHOME (getenv "OHOME"))
