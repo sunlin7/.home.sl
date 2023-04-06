@@ -69,7 +69,6 @@
              org
              python
              sql
-             treemacs
              (version-control :variables version-control-diff-tool 'diff-hl) ; avoid depending the git-gutter
              windows-scripts)))
     ((guard (or (fboundp 'image-mask-p) (native-comp-available-p)))
@@ -137,10 +136,8 @@
              (shell :variables shell-default-shell 'vterm)
              syntax-checking
              systemd
-             smex
              (sql :variables sql-capitalize-keywords t
                   sql-capitalize-keywords-blacklist '("name" "varchar"))
-             treemacs
              typescript
              vimscript
              (version-control :variables version-control-diff-tool 'diff-hl) ; avoid depending the git-gutter
@@ -177,7 +174,6 @@
              markdown
              nginx
              shell
-             smex
              yaml
              vimscript))))
 
