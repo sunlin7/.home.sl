@@ -65,7 +65,7 @@
              ietf
              javascript
              lua
-             multiple-cursors
+             (multiple-cursors :variables multiple-cursors-backend 'mc)
              org
              python
              sql
@@ -126,7 +126,7 @@
                   lua-indent-offset 4
                   lua-lsp-server 'lua-language-server)
              markdown
-             multiple-cursors
+             (multiple-cursors :variables multiple-cursors-backend 'mc)
              nginx
              (org :variables
                   org-plantuml-jar-path (expand-file-name "share/plantuml.jar" portable-root-dir))
