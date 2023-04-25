@@ -64,12 +64,11 @@ A =.emacs= can be copied from =dot-emacs-template=, or simplload it as:
           (user-emacs-directory (expand-file-name ".emacs.d" x)))
       (locate-user-emacs-file ".cache/")))
 
-  (autoload 'org-store-link "ol") ; patch for emacs lisp/loaddefs.el didn't mark it as autoload
-  (when-let* ((init-template
-               (expand-file-name ".home.sl/emacs.spacemacs/dot-emacs-template" portable-home-dir)))
-    (load init-template)
-    (when-let* ((init-file (locate-file init-template nil '(".el" ".el.gz"))))
-      (setq user-init-file init-file)))
+  (define-advice configuration-layer//load (:before (&rest _))
+    (package-activate-all))
+  ;; Spacemacs will turn on yas-global-mode, then it will reload all snippets
+  (define-advice yasnippet-snippets-initialize (:around (&rest _))
+    (add-to-list 'yas-snippet-dirs 'yasnippet-snippets-dir t))
 
   (custom-set-variables
    '(window-system-default-frame-alist
@@ -84,11 +83,18 @@ A =.emacs= can be copied from =dot-emacs-template=, or simplload it as:
    '(ietf-docs-rfc-url-directory "https://ietf.org/rfc/") ; FIXME: https://github.com/choppsv1/ietf-docs/pull/4
    '(ietf-docs-draft-url-directory "http://ietf.org/id/")
    '(helm-ff-use-notify (and file-notify--library t))
+   '(package-quickstart t)                ; enable batch loading
+   '(google-translate-default-target-language "zh-CN")
    '(warning-suppress-log-types '((use-package) (comp) (lsp-mode))))
 
   (custom-set-faces
    '(irfc-reference-face ((t (:foreground "RoyalBlue4" :weight bold)))))
 
+  (when-let* ((init-template
+               (expand-file-name ".home.sl/emacs.spacemacs/dot-emacs-template" portable-home-dir)))
+    (load init-template)
+    (when-let* ((init-file (locate-file init-template nil '(".el" ".el.gz"))))
+      (setq user-init-file init-file)))
   ;; the X frame will shrink after apply the Spacemacs default font
   ;; (add-to-list 'frame-inhibit-implied-resize 'font)
   (spacemacs|do-after-display-system-init

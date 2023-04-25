@@ -275,9 +275,9 @@
 (xterm-mouse-mode 0)
 
 ;; (custom-set-variables
-;; '(default-frame-alist
-;;    '(((top . 0) (left . 0) (width . 110) (height . 40) ; get by `(frame-height)', `(frame-width)' when frame is maximum
-;;      (background-color . "black") (foreground-color . "white")))))
+;; (window-system-default-frame-alist
+;;  '((x . ((top . 72) (left . 2) (width . 190) (height . 50))) ;NOTE: `(frame-height)', `(frame-width)' can get value
+;;    (w32 . ((top . 1) (left . (+ -10)) (width . 190) (height . 52)))))
 
 ;; (when-let (my-project-init (locate-file "projects" (list sl-savefile-dir)))
 ;;   (add-hook 'after-init-hook (lambda () (load-file my-project-init)))
