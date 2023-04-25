@@ -210,7 +210,7 @@
     (custom-set-variables '(pyim-default-scheme 'wubi))
     (declare-function 'pyim-extra-dicts-add-dict "pyim-dict")
     (define-advice pyim-activate (:before (&optional _) mydicts)
-      (advice-remove 'pyim-activate 'pyim-activate@add-wubi-dict)
+      (advice-remove 'pyim-activate 'pyim-activate@mydicts)
       (dolist (x '("share/pyim-wbdict-rime.rime")) ;"share/pyim-wbdict-v86.pyim"
         (pyim-extra-dicts-add-dict
          `(:name ,(file-name-base x) :file ,(expand-file-name x portable-root-dir))))))
@@ -244,13 +244,8 @@
   )
 
 (when (daemonp)
-  (add-hook 'after-init-hook
-            (lambda () (cd "~")
-              (with-temp-buffer ;; try to preload these on mingw64/cygwin
-                (require 'helm-files)
-                (require 'helm-external)
-                (require 'helm-mode)
-                (helm-mode t)))))
+  (with-temp-buffer (helm-mode)) ;; preload heavy packages
+  (with-temp-buffer (org-mode)))
 
 (when (and (eq system-type 'windows-nt) (not (executable-find invocation-name)))
   (warn "Emacs not in PATH, recommend '[...\\mingw64.exe] bash -lc runemacs'"))
