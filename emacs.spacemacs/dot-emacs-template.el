@@ -216,9 +216,9 @@
          `(:name ,(file-name-base x) :file ,(expand-file-name x portable-root-dir))))))
 
   (menu-bar-mode t)
-  (when (eq window-system 'x)
+  (when (string-match "X11" system-configuration-features)
     (use-package org-pdftools ; make sure the function org-pdftools-setup-link exists
-      :hook ((org-load . org-pdftools-setup-link)))
+      :defer t :after org :init (org-pdftools-setup-link))
     (add-hook 'pdf-view-mode-hook
               (lambda ()
                 (when (string-match-p "-dark" (format "%s" custom-enabled-themes))
