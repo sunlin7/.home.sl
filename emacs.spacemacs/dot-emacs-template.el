@@ -266,8 +266,8 @@
   "Update key binding in terminal, `$showkey -a` for key sequence."
   (when (terminal-live-p (frame-terminal frame))
     (with-selected-frame frame
-      (define-key input-decode-map (kbd "\e[127:5u") [C-backspace])
-      (define-key input-decode-map (kbd "\e[127:6u") [C-S-backspace]))))
+      (define-key input-decode-map "[;5~" [C-backspace])
+      (define-key input-decode-map "[;6~" [C-S-backspace]))))
 
 (add-hook 'after-make-frame-functions #'sl-term-kdb-patch)
 (sl-term-kdb-patch (selected-frame)) ; patch 'after-make-frame-functions for the initialed term
