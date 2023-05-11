@@ -218,7 +218,7 @@
   (menu-bar-mode t)
   (when (string-match "X11" system-configuration-features)
     (use-package org-pdftools ; make sure the function org-pdftools-setup-link exists
-      :defer t :after org :init (org-pdftools-setup-link))
+      :defer t :after org :config (org-pdftools-setup-link))
     (add-hook 'pdf-view-mode-hook
               (lambda ()
                 (when (string-match-p "-dark" (format "%s" custom-enabled-themes))
