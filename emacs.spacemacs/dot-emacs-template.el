@@ -274,6 +274,8 @@
 
 (xterm-mouse-mode 0)
 
+(add-to-list 'after-init-hook #'global-hungry-delete-mode)
+
 ;; (custom-set-variables
 ;; (window-system-default-frame-alist
 ;;  '((x . ((left . 0) (top . 50) (width . 190) (height . 50))) ;NOTE: get vlaues by (frame-position), (frame-height), (frame-width)
