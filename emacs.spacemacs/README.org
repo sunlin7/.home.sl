@@ -48,14 +48,20 @@ A =.emacs= can be copied from =dot-emacs-template=, or simplload it as:
   (when (equal system-type 'windows-nt)   ; more executables from cygwin, should before other path
     (dolist (x '("c:/temp/cygwin64/bin" "~/.local/bin"))
       (add-to-list 'exec-path x))
-    (setenv "PATH" (concat (getenv "HOME") "\\.local\\bin;" (getenv "PATH") ";c:\\temp\\cygwin64\\bin")))
+    (setenv "PATH" (concat (getenv "HOME") "\\.local\\bin;" (getenv "PATH") ";c:\\temp\\cygwin64\\bin"))
+    (with-eval-after-load 'org ; org-mode on windows will try call associated application
+      (add-to-list 'org-file-apps-windowsnt '("\\.txt\\'" . emacs))
+      (add-to-list 'org-file-apps-windowsnt '("\\.log\\'" . emacs))))
+
   ;; just following the template configuration.
   (defvar portable-root-dir (expand-file-name ".." invocation-directory))
   (defvar portable-home-dir
     (if (and (null (fboundp 'image-mask-p)) ; try .root[im]-*/.emacs for noX build
              (file-exists-p (expand-file-name ".emacs" portable-root-dir)))
         portable-root-dir
-      (file-name-directory (file-truename (or load-file-name (buffer-file-name))))))
+      (expand-file-name ".." (file-truename (or load-file-name (buffer-file-name))))))
+
+  (defvar portable-running-now (equal portable-root-dir portable-home-dir))
 
   (autoload 'when-let* "subr-x")
   ;; FIXME: `spacemacs-cache-directory' is required on initialize
@@ -66,14 +72,14 @@ A =.emacs= can be copied from =dot-emacs-template=, or simplload it as:
 
   (define-advice configuration-layer//load (:before (&rest _))
     (package-activate-all))
-  ;; Spacemacs will turn on yas-global-mode, then it will reload all snippets
+  ;; add snippets dir on initialize; when Spacemacs turn on yas-global-mode the snippets are reloaded
   (define-advice yasnippet-snippets-initialize (:around (&rest _))
     (add-to-list 'yas-snippet-dirs 'yasnippet-snippets-dir t))
 
   (custom-set-variables
    '(window-system-default-frame-alist
-     '((x . ((top . 72) (left . 2) (width . 190) (height . 50)))
-       (w32 . ((top . 1) (left . (+ -10)) (width . 190) (height . 52)))))
+     '((x . ((left . (+ 16)) (top . (+ 72)) (width . 190) (height . 50)))
+       (w32 . ((left . (+ -9)) (top . (+ -5)) (width . 190) (height . 52)))))
    '(global-hungry-delete-mode t)
    '(dired-compress-directory-default-suffix ".tar.xz")
    '(dired-compress-file-default-suffix ".tar.xz")
@@ -83,6 +89,8 @@ A =.emacs= can be copied from =dot-emacs-template=, or simplload it as:
    '(ietf-docs-rfc-url-directory "https://ietf.org/rfc/") ; FIXME: https://github.com/choppsv1/ietf-docs/pull/4
    '(ietf-docs-draft-url-directory "http://ietf.org/id/")
    '(helm-ff-use-notify (and file-notify--library t))
+   '(native-comp-jit-compilation (not portable-running-now))
+   '(native-comp-enable-subr-trampolines (not portable-running-now))
    '(package-quickstart t)                ; enable batch loading
    '(google-translate-default-target-language "zh-CN")
    '(warning-suppress-log-types '((use-package) (comp) (lsp-mode))))
