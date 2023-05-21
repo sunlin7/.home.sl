@@ -7,20 +7,25 @@
 (autoload 'if-let* "subr-x")
 (autoload 'when-let* "subr-x")
 
+(defvar portable-root-dir (file-name-parent-directory invocation-directory))
+(defvar portable-home-dir
+  (if (and (not (fboundp 'image-mask-p)) ; for noX build try .root[im]-*/.emacs
+           (file-exists-p (expand-file-name ".emacs" portable-root-dir)))
+      portable-root-dir
+    (file-name-directory (or load-file-name (buffer-file-name)))))
+
+(defvar portable-running-p (equal portable-root-dir portable-home-dir))
+
 ;; async-compile will invoke "emacs --batch -l /tmp/xxx.el", then the libgccjit
 ;; will search the crtbegin*.o, change native-comp-driver-options to help
 ;; libgccjit to locate the essential files.
-(custom-set-variables
- '(native-comp-async-jobs-number (when (fboundp 'num-processors) (num-processors)))
- '(native-comp-async-env-modifier-form  ; dirver or compiler options
-   `(setq native-comp-driver-options '(,(concat "-B" (expand-file-name "../lib64/" invocation-directory))))))
-
-(defvar portable-root-dir (expand-file-name ".." invocation-directory))
-(defvar portable-home-dir
-  (if (and (null (fboundp 'image-mask-p)) ; try .rootm-*/.emacs for noX build
-	         (locate-file ".emacs" (list portable-root-dir)))
-      portable-root-dir)
-  (file-name-directory (file-truename (or load-file-name buffer-file-name))))
+(when (native-comp-available-p)
+  (custom-set-variables
+   '(native-comp-jit-compilation (not portable-running-p))
+   '(native-comp-enable-subr-trampolines (not portable-running-p))
+   '(native-comp-async-jobs-number (1- (num-processors)))
+   '(native-comp-async-env-modifier-form  ; dirver or compiler options
+     `(setq native-comp-driver-options '(,(concat "-B" (expand-file-name "../lib64/" invocation-directory)))))))
 
 (defvar sl-savefile-dir (if-let* ((save-dir (expand-file-name "~/.emacs.save/"))
                                   (_ (file-exists-p save-dir)))
