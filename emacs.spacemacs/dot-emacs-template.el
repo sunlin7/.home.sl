@@ -34,165 +34,126 @@
 
 (load (expand-file-name ".home.sl/emacs.spacemacs/init" portable-home-dir))
 
-;; remove windows Python from path which has issues for emacs-win32
-(setq exec-path
-      (seq-remove
-       (apply-partially 'string-match-p "AppData/Local/Programs/Python")
-       exec-path))
-
 ;; assume the spacemaces was installed.
 (when-let* ((spacemacs-dir (expand-file-name ".emacs.spacemacs/" portable-home-dir))
             (_ (file-exists-p spacemacs-dir))
             (sl-spacemacs-init (locate-file "init" (list spacemacs-dir) load-suffixes)))
 
+  (setq sl-packages-excluded
+        '(anaconda-mode
+          ccls
+          chinese-conv
+          company-anaconda
+          company-rtags
+          company-ycmd
+          flycheck-rtags
+          flycheck-ycmd
+          gtags
+          helm-rtags
+          lsp-pyright
+          lsp-python-ms
+          magit-svn
+          rainbow-delimiters
+          rtags
+          tern
+          tide
+          xcscope
+          ycmd))
+  (setq sl-configuration-layers
+        '(auto-completion
+          better-defaults
+          emacs-lisp
+          helm
+          ibuffer
+          imenu-list
+          (lua :variables
+               lua-indent-offset 4
+               lua-lsp-server 'lua-language-server) ; if lsp enabled
+          markdown
+          nginx
+          yaml
+          shell
+          vimscript))
   (pcase system-type
     ('windows-nt
-     (setq sl-packages-excluded
-           '(anaconda-mode
-             ccls
-             rtags
-             company-rtags
-             company-ycmd
-             flycheck-rtags
-             flycheck-ycmd
-             helm-rtags
-             magit-svn
-             tern
-             tide)
-           sl-configuration-layers
-           '(auto-completion
-             better-defaults
-             csv
-             emacs-lisp
-             git
-             helm
-             ibuffer
-             ietf
-             javascript
-             lua
-             (multiple-cursors :variables multiple-cursors-backend 'mc)
-             org
-             python
-             sql
-             (version-control :variables version-control-diff-tool 'diff-hl) ; avoid depending the git-gutter
-             windows-scripts)))
-    ((guard (or (fboundp 'image-mask-p) (native-comp-available-p)))
-     (setq sl-packages-excluded
-           '(anaconda-mode
-             ccls
-             chinese-conv
-             rainbow-delimiters
-             rtags
-             ycmd
-             gtags
-             company-rtags
-             company-ycmd
-             company-anaconda
-             flycheck-rtags
-             flycheck-ycmd
-             helm-rtags
-             lsp-pyright
-             lsp-python-ms
-             magit-svn
-             tern
-             tide
-             xcscope)
-           sl-configuration-layers
-           '(auto-completion
-             better-defaults
-             (c-c++ :variables
-                    ;; c-c++-enable-google-style t
-                    ;; c-c++-enable-google-newline t
-                    c-c++-backend 'lsp-clangd)
-             (chinese :variables chinese-default-input-method t
-                      chinese-enable-avy-pinyin nil)
-             cmake
-             csv
-             dap
-             django
-             emacs-lisp
-             epub
-             git
-             helm
-             html
-             ibuffer
-             imenu-list
-             ietf
-             (javascript :variables
-                         js2-basic-offset 2
-                         javascript-backend 'lsp
-                         javascript-lsp-linter nil)
-             (lsp :variables
-                  ;; lsp-semantic-tokens-enable t
-                  lsp-clients-lua-language-server-install-dir (expand-file-name "share/lua-language-server" portable-root-dir)
-                  ;; lsp-lua-runtime-path ["?.lua" "?/init.lua" "?/?.lua" "../?/?.lua"]
-                  lsp-lua-workspace-preload-file-size 500)
-             (lua :variables
-                  lua-indent-offset 4
-                  lua-lsp-server 'lua-language-server)
-             markdown
-             (multiple-cursors :variables multiple-cursors-backend 'mc)
-             nginx
-             (org :variables
-                  org-plantuml-jar-path (expand-file-name "share/plantuml.jar" portable-root-dir))
-             octave
-             python
-             rust
-             (shell :variables shell-default-shell 'vterm)
-             syntax-checking
-             systemd
-             (sql :variables sql-capitalize-keywords t
-                  sql-capitalize-keywords-blacklist '("name" "varchar"))
-             typescript
-             vimscript
-             (version-control :variables version-control-diff-tool 'diff-hl) ; avoid depending the git-gutter
-             (xclipboard :variables xclipboard-enable-cliphist t)
-             yaml
-             windows-scripts)))
-    (_ ;; terminal without X11, a minimum config
-     (with-eval-after-load "files" (delete '("\\.org\\'" . org-mode) auto-mode-alist))
-     (setq sl-packages-excluded
-           '(anaconda-mode
-             ccls
-             rtags
-             ycmd
-             company-rtags
-             company-ycmd
-             company-anaconda
-             flycheck-rtags
-             flycheck-ycmd
-             helm-rtags
-             pdf-tools
-             org-pdftools
-             tern
-             tide
-             yasnippet
-             yasnippet-snippets)
-           sl-configuration-layers
-           '(auto-completion
-             better-defaults
-             emacs-lisp
-             helm
-             (lua :variables lua-indent-offset 4)
-             ibuffer
-             imenu-list
-             markdown
-             nginx
-             shell
-             yaml
-             vimscript))))
+     (nconc sl-configuration-layers
+            '(csv
+              git
+              ietf
+              javascript
+              (multiple-cursors :variables multiple-cursors-backend 'mc)
+              org
+              python
+              sql
+              (version-control :variables version-control-diff-tool 'diff-hl) ; avoid depending the git-gutter
+              windows-scripts))
+     (setq exec-path ; remove Python-App from path to avoid issues for Emacs-Win32
+           (cl-delete-if
+            (apply-partially 'string-match-p "AppData/Local/Programs/Python")
+            exec-path))
 
-  (when (fboundp 'image-mask-p)
-    (setq  sl-packages-list (append sl-packages-list '(org-pdftools))
-           sl-configuration-layers
-           (append sl-configuration-layers
-                   '(graphviz
-                     pdf
-                     (plantuml :variables plantuml-default-exec-mode 'jar
-                               plantuml-jar-path (expand-file-name "share/plantuml.jar" portable-root-dir))))))
-  (when-let* ((jarpath "~/.local/LanguageTool-6.0-SNAPSHOT/languagetool-commandline.jar")
-              (_ (file-exists-p jarpath)))
-    (add-to-list 'sl-configuration-layers `(languagetool :variables langtool-language-tool-jar ,jarpath)))
+     (when (not (executable-find invocation-name))
+       (warn "Emacs not in PATH, recommend '[...\\mingw64.exe] bash -lc runemacs'")))
+
+    ((guard (or (fboundp 'image-mask-p) (native-comp-available-p))) ; not minimal
+     (nconc sl-configuration-layers
+            '((c-c++ :variables
+                     ;; c-c++-enable-google-style t
+                     ;; c-c++-enable-google-newline t
+                     c-c++-backend 'lsp-clangd)
+              (chinese :variables chinese-default-input-method t
+                       chinese-enable-avy-pinyin nil)
+              cmake
+              csv
+              django
+              epub
+              git
+              html
+              imenu-list
+              ietf
+              (javascript :variables
+                          js2-basic-offset 2
+                          javascript-backend 'lsp
+                          javascript-lsp-linter nil)
+              (lsp :variables
+                   ;; lsp-semantic-tokens-enable t
+                   lsp-clients-lua-language-server-install-dir (expand-file-name "share/lua-language-server" portable-root-dir)
+                   ;; lsp-lua-runtime-path ["?.lua" "?/init.lua" "?/?.lua" "../?/?.lua"]
+                   lsp-lua-workspace-preload-file-size 500)
+              (multiple-cursors :variables multiple-cursors-backend 'mc)
+              (org :variables
+                   org-plantuml-jar-path (expand-file-name "share/plantuml.jar" portable-root-dir))
+              octave
+              python
+              rust
+              (shell :variables shell-default-shell 'vterm)
+              syntax-checking
+              systemd
+              (sql :variables sql-capitalize-keywords t
+                   sql-capitalize-keywords-blacklist '("name" "varchar"))
+              typescript
+              (version-control :variables version-control-diff-tool 'diff-hl) ; avoid depending the git-gutter
+              (xclipboard :variables xclipboard-enable-cliphist t)
+              yaml))
+     (delq 'shell sl-configuration-layers) ;delete the no-argument `shell' layer
+     (when (fboundp 'image-mask-p)
+       (add-to-list 'sl-packages-list 'org-pdftools)
+       (nconc sl-configuration-layers
+              '(graphviz
+                pdf
+                (plantuml :variables plantuml-default-exec-mode 'jar
+                          plantuml-jar-path (expand-file-name "share/plantuml.jar" portable-root-dir)))))
+     (when-let* ((jarpath "~/.local/LanguageTool-6.0-SNAPSHOT/languagetool-commandline.jar")
+                 (_ (file-exists-p jarpath)))
+       (add-to-list 'sl-configuration-layers `(languagetool :variables langtool-language-tool-jar ,jarpath))))
+
+    (_ ;; terminal without X11, a minimum config
+     (nconc sl-packages-excluded '(pdf-tools
+                                   org-pdftools
+                                   yasnippet
+                                   yasnippet-snippets))
+     (nconc sl-configuration-layers '())
+     (with-eval-after-load "files" (delete '("\\.org\\'" . org-mode) auto-mode-alist))))
 
   (define-advice dotspacemacs/layers (:after ())
     (setq-default dotspacemacs-configuration-layers sl-configuration-layers
@@ -204,12 +165,11 @@
   ;; load the spacemacs
   (load-file sl-spacemacs-init)
   (when-let (OHOME (getenv "OHOME"))
-    ;; set the default-directory to full path before change HOME (or "~/bin" is invalid after change HOME)
+    ;; set `default-directory' to full path to avoid "~/bin" is invalid after change HOME
     (setq default-directory (file-truename default-directory))
     (setenv "HOME" OHOME)
     (setenv "OHOME" nil))
   (setq dotspacemacs-frame-title-format "%b@%S")
-  ;; (setq dotspacemacs-line-numbers t) ;; not work here, onlywork in .spacemacs
   ;; post-config for spacemacs
   (when (fboundp 'pyim-activate)
     (custom-set-variables '(pyim-default-scheme 'wubi))
@@ -252,9 +212,6 @@
   (with-temp-buffer (helm-mode)) ;; preload heavy packages
   (with-temp-buffer (org-mode)))
 
-(when (and (eq system-type 'windows-nt) (not (executable-find invocation-name)))
-  (warn "Emacs not in PATH, recommend '[...\\mingw64.exe] bash -lc runemacs'"))
-
 (define-advice undo-tree-save-history-from-hook (:around (ORIG))
   (when (buffer-modified-p) (funcall ORIG)))
 
@@ -264,7 +221,7 @@
                  (message "disable git-gutter for large file")))
 
 (defun sl-term-kdb-patch (frame)
-  "Update key binding in terminal, `$showkey -a` for key sequence."
+  "Update key binding in terminal for FRAME, `$showkey -a` for key sequence."
   (when (terminal-live-p (frame-terminal frame))
     (with-selected-frame frame
       (define-key input-decode-map "[;5~" [C-backspace])
@@ -273,8 +230,7 @@
 (add-hook 'after-make-frame-functions #'sl-term-kdb-patch)
 (sl-term-kdb-patch (selected-frame)) ; patch 'after-make-frame-functions for the initialed term
 
-(xterm-mouse-mode 0)
-
+(add-to-list 'after-init-hook (apply-partially 'xterm-mouse-mode 0))
 (add-to-list 'after-init-hook #'global-hungry-delete-mode)
 
 ;; (custom-set-variables
