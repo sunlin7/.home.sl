@@ -258,10 +258,6 @@
 (define-advice undo-tree-save-history-from-hook (:around (ORIG))
   (when (buffer-modified-p) (funcall ORIG)))
 
-(define-advice semantic-find-file-noselect (:around (orig file &rest r))
-  (let ((find-file-hook nil))
-    (apply orig file r)))
-
 (define-advice git-gutter-mode (:around (ORIG &optional ARG) large-file)
                (if (< (point-max) (* 512 1024))
                    (funcall ORIG ARG)

@@ -111,6 +111,10 @@ Please refer http://wikipedia.org/wiki/Comparison_of_file_systems for detail."
         ret
       (concat (md5 (file-name-directory file)) "!" (file-name-nondirectory file)))))
 
+(define-advice semantic-find-file-noselect (:around (orig file &rest r))
+  (let ((find-file-hook nil))           ; avoid unnecessary actions
+    (apply orig file r)))
+
 
 ;;; flycheck -- settings for flycheck
 (autoload 'oref "eieio")
