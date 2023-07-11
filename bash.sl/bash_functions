@@ -121,7 +121,3 @@ function o() {
         fi
     done
 }
-
-if command -v "mintty" > /dev/null; then
-    alias mintty='mintty.exe -i /Cygwin-Terminal.ico -o Blue=84,84,252 -o BoldBlue=127,127,252 -'
-fi
