@@ -14,15 +14,11 @@
       portable-root-dir
     (file-name-directory (or load-file-name (buffer-file-name)))))
 
-(defvar portable-running-p (equal portable-root-dir portable-home-dir))
-
 ;; async-compile will invoke "emacs --batch -l /tmp/xxx.el", then the libgccjit
 ;; will search the crtbegin*.o, change native-comp-driver-options to help
 ;; libgccjit to locate the essential files.
 (when (native-comp-available-p)
   (custom-set-variables
-   '(native-comp-jit-compilation (not portable-running-p))
-   '(native-comp-enable-subr-trampolines (not portable-running-p))
    '(native-comp-async-jobs-number (1- (num-processors)))
    '(native-comp-async-env-modifier-form  ; dirver or compiler options
      `(setq native-comp-driver-options '(,(concat "-B" (expand-file-name "../lib64/" invocation-directory)))))))
@@ -143,9 +139,9 @@
                 pdf
                 (plantuml :variables plantuml-default-exec-mode 'jar
                           plantuml-jar-path (expand-file-name "share/plantuml.jar" portable-root-dir)))))
-     (when-let* ((jarpath "~/.local/LanguageTool-6.0-SNAPSHOT/languagetool-commandline.jar")
-                 (_ (file-exists-p jarpath)))
-       (add-to-list 'sl-configuration-layers `(languagetool :variables langtool-language-tool-jar ,jarpath))))
+     (when-let* ((default-directory portable-home-dir)
+                 (paths (file-expand-wildcards ".local/LanguageTool*/languagetool-commandline.jar" t)))
+       (add-to-list 'sl-configuration-layers `(languagetool :variables langtool-language-tool-jar ,(car paths)))))
 
     (_ ;; terminal without X11, a minimum config
      (nconc sl-packages-excluded '(pdf-tools
@@ -199,6 +195,11 @@
                           (if-let ((scale (getenv "GDK_DPI_SCALE")))
                               (string-to-number scale)
                             t)))
+
+  (with-eval-after-load 'helm-files
+    (require 'filenotify)
+    (setq helm-ff-use-notify (and file-notify--library t)))
+
   ;;;; fix the c-basic-offset for google-c-style
   ;; (with-eval-after-load 'google-c-style
   ;;   '(dolist (v google-c-style)
@@ -206,19 +207,32 @@
   ;;       (setcdr v 4))))
   ;; (add-hook 'c-mode-common-hook
   ;;           (lambda () (setq-local tab-width c-basic-offset)))
+
+  (when (daemonp)
+    (with-temp-buffer (helm-mode)) ;; preload heavy packages
+    (with-temp-buffer (org-mode)))
+
+  (define-advice undo-tree-save-history-from-hook (:around (ORIG))
+    (when (buffer-modified-p) (funcall ORIG)))
+
+  (define-advice git-gutter-mode (:around (ORIG &optional ARG) large-file)
+    (if (< (point-max) (* 512 1024))
+        (funcall ORIG ARG)
+      (message "disable git-gutter for large file")))
+
+  (with-eval-after-load 'multi-term
+    (nconc term-bind-key-alist '(("<M-backspace>" . term-send-backward-kill-word))))
+
+  (with-eval-after-load 'vterm
+    (define-key vterm-mode-map (kbd "C-y") 'vterm--self-insert))
+
+  (let ((template-file (or load-file-name (buffer-file-name))))
+    (defun open-dot-emacs-template ()
+      (interactive)
+      (find-file-existing template-file))
+    (spacemacs/set-leader-keys
+      "fet" #'open-dot-emacs-template)) ; function NAME displayed on transaction menu
   )
-
-(when (daemonp)
-  (with-temp-buffer (helm-mode)) ;; preload heavy packages
-  (with-temp-buffer (org-mode)))
-
-(define-advice undo-tree-save-history-from-hook (:around (ORIG))
-  (when (buffer-modified-p) (funcall ORIG)))
-
-(define-advice git-gutter-mode (:around (ORIG &optional ARG) large-file)
-               (if (< (point-max) (* 512 1024))
-                   (funcall ORIG ARG)
-                 (message "disable git-gutter for large file")))
 
 (defun sl-term-kdb-patch (frame)
   "Update key binding in terminal for FRAME, `$showkey -a` for key sequence."

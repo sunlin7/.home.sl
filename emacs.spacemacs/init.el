@@ -11,7 +11,7 @@
 (defvar sl-packages-list '()
   "The list of the package used for currrent configuration.")
 (defcustom sl-savefile-dir (expand-file-name "save.d" user-emacs-directory)
-  "The directory to save data."
+  "The directory to save user data."
   :group 'sl-emacs
   :type 'string)
 

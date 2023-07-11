@@ -1,7 +1,7 @@
 #+TITLE: My emacs configuration
 #+INCLUDE: ~/.emacs.save/org/common_header.org
 
-This is my .emacs configure for emacs27 on CentOS 7.
+This is my =.emacs= configure for emacs29 on CentOS 7.
 It depends on the [[https://github.com/syl20bnr/spacemacs/commits/develop][Spacemacs develop branch]].
 
 ** My configurations
@@ -18,50 +18,50 @@ For more details, just refer the [[./init.el]].
 The [[./dot-emacs-template.el]] is a template for dot-emacs, refer it for details.
 
 *** Integrate with Spacemacs
- Config the spacemacs with follow layers in =.spacemacs=
+ In the [[./dot-emacs-template.el]], it will advice the function ~dotspacemacs/layers~ to rewrite following key variables to the desiered values for =Spacemacs=:
  #+BEGIN_SRC emacs-lisp :tangle no
    dotspacemacs-configuration-layers sl-configuration-layers
    dotspacemacs-additional-packages sl-packages-list
    dotspacemacs-excluded-packages sl-packages-excluded
    ;; ...
-   dotspacemacs-mode-line-theme 'vanilla
  #+end_src
- Then the Spacemacs will follow the variables initilized in =.emacs=.
 
-*** emacs with msys64
-Starting emacs-x86_64-mingw64 directly maybe got the PATH without mingw32/64; follow cmds will help to get correct PATH.
-#+begin_src shell
-  # starting emacs daemon
-  c:\msys64\mingw64.exe bash -lc "runemacs --daemon"
-  # starting emacs daemon and kill the frame
-  c:\msys64\mingw64.exe bash -lc "emacsclientw --alternate-editor= -t --eval '(delete-frame nil 1)'"
-  # for starting a client that daemon maybe not exist
-  c:\msys64\mingw64.exe bash -lc "emacsclientw -nc --alternate-editor="
-  # for just starting an emacsclient
-  c:\msys64\mingw64\bin\emacsclient -c
+*** An example for early-init.el
+The =early-init.el= should do the very early initialization, like follow:
+#+begin_src emacs-lisp :tangle ~/.emacs.d/early-init.el
+  (setq gc-cons-threshold 402653184       ; copy from the init.el of Spacemacs
+        gc-cons-percentage 0.6
+        package-enable-at-startup nil
+        native-comp-jit-compilation nil
+        native-comp-enable-subr-trampolines nil
+        comp-el-to-eln-strip-prefix '(".*\\.emacs\\.spacemacs/elpa/")
+        warning-suppress-log-types '((use-package) (comp) (lsp-mode))
+        org-modules nil                   ; speedup org-mode startup
+        package-quickstart t              ; enable batch loading
+        )
 #+end_src
-*** an example for .emacs
-A =.emacs= can be copied from =dot-emacs-template=, or simplload it as:
+
+*** An example for .emacs
+A =.emacs= can copy from the =dot-emacs-template.el=; or to load the =dot-emacs-template.el=, like follow:
 #+begin_src emacs-lisp :tangle "dot-emacs.el"
   ;; -*- mode: emacs-lisp; lexical-binding: t -*-
 
-  (when (equal system-type 'windows-nt)   ; more executables from cygwin, should before other path
+  (when (eq system-type 'windows-nt)   ; more executables from cygwin, should before other path
     (dolist (x '("c:/temp/cygwin64/bin" "~/.local/bin"))
       (add-to-list 'exec-path x))
     (setenv "PATH" (concat (getenv "HOME") "\\.local\\bin;" (getenv "PATH") ";c:\\temp\\cygwin64\\bin"))
     (with-eval-after-load 'org ; org-mode on windows will try call associated application
       (add-to-list 'org-file-apps-windowsnt '("\\.txt\\'" . emacs))
-      (add-to-list 'org-file-apps-windowsnt '("\\.log\\'" . emacs))))
+      (add-to-list 'org-file-apps-windowsnt '("\\.log\\'" . emacs)))
+    (add-to-list 'auto-mode-alist '("\\.mtl\\'" . xml-mode)))
 
-  ;; just following the template configuration.
-  (defvar portable-root-dir (expand-file-name ".." invocation-directory))
+  ;; copy from the template to initialize the portable-* values
+  (defvar portable-root-dir (file-name-parent-directory invocation-directory))
   (defvar portable-home-dir
-    (if (and (null (fboundp 'image-mask-p)) ; try .root[im]-*/.emacs for noX build
+    (if (and (not (fboundp 'image-mask-p)) ; for noX build try .root[im]-*/.emacs
              (file-exists-p (expand-file-name ".emacs" portable-root-dir)))
         portable-root-dir
-      (expand-file-name ".." (file-truename (or load-file-name (buffer-file-name))))))
-
-  (defvar portable-running-now (equal portable-root-dir portable-home-dir))
+      (file-name-directory (or load-file-name (buffer-file-name)))))
 
   (autoload 'when-let* "subr-x")
   ;; FIXME: `spacemacs-cache-directory' is required on initialize
@@ -76,10 +76,16 @@ A =.emacs= can be copied from =dot-emacs-template=, or simplload it as:
   (define-advice yasnippet-snippets-initialize (:around (&rest _))
     (add-to-list 'yas-snippet-dirs 'yasnippet-snippets-dir t))
 
-  (custom-set-variables
+  (when-let* ((init-template
+               (expand-file-name ".home.sl/emacs.spacemacs/dot-emacs-template" portable-home-dir)))
+    (load init-template))
+
+  (custom-set-variables                   ; variables after loading Spacemacs
    '(window-system-default-frame-alist
      '((x . ((left . (+ 16)) (top . (+ 72)) (width . 190) (height . 50)))
        (w32 . ((left . (+ -9)) (top . (+ -5)) (width . 190) (height . 52)))))
+   '(lsp-clients-clangd-args '("--header-insertion-decorators=0" "--clang-tidy" "--completion-style=detailed"))
+   '(dired-listing-switches "-alt") ;  (setq dired-quick-sort-sort-by-last "time")
    '(dired-compress-directory-default-suffix ".tar.xz")
    '(dired-compress-file-default-suffix ".tar.xz")
    '(display-time-mode 1)
@@ -87,42 +93,41 @@ A =.emacs= can be copied from =dot-emacs-template=, or simplload it as:
    '(bookmark-default-file (expand-file-name "bookmarks" sl-savefile-dir))
    '(ietf-docs-rfc-url-directory "https://ietf.org/rfc/") ; FIXME: https://github.com/choppsv1/ietf-docs/pull/4
    '(ietf-docs-draft-url-directory "http://ietf.org/id/")
-   '(helm-ff-use-notify (and file-notify--library t))
-   '(native-comp-jit-compilation (not portable-running-now))
-   '(native-comp-enable-subr-trampolines (not portable-running-now))
-   '(package-quickstart t)                ; enable batch loading
-   '(google-translate-default-target-language "zh-CN")
-   '(warning-suppress-log-types '((use-package) (comp) (lsp-mode))))
+   '(google-translate-default-target-language "zh-CN"))
 
   (custom-set-faces
    '(irfc-reference-face ((t (:foreground "RoyalBlue4" :weight bold)))))
 
-  (when-let* ((init-template
-               (expand-file-name ".home.sl/emacs.spacemacs/dot-emacs-template" portable-home-dir)))
-    (load init-template)
-    (when-let* ((init-file (locate-file init-template nil '(".el" ".el.gz"))))
-      (setq user-init-file init-file)))
   ;; the X frame will shrink after apply the Spacemacs default font
   ;; (add-to-list 'frame-inhibit-implied-resize 'font)
   (spacemacs|do-after-display-system-init
    (modify-frame-parameters nil (alist-get (framep (selected-frame)) window-system-default-frame-alist)))
 
-  (with-eval-after-load 'vterm
-    (define-key vterm-mode-map (kbd "C-y") 'vterm--self-insert))
-
-  (with-eval-after-load 'multi-term
-    (nconc term-bind-key-alist '(("<M-backspace>" . term-send-backward-kill-word))))
-
-  (run-with-idle-timer 36000 nil 'kill-emacs) ; auto exit
+  (defun advice-unadvice (sym)
+    "Remove all advices from symbol SYM."
+    (interactive "aFunction symbol: ")
+    (advice-mapc (lambda (advice _props) (advice-remove sym advice)) sym))
+#+end_src
+*** emacs with msys64
+Starting emacs-x86_64-mingw64 directly maybe got the PATH without mingw32/64; follow cmds will help to get correct PATH.
+#+begin_src shell
+  # starting emacs daemon
+  c:\msys64\mingw64.exe bash -lc "runemacs --daemon"
+  # starting emacs daemon and kill the frame
+  c:\msys64\mingw64.exe bash -lc "emacsclientw --alternate-editor= -t --eval '(delete-frame nil 1)'"
+  # for starting a client that daemon maybe not exist
+  c:\msys64\mingw64.exe bash -lc "emacsclientw -nc --alternate-editor="
+  # for just starting an emacsclient
+  c:\msys64\mingw64\bin\emacsclient -c
 #+end_src
 ** Addtional Requirest
-If you need support python =live-py-mode=, it requests the =thinter= package, can install by
+If you need support python =live-py-mode=, it requests the =tkinter= package, can install by
 #+begin_src shell
 apt-get install python36-tkinter
 #+end_src
 
 Spacemacs use some symbols fonts in ~spacemacs--diminished-minor-modes~, install ~ttf-ancient-fonts-symbola~ or ~adobe-source-han-sans-cn-fonts~ for them.
-The fonts depend on ~all-the-icons~ can download with elisp `all-the-icons-install-fonts'.
+The fonts depend on ~all-the-icons~ can download with elisp ~all-the-icons-install-fonts~.
 ** Misc notes
 *** Use the emacsclient as the default git difftool and mergetool
 Edit ~/.gitconfig file, add follow sections to invoke the emacsclient.
