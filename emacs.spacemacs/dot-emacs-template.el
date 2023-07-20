@@ -112,6 +112,7 @@
                           javascript-backend 'lsp
                           javascript-lsp-linter nil)
               (lsp :variables
+                   lsp-restart 'ignore
                    ;; lsp-semantic-tokens-enable t
                    lsp-clients-lua-language-server-install-dir (expand-file-name "share/lua-language-server" portable-root-dir)
                    ;; lsp-lua-runtime-path ["?.lua" "?/init.lua" "?/?.lua" "../?/?.lua"]
