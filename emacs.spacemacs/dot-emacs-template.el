@@ -138,7 +138,8 @@
        (add-to-list 'sl-packages-list 'org-pdftools)
        (nconc sl-configuration-layers
               '(graphviz
-                pdf)))
+                pdf))
+       (custom-set-variables '(pdf-view-restore-filename "~/.emacs.d/.cache/pdf-view-restore")))
      (when-let* ((default-directory portable-home-dir)
                  (paths (file-expand-wildcards ".local/LanguageTool*/languagetool-commandline.jar" t)))
        (add-to-list 'sl-configuration-layers `(languagetool :variables langtool-language-tool-jar ,(car paths)))))
