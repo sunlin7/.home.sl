@@ -117,9 +117,11 @@
                    ;; lsp-lua-runtime-path ["?.lua" "?/init.lua" "?/?.lua" "../?/?.lua"]
                    lsp-lua-workspace-preload-file-size 500)
               (multiple-cursors :variables multiple-cursors-backend 'mc)
+              octave
               (org :variables
                    org-plantuml-jar-path (expand-file-name "share/plantuml.jar" portable-root-dir))
-              octave
+              (plantuml :variables plantuml-default-exec-mode 'jar
+                        plantuml-jar-path (expand-file-name "share/plantuml.jar" portable-root-dir))
               python
               rust
               (shell :variables shell-default-shell 'vterm)
@@ -136,9 +138,7 @@
        (add-to-list 'sl-packages-list 'org-pdftools)
        (nconc sl-configuration-layers
               '(graphviz
-                pdf
-                (plantuml :variables plantuml-default-exec-mode 'jar
-                          plantuml-jar-path (expand-file-name "share/plantuml.jar" portable-root-dir)))))
+                pdf)))
      (when-let* ((default-directory portable-home-dir)
                  (paths (file-expand-wildcards ".local/LanguageTool*/languagetool-commandline.jar" t)))
        (add-to-list 'sl-configuration-layers `(languagetool :variables langtool-language-tool-jar ,(car paths)))))
@@ -186,8 +186,10 @@
                   (pdf-view-midnight-minor-mode t)))))
   ;; (or (file-exists-p plantuml-jar-path) (plantuml-download-jar)); download plantuml.jar
   (with-eval-after-load 'plantuml-mode
-    (declare-function plantuml-set-output-type "plantuml-mode")
-    (plantuml-set-output-type "png")) ; text in svg image hard to see in dark theme
+    (when (fboundp 'image-mask-p)
+      (plantuml-set-output-type "png")) ; text in svg image hard to see in dark theme
+    (define-advice plantuml-jar-output-type-opt (:around (ORIG output-type))
+      (funcall ORIG (if (display-graphic-p) output-type "txt")))) ; "txt" for terminal
 
   ;; disable img resize for window size is changed by HELM windows
   (custom-set-variables '(image-auto-resize-on-window-resize nil)
