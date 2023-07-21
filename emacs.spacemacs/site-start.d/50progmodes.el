@@ -187,11 +187,6 @@ Please refer http://wikipedia.org/wiki/Comparison_of_file_systems for detail."
 
 (defun sl-ede-flycheck-init ()
   "Setup the flycheck for ede projects."
-  (when (equal major-mode 'c++-mode)
-    (dolist (x '(flycheck-clang-language-standard flycheck-gcc-language-standard))
-      (when (not (string-empty-p x))
-        (setq-local x "c++11"))))
-
   (when-let ((cur-proj (ede-current-project)))
     (when (and (class-p 'ede-cpp-root-project)
                (object-of-class-p cur-proj 'ede-cpp-root-project))
@@ -200,22 +195,19 @@ Please refer http://wikipedia.org/wiki/Comparison_of_file_systems for detail."
                (object-of-class-p cur-proj 'ede-compdb-project))
       (sl-ede-compdb-flycheck-init))))
 
+(defun sl-flycheck-c++-std ()
+  "Change the g++/clang++ language standards param -std to c++11."
+  (when (eq major-mode 'c++-mode)
+    (dolist (x '(flycheck-clang-language-standard flycheck-gcc-language-standard))
+      (when (string-empty-p (or (symbol-value x) ""))
+        (set (make-local-variable x) "c++11")))))
+
 (with-eval-after-load 'flycheck
   (add-hook 'ede-compdb-project-rescan-hook #'sl-ede-compdb-flycheck-init)
   (add-hook 'ede-minor-mode-hook #'sl-ede-flycheck-init)
-  (add-hook 'flycheck-mode-hook #'sl-ede-flycheck-init)
+  (add-hook 'flycheck-mode-hook #'sl-flycheck-c++-std)
   ;; FIXME: disable clang warning on struct init syntax "struct a = {0}".
   (add-to-list 'flycheck-clang-args "-Wno-missing-field-initializers"))
-
-;; fix the pycompile-checker executable
-(add-hook 'python-mode-hook
-          (lambda ()
-            (when (and (boundp 'flycheck-python-pycompile-executable)
-                       (not flycheck-python-pycompile-executable))
-              (setq-local flycheck-python-pycompile-executable
-                          (if (string= (file-name-base python-shell-interpreter) "ipython")
-                              (or (executable-find "python3") (executable-find "python2") "python")
-                            python-shell-interpreter)))))
 
 ;; fix that the pipenv only find pylint in virtual evnvironment
 ;; (with-eval-after-load 'pipenv

@@ -171,7 +171,6 @@
   ;; post-config for spacemacs
   (when (fboundp 'pyim-activate)
     (custom-set-variables '(pyim-default-scheme 'wubi))
-    (declare-function 'pyim-extra-dicts-add-dict "pyim-dict")
     (define-advice pyim-activate (:before (&optional _) mydicts)
       (advice-remove 'pyim-activate 'pyim-activate@mydicts)
       (dolist (x '("share/pyim-wbdict-rime.rime")) ;"share/pyim-wbdict-v86.pyim"
