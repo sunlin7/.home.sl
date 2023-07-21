@@ -12,7 +12,7 @@
   (if (and (not (fboundp 'image-mask-p)) ; for noX build try .root[im]-*/.emacs
            (file-exists-p (expand-file-name ".emacs" portable-root-dir)))
       portable-root-dir
-    (file-name-directory (or load-file-name (buffer-file-name)))))
+    (file-name-directory (or (buffer-file-name) load-file-name))))
 
 ;; async-compile will invoke "emacs --batch -l /tmp/xxx.el", then the libgccjit
 ;; will search the crtbegin*.o, change native-comp-driver-options to help
@@ -230,7 +230,7 @@
   (with-eval-after-load 'vterm
     (define-key vterm-mode-map (kbd "C-y") 'vterm--self-insert))
 
-  (let ((template-file (or load-file-name (buffer-file-name))))
+  (let ((template-file (or (buffer-file-name) load-file-name)))
     (defun open-dot-emacs-template ()
       (interactive)
       (find-file-existing template-file))

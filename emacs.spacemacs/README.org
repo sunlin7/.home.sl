@@ -61,21 +61,24 @@ A =.emacs= can copy from the =dot-emacs-template.el=; or to load the =dot-emacs-
     (if (and (not (fboundp 'image-mask-p)) ; for noX build try .root[im]-*/.emacs
              (file-exists-p (expand-file-name ".emacs" portable-root-dir)))
         portable-root-dir
-      (file-name-directory (or load-file-name (buffer-file-name)))))
+      (file-name-directory (or (buffer-file-name) load-file-name))))
 
-  (autoload 'when-let* "subr-x")
+  (if (not early-init-file)         ; load the early-init.el for essential variables
+      (load (expand-file-name "early-init.el" user-emacs-directory) t t t)
+    (define-advice configuration-layer//load (:before (&rest _))
+      (package-activate-all)))
+
   ;; FIXME: `spacemacs-cache-directory' is required on initialize
-  (dolist (x (remove nil (list (getenv "OHOME") (getenv "HOME"))))
-    (let ((noninteractive nil)            ; for -batch mode
-          (user-emacs-directory (expand-file-name ".emacs.d" x)))
+  (dolist (x (flatten-list (mapcar 'getenv '("OHOME" "HOME"))))
+    (let ((user-emacs-directory (expand-file-name ".emacs.d" x))
+          (noninteractive nil)) ; `locate-user-emacs-file' short return for "-batch" mode
       (locate-user-emacs-file ".cache/")))
 
-  (define-advice configuration-layer//load (:before (&rest _))
-    (package-activate-all))
   ;; add snippets dir on initialize; when Spacemacs turn on yas-global-mode the snippets are reloaded
   (define-advice yasnippet-snippets-initialize (:around (&rest _))
     (add-to-list 'yas-snippet-dirs 'yasnippet-snippets-dir t))
 
+  (autoload 'when-let* "subr-x")
   (when-let* ((init-template
                (expand-file-name ".home.sl/emacs.spacemacs/dot-emacs-template" portable-home-dir)))
     (load init-template))
