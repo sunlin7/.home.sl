@@ -227,7 +227,12 @@
     (nconc term-bind-key-alist '(("<M-backspace>" . term-send-backward-kill-word))))
 
   (with-eval-after-load 'vterm
-    (define-key vterm-mode-map (kbd "C-y") 'vterm--self-insert))
+    (define-key vterm-mode-map (kbd "C-y") 'vterm--self-insert)
+    (define-key vterm-mode-map (kbd "C-S-<insert>")
+                #'(lambda () "`kill-ring-save' then `yank'"
+                    (interactive)
+                    (call-interactively 'kill-ring-save)
+                    (call-interactively 'vterm-yank))))
 
   (let ((template-file (or (buffer-file-name) load-file-name)))
     (defun open-dot-emacs-template ()
