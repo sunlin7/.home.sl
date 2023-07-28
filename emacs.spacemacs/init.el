@@ -16,8 +16,11 @@
   :type 'string)
 
 (add-to-list 'load-path sl-site-lisp-dir)
-(mapc (lambda (x)
-        (require (intern (file-name-base x)) (file-name-sans-extension x)))
-      (directory-files sl-site-start-dir t "^[0-9].*.el$"))
+
+(mapc 'load (seq-uniq
+             (mapcar
+              (lambda (x) (substring x 0 (string-match "\\.elc?\\(\\.gz\\)?$" x)))
+              (directory-files sl-site-start-dir t "^[0-9].+\\.elc?\\(\\.gz\\)?$"))))
+
 (provide 'sl-init)
 ;;; init.el ends here
