@@ -125,7 +125,7 @@
                         plantuml-jar-path (expand-file-name "share/plantuml.jar" portable-root-dir))
               python
               rust
-              (shell :variables shell-default-shell 'vterm)
+              (shell :variables shell-default-shell 'multi-vterm)
               syntax-checking
               systemd
               (sql :variables sql-capitalize-keywords t
