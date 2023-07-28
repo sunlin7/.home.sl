@@ -93,7 +93,7 @@ export EDITOR="emacsclient --alternate-editor=" # use exists term
 [[ -d "$HOME/.root/bin" ]] && export PATH="$HOME/.root/bin:$PATH"
 [[ -d "$HOME/.bin" ]]      && export PATH="$HOME/.bin:$PATH"
 export LIBGL_ALWAYS_INDIRECT=1
-export LS_COLORS="$LS_COLORS:di=01;34" # fix the blue is hard to see
+export LS_COLORS="di=01;34:${LS_COLORS/:di=/:*.x=}" # dir color (blue) is hard to see
 
 # some aliases
 alias ll='ls -alF'
