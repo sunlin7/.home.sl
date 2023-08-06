@@ -87,7 +87,7 @@
     (if-let* ((cmd_list (alist-get lang quickrun--language-alist nil nil #'string=))
               (exec (alist-get ':exec cmd_list))
               (compile (car exec)))
-        (when (not (string-match "-std=" compile))
+        (unless (string-match "-std=" compile)
           (setf (car exec) (concat compile " -std=c++11"))))))
 
 (with-eval-after-load 'menu-bar
@@ -213,9 +213,8 @@ Please refer http://wikipedia.org/wiki/Comparison_of_file_systems for detail."
 ;; (with-eval-after-load 'pipenv
 ;;   (define-advice pipenv-executable-find (:around (ORIG executable))
 ;;     (when (funcall ORIG executable)
-;;       (progn
-;;         (message "Warrning: %s not found in pipenv, try global one", executable)
-;;         (executable-find executable)))))
+;;       (message "Warrning: %s not found in pipenv, try global one" executable)
+;;       (executable-find executable))))
 
 ;;; gdb interface
 (add-hook 'gdb-mode-hook
