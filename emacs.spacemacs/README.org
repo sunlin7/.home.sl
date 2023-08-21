@@ -89,7 +89,8 @@ A =.emacs= can copy from the =dot-emacs-template.el=; or to load the =dot-emacs-
      '((x . ((left . (+ 16)) (top . (+ 72)) (width . 190) (height . 50)))
        (w32 . ((left . (+ -9)) (top . (+ -5)) (width . 190) (height . 52)))))
    '(lsp-clients-clangd-args '("--header-insertion-decorators=0" "--clang-tidy" "--completion-style=detailed"))
-   '(dired-listing-switches "-alt") ;  (setq dired-quick-sort-sort-by-last "time")
+   '(lsp-server-install-dir (expand-file-name ".emacs.d/.cache/lsp/" portable-home-dir))
+   ;; '(dired-listing-switches "-alt") ; (setq dired-quick-sort-sort-by-last "time")
    '(dired-compress-directory-default-suffix ".tar.xz")
    '(dired-compress-file-default-suffix ".tar.xz")
    '(display-time-mode 1)
@@ -98,10 +99,15 @@ A =.emacs= can copy from the =dot-emacs-template.el=; or to load the =dot-emacs-
    '(ietf-docs-rfc-url-directory "https://ietf.org/rfc/") ; FIXME: https://github.com/choppsv1/ietf-docs/pull/4
    '(ietf-docs-draft-url-directory "http://ietf.org/id/")
    '(google-translate-default-target-language "zh-CN")
+   '(eww-search-prefix "https://www.google.com/search?q=")
+   '(url-cookie-save-interval 60)
    '(rmail-file-name "~/.emacs.d/RMAIL"))
 
   (custom-set-faces
    '(irfc-reference-face ((t (:foreground "RoyalBlue4" :weight bold)))))
+
+  (with-eval-after-load 'dired-quick-sort
+    (setq dired-quick-sort-sort-by-last "time"))
 
   ;; the X frame will shrink after apply the Spacemacs default font
   ;; (add-to-list 'frame-inhibit-implied-resize 'font)
@@ -112,6 +118,19 @@ A =.emacs= can copy from the =dot-emacs-template.el=; or to load the =dot-emacs-
     "Remove all advices from symbol SYM."
     (interactive "aFunction symbol: ")
     (advice-mapc (lambda (advice _props) (advice-remove sym advice)) sym))
+
+  (with-eval-after-load 'eww
+    (defun eww-open-background ()
+      "Fetch URL in a new EWW background buffer"
+      (interactive)
+      (save-window-excursion (funcall 'eww-open-in-new-buffer)))
+
+    (define-key-after eww-mode-map
+      [menu-bar eww follow-url-background]
+      '(menu-item "Follow URL in background" #'eww-open-background)
+      'Follow\ URL\ in\ new\ buffer)
+    (define-key eww-mode-map [C-return] #'eww-open-background)
+    (define-key eww-mode-map "Q" #'spacemacs/kill-this-buffer))
 #+end_src
 *** emacs with msys64
 Starting emacs-x86_64-mingw64 directly maybe got the PATH without mingw32/64; follow cmds will help to get correct PATH.
