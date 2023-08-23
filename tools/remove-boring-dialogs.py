@@ -10,6 +10,11 @@ import win32gui
 import win32con
 
 
+def SubwinEnumerationHandler(hwnd, winList):
+    if win32gui.GetWindowText(hwnd) == "Connected":
+        winList.append(hwnd)
+        return False            # discontinue the loop
+
 def windowEnumerationHandler(hwnd, winList):
     '''The procedual for enumerating windows to filter out the VPN windows'''
     winStyle = win32gui.GetWindowLong(hwnd, win32con.GWL_STYLE)
@@ -20,7 +25,10 @@ def windowEnumerationHandler(hwnd, winList):
         elif winTitle == "GlobalProtect":
             winClsName = win32gui.GetClassName(hwnd)
             if winClsName == '#32770':
-                winList.append(hwnd)
+                subList = []
+                win32gui.EnumChildWindows(hwnd, SubwinEnumerationHandler, subList)
+                if len(subList) > 0:
+                    winList.append(hwnd)
 
 
 def hide_vpn_windows_main(argv=None):
