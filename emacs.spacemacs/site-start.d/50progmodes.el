@@ -11,6 +11,15 @@
   (message "tab-width is %s now" tab-width))
 
 
+(add-to-list 'sl-packages-list
+             '(guess-style :location (recipe :fetcher github :repo "nschum/guess-style")))
+
+(add-hook 'emacs-lisp-mode-hook
+          #'(lambda ()
+              (when (fboundp 'guess-style-guess-variable)
+                (guess-style-guess-variable 'tab-width))))
+
+
 (with-eval-after-load 'hideshow
   (declare-function 'hs-already-hidden-p "hideshow")
   (declare-function 'hs-show-all "hideshow")
@@ -82,21 +91,6 @@
   ;;              '(emacs-lisp-mode . semantic-default-elisp-setup))
   )
 
-(with-eval-after-load 'quickrun
-  (dolist (lang '("c++/g++" "c++/clang++"))
-    (if-let* ((cmd_list (alist-get lang quickrun--language-alist nil nil #'string=))
-              (exec (alist-get ':exec cmd_list))
-              (compile (car exec)))
-        (unless (string-match "-std=" compile)
-          (setf (car exec) (concat compile " -std=c++11"))))))
-
-(with-eval-after-load 'menu-bar
-  (easy-menu-add-item
-   nil '("Tools")
-   '["Quick Run..." quickrun :help "Quick run the code"]
-   "Compile...")
-  (global-set-key [(f9)] #'quickrun))
-
 (define-advice cedet-directory-name-to-file-name (:around (orig-fun file) sl-adv)
   "Check the return value, if it longer than 255, generate an MD5 value instead.
 ORIG-FUN is the original function.
@@ -114,6 +108,22 @@ Please refer http://wikipedia.org/wiki/Comparison_of_file_systems for detail."
 (define-advice semantic-find-file-noselect (:around (orig file &rest r))
   (let ((find-file-hook nil))           ; avoid unnecessary actions
     (apply orig file r)))
+
+
+(with-eval-after-load 'quickrun
+  (dolist (lang '("c++/g++" "c++/clang++"))
+    (if-let* ((cmd_list (alist-get lang quickrun--language-alist nil nil #'string=))
+              (exec (alist-get ':exec cmd_list))
+              (compile (car exec)))
+        (unless (string-match "-std=" compile)
+          (setf (car exec) (concat compile " -std=c++11"))))))
+
+(with-eval-after-load 'menu-bar
+  (easy-menu-add-item
+   nil '("Tools")
+   '["Quick Run..." quickrun :help "Quick run the code"]
+   "Compile...")
+  (global-set-key [(f9)] #'quickrun))
 
 
 ;;; flycheck -- settings for flycheck
