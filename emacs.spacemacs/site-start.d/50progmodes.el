@@ -43,17 +43,17 @@
   (define-key hs-minor-mode-map (kbd "C-;") 'hs-toggle-hiding))
 
 
-(add-hook 'c-mode-common-hook
-          (lambda ()
-            ;; c/c++ common settings
-            (declare-function c-toggle-hungry-state "cc-cmds")
-            (c-toggle-hungry-state 1)
-            ;; (c-toggle-auto-hungry-state 1) ; hungry-delete and auto-newline
-            ;; (c-set-offset 'case-label '+) ; indent the case
-            ;; don't punctuation characters such as ‘;’ or ‘{’
-            ;; (c-toggle-electric-state -1)
-            ))
-
+(with-eval-after-load 'cc-vars
+  (add-hook 'c-mode-common-hook
+            (lambda ()
+              ;; c/c++ common settings
+              (declare-function c-toggle-hungry-state "cc-cmds")
+              (c-toggle-hungry-state 1)
+              ;; (c-toggle-auto-hungry-state 1) ; hungry-delete and auto-newline
+              ;; (c-set-offset 'case-label '+) ; indent the case
+              ;; don't punctuation characters such as ‘;’ or ‘{’
+              ;; (c-toggle-electric-state -1)
+              )))
 
 ;;; CEDET configure
 ;; (add-hook 'after-init-hook
@@ -121,9 +121,9 @@ Please refer http://wikipedia.org/wiki/Comparison_of_file_systems for detail."
 (with-eval-after-load 'menu-bar
   (easy-menu-add-item
    nil '("Tools")
-   '["Quick Run..." quickrun :help "Quick run the code"]
+   '["Quick Run..." spacemacs/quickrun :help "Quick run the code"]
    "Compile...")
-  (global-set-key [(f9)] #'quickrun))
+  (global-set-key [(f9)] #'spacemacs/quickrun))
 
 
 ;;; flycheck -- settings for flycheck
@@ -194,18 +194,17 @@ Please refer http://wikipedia.org/wiki/Comparison_of_file_systems for detail."
 ;;       (executable-find executable))))
 
 ;;; gdb interface
-(add-hook 'gdb-mode-hook
-          #'(lambda ()
-              (define-key gud-minor-mode-map [(f5)] 'gud-go)
-              (define-key gud-minor-mode-map [(f6)] 'gud-print)
-              (define-key gud-minor-mode-map [(S+f6)] 'gud-pstar)
-              (define-key gud-minor-mode-map [(f7)] 'gud-step)
-              (define-key gud-minor-mode-map [(f8)] 'gud-next)
-              (define-key gud-minor-mode-map [(S-f8)] 'gud-finish)
-              (define-key gud-minor-mode-map [(C-f8)] 'gud-until)
-              (define-key gud-minor-mode-map [(f9)] 'gud-break)
-              (define-key gud-minor-mode-map [(S-f9)] 'gud-remove)
-              (define-key gud-minor-mode-map [(C-f9)] 'gud-tbreak)))
+(with-eval-after-load 'gdb-mi
+  (define-key gud-minor-mode-map [(f5)] 'gud-go)
+  (define-key gud-minor-mode-map [(f6)] 'gud-print)
+  (define-key gud-minor-mode-map [(S+f6)] 'gud-pstar)
+  (define-key gud-minor-mode-map [(f7)] 'gud-step)
+  (define-key gud-minor-mode-map [(f8)] 'gud-next)
+  (define-key gud-minor-mode-map [(S-f8)] 'gud-finish)
+  (define-key gud-minor-mode-map [(C-f8)] 'gud-until)
+  (define-key gud-minor-mode-map [(f9)] 'gud-break)
+  (define-key gud-minor-mode-map [(S-f9)] 'gud-remove)
+  (define-key gud-minor-mode-map [(C-f9)] 'gud-tbreak))
 
 (with-eval-after-load 'menu-bar
   (define-key menu-bar-tools-menu [(f11)] #'gdb))
