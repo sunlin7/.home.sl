@@ -166,44 +166,12 @@ Please refer http://wikipedia.org/wiki/Comparison_of_file_systems for detail."
                                 (t (concat (car defs) "=" (cdr defs)))))
                         (oref cur-proj spp-table)))))
 
-(declare-function 'get-command-line "ede-compdb")
-(declare-function 'get-defines "ede-compdb")
-(declare-function 'get-includes "ede-compdb")
-(declare-function 'get-include-path "ede-compdb")
-(defun sl-ede-compdb-flycheck-init ()
-  "Setup the flycheck for ede-compdb."
-  (defvar ede-object)
-  (when (and ede-object
-             (class-p 'ede-compdb-project)
-             (object-of-class-p ede-object 'ede-compdb-project))
-    (let* ((comp (oref ede-object compilation))
-           (cmd (get-command-line comp)))
-      ;; Configure flycheck clang checker. TODO: configure gcc checker also
-      (dolist (s '(" \\(-O[0-9]\\) " " \\(-fPIC\\) " ))
-        (when (string-match s cmd)
-          (add-to-list 'flycheck-clang-args (match-string 1 cmd))))
-      (when (string-match " -std=\\([^ ]+\\)" cmd)
-        (setq-local flycheck-clang-language-standard (match-string 1 cmd)))
-      (when (string-match " -stdlib=\\([^ ]+\\)" cmd)
-        (setq-local flycheck-clang-standard-library (match-string 1 cmd)))
-      (setq-local
-       flycheck-clang-ms-extensions (and (string-match-p " -fms-extensions " cmd) t)
-       flycheck-clang-no-exceptions (and (string-match-p " -fno-exceptions " cmd) t)
-       flycheck-clang-no-rtti (and (string-match-p " -fno-rtti " cmd) t)
-       flycheck-clang-blocks (and (string-match-p " -fblocks " cmd) t)
-       flycheck-clang-includes (get-includes comp)
-       flycheck-clang-definitions (get-defines comp)
-       flycheck-clang-include-path (get-include-path comp t)))))
-
 (defun sl-ede-flycheck-init ()
   "Setup the flycheck for ede projects."
   (when-let ((cur-proj (ede-current-project)))
     (when (and (class-p 'ede-cpp-root-project)
                (object-of-class-p cur-proj 'ede-cpp-root-project))
-      (sl-ede-cpp-root-project-flycheck-init))
-    (when (and (class-p 'ede-compdb-project)
-               (object-of-class-p cur-proj 'ede-compdb-project))
-      (sl-ede-compdb-flycheck-init))))
+      (sl-ede-cpp-root-project-flycheck-init))))
 
 (defun sl-flycheck-c++-std ()
   "Change the g++/clang++ language standards param -std to c++11."
@@ -213,7 +181,6 @@ Please refer http://wikipedia.org/wiki/Comparison_of_file_systems for detail."
         (set (make-local-variable x) "c++11")))))
 
 (with-eval-after-load 'flycheck
-  (add-hook 'ede-compdb-project-rescan-hook #'sl-ede-compdb-flycheck-init)
   (add-hook 'ede-minor-mode-hook #'sl-ede-flycheck-init)
   (add-hook 'flycheck-mode-hook #'sl-flycheck-c++-std)
   ;; FIXME: disable clang warning on struct init syntax "struct a = {0}".
