@@ -86,14 +86,15 @@ A =.emacs= can copy from the =dot-emacs-template.el=; or to load the =dot-emacs-
 
   (custom-set-variables                   ; variables after loading Spacemacs
    '(window-system-default-frame-alist
-     '((x . ((left . (+ 16)) (top . (+ 72)) (width . 190) (height . 50)))
-       (w32 . ((left . (+ -9)) (top . (+ -5)) (width . 190) (height . 52)))))
+     '((x . ((left . 0) (top . 72) (width . 190) (height . 50)))
+       (w32 . ((left . (+ -16)) (top . (+ -3)) (width . 191) (height . 52)))))
    '(lsp-clients-clangd-args '("--header-insertion-decorators=0" "--clang-tidy" "--completion-style=detailed"))
    '(lsp-server-install-dir (expand-file-name ".emacs.d/.cache/lsp/" portable-home-dir))
    ;; '(dired-listing-switches "-alt") ; (setq dired-quick-sort-sort-by-last "time")
    '(dired-compress-directory-default-suffix ".tar.xz")
    '(dired-compress-file-default-suffix ".tar.xz")
    '(display-time-mode 1)
+   '(display-time-24hr-format t)
    '(browse-url-browser-function 'eww)
    '(bookmark-default-file (expand-file-name "bookmarks" sl-savefile-dir))
    '(ietf-docs-rfc-url-directory "https://ietf.org/rfc/") ; FIXME: https://github.com/choppsv1/ietf-docs/pull/4
@@ -109,8 +110,7 @@ A =.emacs= can copy from the =dot-emacs-template.el=; or to load the =dot-emacs-
   (with-eval-after-load 'dired-quick-sort
     (setq dired-quick-sort-sort-by-last "time"))
 
-  ;; the X frame will shrink after apply the Spacemacs default font
-  ;; (add-to-list 'frame-inhibit-implied-resize 'font)
+  ;; the X11 window will shrink after apply the Spacemacs default font
   (spacemacs|do-after-display-system-init
    (modify-frame-parameters nil (alist-get (framep (selected-frame)) window-system-default-frame-alist)))
 

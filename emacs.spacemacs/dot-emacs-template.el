@@ -81,7 +81,7 @@
               org
               python
               sql
-              (version-control :variables version-control-diff-tool 'diff-hl) ; avoid depending the git-gutter
+              version-control
               windows-scripts))
      (setq exec-path ; remove Python-App from path to avoid issues for Emacs-Win32
            (cl-delete-if
@@ -132,7 +132,7 @@
               (sql :variables sql-capitalize-keywords t
                    sql-capitalize-keywords-blacklist '("name" "varchar"))
               typescript
-              (version-control :variables version-control-diff-tool 'diff-hl) ; avoid depending the git-gutter
+              version-control
               (xclipboard :variables xclipboard-enable-cliphist t)
               yaml))
      (delq 'shell sl-configuration-layers) ;delete the no-argument `shell' layer
