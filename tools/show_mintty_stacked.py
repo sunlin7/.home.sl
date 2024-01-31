@@ -64,6 +64,7 @@ def show_mintty_stacked_main(argv=None):
         print('No Mintty window be found!')
         sys.exit(1)
 
+    latest = top_windows[0]
     top_windows.sort(key=lambda x: (x[1], x[0]))
 
     x, y, w, h = getWorkArea()
@@ -84,6 +85,7 @@ def show_mintty_stacked_main(argv=None):
                               *posPre[idx],  # it has four params
                               win32con.SWP_SHOWWINDOW)
 
+    win32gui.SetForegroundWindow(latest[0])
     return 0
 
 
