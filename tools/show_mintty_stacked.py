@@ -46,14 +46,13 @@ def getWorkArea():
 
 
 def windowEnumerationHandler(hwnd, top_windows):
-    clsName = win32gui.GetClassName(hwnd)
-    winStyle = win32gui.GetWindowLong(hwnd, win32con.GWL_STYLE)
-    if clsName == 'mintty' and winStyle & win32con.WS_VISIBLE:
-        threadId, processId = win32process.GetWindowThreadProcessId(hwnd)
-        procHdl = win32api.OpenProcess(win32con.PROCESS_QUERY_INFORMATION,
-                                       False, processId)
-        info = win32process.GetProcessTimes(procHdl)
-        top_windows.append((hwnd, info['CreationTime'], clsName,
+    if 'mintty' == win32gui.GetClassName(hwnd) \
+       and win32con.WS_VISIBLE & win32gui.GetWindowLong(hwnd, win32con.GWL_STYLE):
+        threadId, _ = win32process.GetWindowThreadProcessId(hwnd)
+        threadHdl = win32api.OpenThread(win32con.THREAD_QUERY_INFORMATION,
+                                        False, threadId)
+        info = win32process.GetThreadTimes(threadHdl)
+        top_windows.append((hwnd, info['CreationTime'], threadId,
                             win32gui.GetWindowText(hwnd)))
 
 
@@ -61,11 +60,11 @@ def show_mintty_stacked_main(argv=None):
     '''The main function to show mintty windows statcked'''
     top_windows = []
     win32gui.EnumWindows(windowEnumerationHandler, top_windows)
-    if len(top_windows) == 0:
+    if len(top_windows) < 1:
         print('No Mintty window be found!')
         sys.exit(1)
 
-    top_windows.sort(key=lambda x: x[1])
+    top_windows.sort(key=lambda x: (x[1], x[0]))
 
     x, y, w, h = getWorkArea()
     nw, nh = int(w/2), int(h/2)
