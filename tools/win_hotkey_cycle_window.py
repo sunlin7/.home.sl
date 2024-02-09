@@ -62,7 +62,7 @@ def hotkey_main():
             if len(karg['wList']) < 2:  # less than 2 windows
                 continue
 
-            karg['wList'].sort(key=lambda x: (x[1], x[2], x[0]))  # sort by ThreadID,CreationTime,whdl
+            karg['wList'].sort(key=lambda x: (x[2], x[0]))  # sort by CreationTime,whdl
             for idx, val in enumerate(karg['wList']):
                 if val[0] == hwnd:
                     off = 1 if msg.wParam == HOTKEY_CYCLE_WIN_NEXT else -1
