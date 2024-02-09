@@ -5,4 +5,10 @@ Some tools list here
 | [[./sync-remote-to-local]]     | sync remote dir to local dir when it's changed |
 | [[./update-host-ip-to-remote]] | update host ip to remote                       |
 | [[./sshfsw][./sshfsw]]                   | run sshfs on windows                           |
+| [[./remove_boring_dialogs.py][./remove_boring_dialogs]]    | remove the unwanted windows                    |
+| [[./win_hotkey_cycle_groups.py][./win_hotkey_cycle_groups]]  | windows hotkey to cycle between taskbar group  |
+| [[./win_hotkey_cycle_window.py][./win_hotkey_cycle_window]]  | windows hotkey to cycle inside windows gropu   |
 
+Example Shortcut to start the helpers:
+Target: %HOME%\.home.sl\tools\.venv\Scripts\pythonw.exe -c "import remove_boring_dialogs,win_hotkey_cycle_groups,win_hotkey_cycle_window"
+Start in: %HOME%\.home.sl\tools
