@@ -66,6 +66,11 @@ class TimerExecGlobalProDlg(ITimerExec):
         if not win32gui.IsWindowVisible(self.hwnd):
             return True
 
+        fhwnd = win32gui.GetForegroundWindow()
+        if fhwnd and (fhwnd == self.hwnd  # still foreground
+                      or '#32770' == win32gui.GetClassName(fhwnd)):  # list popup
+            return False
+
         ntime = time.time()
         if ntime - self.lastTime <= 3.0:
             return False         # will let the UI show 3+ seconds
@@ -121,7 +126,7 @@ class TimerExecLoginPage(ITimerExec):
             Y = x[1]+x[3]
             if Y <= preY:       # skip same line
                 continue
-    
+
             preY = Y
             ximg = img.crop((x[0], x[1], x[0]+x[2], x[1]+x[3]))
             tess.SetImage(ximg)
@@ -152,7 +157,7 @@ class TimerExecLoginPage(ITimerExec):
                       re.match("We found some errors.*", txt)]):
                 print(f"incorrect login credits, stopping auto script")
                 return True
-    
+
         print(f"Nothing to do, will try next round.")
         return False
 
