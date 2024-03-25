@@ -1,8 +1,8 @@
 '''
-Hide the VPN (GlobalProtect) windows after seconds idle
+Cycle the windows in their group.
 This tools depends on pywin32.
 Run with pythonw.exe on background.
-$ pythonw.exe remove-boring-dialogs.py
+$ pythonw.exe win_hotkey_cycle_window.py
 '''
 import ctypes
 import win32api

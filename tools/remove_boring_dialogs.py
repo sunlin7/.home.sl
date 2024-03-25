@@ -47,8 +47,10 @@ class TimerExecSecurityDlg(ITimerExec):
 
 class TimerExecGlobalProDlg(ITimerExec):
     hwnd = None
+    lastTime = None
     def __init__(self, hwnd):
         self.hwnd = hwnd
+        self.lastTime = time.time()
 
     def sWinEnumHandler(self, hwnd, res):
         if win32gui.GetWindowText(hwnd) == "Connected":
@@ -58,6 +60,12 @@ class TimerExecGlobalProDlg(ITimerExec):
     def run(self):
         if not win32gui.IsWindowVisible(self.hwnd):
             return True
+
+        ntime = time.time()
+        if ntime - self.lastTime <= 3.0:
+            return False         # will let the UI show 3+ seconds
+
+        self.lastTime = ntime
 
         res = []
         win32gui.EnumChildWindows(self.hwnd, self.sWinEnumHandler, res)
@@ -130,7 +138,6 @@ if not globals().get('MANUAL_START_THREAD'):
             eObjs[hwnd].run()
         elif title == "GlobalProtect" and '#32770' == win32gui.GetClassName(hwnd):
             eObjs[hwnd] = TimerExecGlobalProDlg(hwnd)
-            eObjs[hwnd].run()
 
     _listen_thread = threading.Thread(target=listen_foreground, args=(evtCB,), daemon=True)
     _listen_thread.start()
@@ -144,7 +151,7 @@ if not globals().get('MANUAL_START_THREAD'):
         for key in rkeys:
             del eObjs[key]
 
-    _timer_thread = RepeatTimer(1.5, timerCB, (eObjs,))
+    _timer_thread = RepeatTimer(1, timerCB, (eObjs,))
     _timer_thread.start()
 
     win32api.SetConsoleCtrlHandler(
