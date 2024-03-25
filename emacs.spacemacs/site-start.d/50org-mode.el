@@ -14,7 +14,9 @@
    ;; Targets complete in steps so we start with filename, TAB shows the next level of targets etc
    '(org-todo-keywords
      '((sequence "TODO(t)" "DOING(i)" "PENDING(p)" "WAIT(w)" "|" "DONE(d)" "CANCEL(l)")
-       (sequence "OPEN(o)" "|" "CLOSED(c)")))
+       (sequence "OPEN(o)" "|" "CLOSED(c)")
+       (type "NOTE")))
+   '(org-todo-keyword-faces '(("NOTE" . '(:foreground "#875f00"))))
    '(org-src-fontify-natively t)
    '(org-agenda-files '("personal.org"  ; file path relate to org-directory
                         "action.org"
