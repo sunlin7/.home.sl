@@ -12,6 +12,7 @@ tesserocr = {file = "https://github.com/simonflueckiger/tesserocr-windows_build/
 [dev-packages]
 ipython = "*"
 ipdb = "*"
+python-lsp-server = {extras = ["autopep8", "rope", "pyflakes", "mccabe", "pycodestyle"], version = "*"}
 
 [requires]
 python_version = "3.11"

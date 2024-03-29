@@ -1,4 +1,4 @@
-''' -*- code: utf-8 -*-
+'''
 Tools for removing the boring dialog.
 globals().update("MANUAL_START_THREAD=True") will suppress auto start the thread.
 '''
@@ -17,35 +17,84 @@ from ctypes import windll, wintypes
 from PIL import ImageGrab as igrab
 from tesserocr import PyTessBaseAPI
 
+
+def get_rectangles(img):
+    imgCv = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
+    imgBlur = cv2.GaussianBlur(imgCv, (3, 3), 0)
+    imgGray = cv2.cvtColor(imgBlur, cv2.COLOR_BGR2GRAY)
+    imgBin = cv2.Canny(imgGray, 30, 100, apertureSize=3)
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (6,3))
+    dilate = cv2.dilate(imgBin, kernel, iterations=4)
+    contours, _hierarchy = cv2.findContours(dilate, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    return [cv2.boundingRect(x) for x in contours]  # ordered in buttom to up
+
+
 class ITimerExec(object):
     '''Interface for executable object'''
     def run():
         '''Run the action. Return True for done, False for need another try'''
         return True
 
+
 class TimerExecSecurityDlg(ITimerExec):
     hwnd = None
     def __init__(self, hwnd):
         self.hwnd = hwnd
 
+    def left_click(self, pos):
+        cInfo = win32gui.GetCursorInfo()  # save the Cursor pos
+        win32api.SetCursor(None)          # hide the Cursor
+        win32api.SetCursorPos(pos)
+        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
+        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
+        win32api.SetCursorPos(cInfo[2])  # restore the Cursor
+        win32api.SetCursor(cInfo[1])
+
     def run(self):
-        if not win32gui.IsWindowVisible(self.hwnd):  # not visible
+        if (win32gui.GetForegroundWindow() != self.hwnd  # foreground switched
+            or not win32gui.IsWindowVisible(self.hwnd)):  # invisible
+            print(f"SecrityDlg:foreground changed or invisible window {self.hwnd}")
             return True
-        windll.user32.SetThreadDpiAwarenessContext(wintypes.HANDLE(-2))  # Toggle ON
-        wRect = win32gui.GetWindowRect(self.hwnd)
-        X = int(wRect[0] + (wRect[2] - wRect[0]) / 4)  # left + width*1/4
+
+        tess = PyTessBaseAPI()
         titleH = win32api.GetSystemMetrics(win32con.SM_CYCAPTION)
-        Y = int(wRect[3] - titleH * 2)         # above bottom with TitleHeight*2
-        win32gui.SetForegroundWindow(self.hwnd)  # bring the window to forge
-        color = igrab.grab((X-1, Y-1, X, Y)).getpixel((0,0))
-        if color == (76, 194, 255):  # "OK" button highlighted with Blue color
-            cInfo = win32gui.GetCursorInfo()  # save the Cursor pos
-            win32api.SetCursor(None)          # hide the Cursor
-            win32api.SetCursorPos((X, Y))
-            win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
-            win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
-            win32api.SetCursorPos(cInfo[2])  # restore the Cursor
-            win32api.SetCursor(cInfo[1])
+        wRect = win32gui.GetWindowRect(self.hwnd)
+        pad = titleH//4         # remove window pad, 1/4 of caption height
+        img = igrab.grab(tuple(np.add(wRect, [pad, pad, -pad, -pad])))
+
+        # tesserocr has problem on "OK" with background color
+        # re-split "OK" button into exactly rectangle and search text
+        okBtnVector = (img.width//8, img.height - 3*titleH, img.width//2, img.height - titleH)
+        imgBtnOK = img.crop(okBtnVector)
+        rectList = get_rectangles(imgBtnOK)
+        for x in rectList:
+            ximg = imgBtnOK.crop((*x[:2], *np.add(x[:2], x[2:])))
+            tess.SetImage(ximg)
+            txt = tess.GetUTF8Text()
+            if txt == "OK\n":
+                pos = np.add(okBtnVector[:2], x[:2])
+                self.left_click(win32gui.ClientToScreen(self.hwnd, tuple(pos)))
+                return True  # discontinue
+
+        rectList = get_rectangles(img)
+        for x in rectList:
+            ximg = img.crop((*x[:2], *np.add(x[:2], x[2:])))
+            tess.SetImage(ximg)
+            txt = tess.GetUTF8Text()
+            # try search the "Face" option first
+            if txt == "Face\n":
+                r0, r1 = x[1] - x[3], x[1] + x[3]
+                res = [x for x in rectList if r0 < x[1] < r1]
+                if len(res) < 3:  # not click on "Face"
+                    self.left_click(win32gui.ClientToScreen(self.hwnd, x[:2]))
+
+                return False     # to the next round
+
+            # try click the "More choices"
+            if txt == "More choices\n":
+                self.left_click(win32gui.ClientToScreen(self.hwnd, x[:2]))
+                time.sleep(0.3)
+                return self.run()  # retry after expanded choices
 
         return False            # will check the window on next cycle
 
@@ -108,7 +157,6 @@ class TimerExecLoginPage(ITimerExec):
             print("browser tab switched")
             return False        # browser tab switched
 
-        windll.user32.SetThreadDpiAwarenessContext(wintypes.HANDLE(-2))  # Toggle ON
         wRect = win32gui.GetWindowRect(self.hwnd)
         img = igrab.grab(wRect)
         imgCv = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
@@ -215,6 +263,8 @@ def stop():
 
 if not globals().get('MANUAL_START_THREAD'):
     '''The main function when running as a plugin'''
+    windll.user32.SetProcessDpiAwarenessContext(wintypes.HANDLE(-2))  # Toggle ON
+
     eObjs = dict()
     def evtCB(e,hwnd,title):
         if hwnd in eObjs:
