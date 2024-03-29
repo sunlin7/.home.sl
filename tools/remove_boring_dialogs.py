@@ -17,16 +17,27 @@ from ctypes import windll, wintypes
 from PIL import ImageGrab as igrab
 from tesserocr import PyTessBaseAPI
 
+import logging
+logging.basicConfig(format='%(asctime)s %(filename)s:%(lineno)d %(message)s', level=logging.DEBUG)
 
-def get_rectangles(img):
+def get_rectangles(img, mode=cv2.RETR_EXTERNAL):
     imgCv = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
     imgBlur = cv2.GaussianBlur(imgCv, (3, 3), 0)
     imgGray = cv2.cvtColor(imgBlur, cv2.COLOR_BGR2GRAY)
     imgBin = cv2.Canny(imgGray, 30, 100, apertureSize=3)
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (6,3))
     dilate = cv2.dilate(imgBin, kernel, iterations=4)
-    contours, _hierarchy = cv2.findContours(dilate, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours, _hierarchy = cv2.findContours(dilate, mode, cv2.CHAIN_APPROX_SIMPLE)
     return [cv2.boundingRect(x) for x in contours]  # ordered in buttom to up
+
+def mouse_click(pos, evt=win32con.MOUSEEVENTF_LEFTDOWN):
+    cInfo = win32gui.GetCursorInfo()  # save the Cursor pos
+    win32api.SetCursor(None)          # hide the Cursor
+    win32api.SetCursorPos(pos)
+    win32api.mouse_event(evt, 0, 0, 0, 0)
+    win32api.mouse_event(evt<<1, 0, 0, 0, 0)
+    win32api.SetCursorPos(cInfo[2])  # restore the Cursor
+    win32api.SetCursor(cInfo[1])
 
 
 class ITimerExec(object):
@@ -41,19 +52,10 @@ class TimerExecSecurityDlg(ITimerExec):
     def __init__(self, hwnd):
         self.hwnd = hwnd
 
-    def left_click(self, pos):
-        cInfo = win32gui.GetCursorInfo()  # save the Cursor pos
-        win32api.SetCursor(None)          # hide the Cursor
-        win32api.SetCursorPos(pos)
-        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
-        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
-        win32api.SetCursorPos(cInfo[2])  # restore the Cursor
-        win32api.SetCursor(cInfo[1])
-
     def run(self):
         if (win32gui.GetForegroundWindow() != self.hwnd  # foreground switched
             or not win32gui.IsWindowVisible(self.hwnd)):  # invisible
-            print(f"SecrityDlg:foreground changed or invisible window {self.hwnd}")
+            logging.debug(f"SecrityDlg:foreground changed or invisible window {self.hwnd}")
             return True
 
         tess = PyTessBaseAPI()
@@ -72,8 +74,9 @@ class TimerExecSecurityDlg(ITimerExec):
             tess.SetImage(ximg)
             txt = tess.GetUTF8Text()
             if txt == "OK\n":
+                logging.debug("Click the OK button")
                 pos = np.add(okBtnVector[:2], x[:2])
-                self.left_click(win32gui.ClientToScreen(self.hwnd, tuple(pos)))
+                mouse_click(win32gui.ClientToScreen(self.hwnd, tuple(pos)))
                 return True  # discontinue
 
         rectList = get_rectangles(img)
@@ -85,15 +88,17 @@ class TimerExecSecurityDlg(ITimerExec):
             if txt == "Face\n":
                 r0, r1 = x[1] - x[3], x[1] + x[3]
                 res = [x for x in rectList if r0 < x[1] < r1]
+                logging.debug(f"'Face' column has rectangles count={len(res)}")
                 if len(res) < 3:  # not click on "Face"
-                    self.left_click(win32gui.ClientToScreen(self.hwnd, x[:2]))
+                    mouse_click(win32gui.ClientToScreen(self.hwnd, x[:2]))
 
                 return False     # to the next round
 
             # try click the "More choices"
             if txt == "More choices\n":
-                self.left_click(win32gui.ClientToScreen(self.hwnd, x[:2]))
-                time.sleep(0.3)
+                logging.debug("Click the 'More choices' and retry immediately")
+                mouse_click(win32gui.ClientToScreen(self.hwnd, x[:2]))
+                time.sleep(0.2)
                 return self.run()  # retry after expanded choices
 
         return False            # will check the window on next cycle
@@ -149,41 +154,35 @@ class TimerExecLoginPage(ITimerExec):
     def run(self):
         if (win32gui.GetForegroundWindow() != self.hwnd  # foreground switched
             or not win32gui.IsWindowVisible(self.hwnd)):  # invisible
-            print("foreground changed or invisible window")
+            logging.debug("foreground changed or invisible window")
             return True
 
         if not re.match(".*Communications - Sign In.*",
                         win32gui.GetWindowText(self.hwnd)):
-            print("browser tab switched")
+            logging.debug("browser tab switched")
             return False        # browser tab switched
 
+        titleH = win32api.GetSystemMetrics(win32con.SM_CYCAPTION)
         wRect = win32gui.GetWindowRect(self.hwnd)
         img = igrab.grab(wRect)
-        imgCv = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
-        imgBlur = cv2.GaussianBlur(imgCv, (3, 3), 0)
-        imgGray = cv2.cvtColor(imgBlur, cv2.COLOR_BGR2GRAY)
-        imgBin = cv2.Canny(imgGray, 30, 100, apertureSize=3)
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (6,3))
-        dilate = cv2.dilate(imgBin, kernel, iterations=4)
-        contours, _hierarchy = cv2.findContours(dilate, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
-        rectList = [cv2.boundingRect(x) for x in contours]
+        rectList = get_rectangles(img, cv2.RETR_CCOMP)
         rectList.sort(key=lambda x: x[1]+x[3])  # sort by right-bottom
         preY = 0
         tess = PyTessBaseAPI()
         for x in rectList:
             Y = x[1]+x[3]
-            if Y <= preY:       # skip same line
+            if (Y < titleH*4    # skip browser tab head and address line
+                or Y <= preY):  # skip same line
                 continue
 
             preY = Y
             ximg = img.crop((x[0], x[1], x[0]+x[2], x[1]+x[3]))
             tess.SetImage(ximg)
             txt = tess.GetUTF8Text()
-            # print(f'text:{txt}')
             if txt in ["Username\n", "Password\n"]:
                 pos0 = (x[0], x[1]+int(x[3]*2))
                 pos = win32gui.ClientToScreen(self.hwnd, pos0)
-                print(f'try input on: {pos}')
+                logging.debug(f'try input on: {pos}')
                 cInfo = win32gui.GetCursorInfo()  # save the Cursor pos
                 win32api.SetCursor(None)          # hide the Cursor
                 win32api.SetCursorPos(pos)
@@ -203,10 +202,10 @@ class TimerExecLoginPage(ITimerExec):
                 return False
             elif any([txt == "Unable to sign in\n",
                       re.match("We found some errors.*", txt)]):
-                print(f"incorrect login credits, stopping auto script")
+                logging.debug(f"incorrect login credits, stopping auto script")
                 return True
 
-        print(f"Nothing to do, will try next round.")
+        logging.debug(f"Nothing to do, will try next round.")
         return False
 
 
@@ -233,7 +232,7 @@ def listen_foreground(cb=lambda *args:None):
         win32con.WINEVENT_OUTOFCONTEXT | win32con.WINEVENT_SKIPOWNPROCESS
     )
     if hook == 0:
-        print('SetWinEventHook failed', file=sys.stderr)
+        logging.error('SetWinEventHook failed', file=sys.stderr)
         exit(1)
 
     msg = wintypes.MSG()
@@ -242,7 +241,7 @@ def listen_foreground(cb=lambda *args:None):
         windll.user32.DispatchMessageW(msg)
 
     # Stopped receiving events, so clear up the winevent hook and uninitialise.
-    print('Stopped receiving new window change events. Exiting...')
+    logging.error('Stopped receiving new window change events. Exiting...')
     windll.user32.UnhookWinEvent(hook)
 
 
