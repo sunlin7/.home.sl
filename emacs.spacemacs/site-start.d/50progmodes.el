@@ -111,6 +111,7 @@ Please refer http://wikipedia.org/wiki/Comparison_of_file_systems for detail."
 
 
 (with-eval-after-load 'quickrun
+  (setf (alist-get ':command (alist-get "python" quickrun--language-alist nil nil #'string=)) "python3")
   (dolist (lang '("c++/g++" "c++/clang++"))
     (if-let* ((cmd_list (alist-get lang quickrun--language-alist nil nil #'string=))
               (exec (alist-get ':exec cmd_list))
