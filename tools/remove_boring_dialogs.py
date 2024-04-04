@@ -69,24 +69,24 @@ class TimerExecSecurityDlg(ITimerExec):
         okBtnVector = (img.width//8, img.height - 3*titleH, img.width//2, img.height - titleH)
         imgBtnOK = img.crop(okBtnVector)
         rectList = get_rectangles(imgBtnOK)
+        tess.SetImage(imgBtnOK)
         for x in rectList:
-            ximg = imgBtnOK.crop((*x[:2], *np.add(x[:2], x[2:])))
-            tess.SetImage(ximg)
+            tess.SetRectangle(*x)
             txt = tess.GetUTF8Text()
             if txt == "OK\n":
-                logging.debug("Click the OK button")
-                pos = np.add(okBtnVector[:2], x[:2])
+                pos = np.add(okBtnVector[:2], x[:2])  # btn pos to window pos
+                logging.debug(f"Click the OK button: {pos}")
                 mouse_click(win32gui.ClientToScreen(self.hwnd, tuple(pos)))
                 return True  # discontinue
 
+        tess.SetImage(img)
         rectList = get_rectangles(img)
         for x in rectList:
-            ximg = img.crop((*x[:2], *np.add(x[:2], x[2:])))
-            tess.SetImage(ximg)
+            tess.SetRectangle(*x)
             txt = tess.GetUTF8Text()
             # try search the "Face" option first
             if txt == "Face\n":
-                r0, r1 = x[1] - x[3], x[1] + x[3]
+                r0, r1 = x[1] - x[3], x[1] + x[3]  # range in [-h, +h]
                 res = [x for x in rectList if r0 < x[1] < r1]
                 logging.debug(f"'Face' column has rectangles count={len(res)}")
                 if len(res) < 3:  # not click on "Face"
@@ -169,6 +169,7 @@ class TimerExecLoginPage(ITimerExec):
         rectList.sort(key=lambda x: x[1]+x[3])  # sort by right-bottom
         preY = 0
         tess = PyTessBaseAPI()
+        tess.SetImage(img)
         for x in rectList:
             Y = x[1]+x[3]
             if (Y < titleH*4    # skip browser tab head and address line
@@ -176,8 +177,7 @@ class TimerExecLoginPage(ITimerExec):
                 continue
 
             preY = Y
-            ximg = img.crop((x[0], x[1], x[0]+x[2], x[1]+x[3]))
-            tess.SetImage(ximg)
+            tess.SetRectangle(*x)
             txt = tess.GetUTF8Text()
             if txt in ["Username\n", "Password\n"]:
                 pos0 = (x[0], x[1]+int(x[3]*2))
