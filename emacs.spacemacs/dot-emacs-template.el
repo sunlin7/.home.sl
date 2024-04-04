@@ -47,7 +47,6 @@
           gtags
           helm-rtags
           lsp-pyright
-          lsp-python-ms
           magit-svn
           rainbow-delimiters
           rtags
@@ -159,6 +158,7 @@
                   dotspacemacs-additional-packages sl-packages-list
                   dotspacemacs-excluded-packages sl-packages-excluded
                   dotspacemacs-editing-style 'emacs
+                  dotspacemacs-loading-progress-bar nil
                   dotspacemacs-maximized-at-startup nil
                   dotspacemacs-line-numbers '(:disabled-for-modes org-mode)))
   ;; load the spacemacs
