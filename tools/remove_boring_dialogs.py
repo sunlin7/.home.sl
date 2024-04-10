@@ -8,6 +8,7 @@ import re
 import sys
 import time
 import ctypes
+import logging
 import threading
 import win32api
 import win32con
@@ -17,8 +18,6 @@ from ctypes import windll, wintypes
 from PIL import ImageGrab as igrab
 from tesserocr import PyTessBaseAPI
 
-import logging
-logging.basicConfig(format='%(asctime)s %(filename)s:%(lineno)d %(message)s', level=logging.DEBUG)
 
 def get_rectangles(img, mode=cv2.RETR_EXTERNAL):
     imgCv = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
@@ -36,6 +35,25 @@ def mouse_click(pos, evt=win32con.MOUSEEVENTF_LEFTDOWN):
     win32api.SetCursorPos(pos)
     win32api.mouse_event(evt, 0, 0, 0, 0)
     win32api.mouse_event(evt<<1, 0, 0, 0, 0)
+    win32api.SetCursorPos(cInfo[2])  # restore the Cursor
+    win32api.SetCursor(cInfo[1])
+
+
+def apply_1st_auto_fill(pos):
+    cInfo = win32gui.GetCursorInfo()  # save the Cursor pos
+    win32api.SetCursor(None)          # hide the Cursor
+    win32api.SetCursorPos(pos)
+    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
+    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
+    time.sleep(0.5)
+    win32api.keybd_event(win32con.VK_DOWN, 0, 0, 0)
+    win32api.keybd_event(win32con.VK_DOWN, 0, win32con.KEYEVENTF_KEYUP, 0)
+    time.sleep(0.1)
+    win32api.keybd_event(win32con.VK_RETURN, 0, 0, 0)
+    win32api.keybd_event(win32con.VK_RETURN, 0, win32con.KEYEVENTF_KEYUP, 0)
+    time.sleep(0.1)
+    win32api.keybd_event(win32con.VK_RETURN, 0, 0, 0)
+    win32api.keybd_event(win32con.VK_RETURN, 0, win32con.KEYEVENTF_KEYUP, 0)
     win32api.SetCursorPos(cInfo[2])  # restore the Cursor
     win32api.SetCursor(cInfo[1])
 
@@ -75,7 +93,7 @@ class TimerExecSecurityDlg(ITimerExec):
             txt = tess.GetUTF8Text()
             if txt == "OK\n":
                 pos = np.add(okBtnVector[:2], x[:2])  # btn pos to window pos
-                logging.debug(f"Click the OK button: {pos}")
+                logging.debug(f"Click the OK button: {pos} : {okBtnVector}")
                 mouse_click(win32gui.ClientToScreen(self.hwnd, tuple(pos)))
                 return True  # discontinue
 
@@ -147,20 +165,21 @@ class TimerExecLoginPage(ITimerExec):
     tesserocr-data: https://github.com/tesseract-ocr/tessdata/blob/main/eng.traineddata
       download and put on the work directoy.
     '''
-    hwnd = None
-    def __init__(self, hwnd):
+    def __init__(self, hwnd, searchTitle):
         self.hwnd = hwnd
+        self.searchTitle = searchTitle
 
-    def run(self):
+    def run(self, fn = lambda txt, rect: None):
         if (win32gui.GetForegroundWindow() != self.hwnd  # foreground switched
             or not win32gui.IsWindowVisible(self.hwnd)):  # invisible
-            logging.debug("foreground changed or invisible window")
+            logging.debug("discontinue for foreground or invisible changed")
             return True
 
-        if not re.match(".*Communications - Sign In.*",
-                        win32gui.GetWindowText(self.hwnd)):
-            logging.debug("browser tab switched")
-            return False        # browser tab switched
+        title = win32gui.GetWindowText(self.hwnd)
+        if not re.search(self.searchTitle, title):
+            logging.debug(f"Title changed: {self.searchTitle} -> {title}, try other routines")
+            res = evtCB(win32con.EVENT_SYSTEM_FOREGROUND, self.hwnd, title)
+            return False if res else True  # res is True for continue with new procedual
 
         titleH = win32api.GetSystemMetrics(win32con.SM_CYCAPTION)
         wRect = win32gui.GetWindowRect(self.hwnd)
@@ -179,34 +198,47 @@ class TimerExecLoginPage(ITimerExec):
             preY = Y
             tess.SetRectangle(*x)
             txt = tess.GetUTF8Text()
+            res = fn(txt, x)
+            if not res is None:
+                return res
+
             if txt in ["Username\n", "Password\n"]:
                 pos0 = (x[0], x[1]+int(x[3]*2))
                 pos = win32gui.ClientToScreen(self.hwnd, pos0)
                 logging.debug(f'try input on: {pos}')
-                cInfo = win32gui.GetCursorInfo()  # save the Cursor pos
-                win32api.SetCursor(None)          # hide the Cursor
-                win32api.SetCursorPos(pos)
-                win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
-                win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
-                time.sleep(0.5)
-                win32api.keybd_event(win32con.VK_DOWN, 0, 0, 0)
-                win32api.keybd_event(win32con.VK_DOWN, 0, win32con.KEYEVENTF_KEYUP, 0)
-                time.sleep(0.1)
-                win32api.keybd_event(win32con.VK_RETURN, 0, 0, 0)
-                win32api.keybd_event(win32con.VK_RETURN, 0, win32con.KEYEVENTF_KEYUP, 0)
-                time.sleep(0.1)
-                win32api.keybd_event(win32con.VK_RETURN, 0, 0, 0)
-                win32api.keybd_event(win32con.VK_RETURN, 0, win32con.KEYEVENTF_KEYUP, 0)
-                win32api.SetCursorPos(cInfo[2])  # restore the Cursor
-                win32api.SetCursor(cInfo[1])
+                apply_1st_auto_fill(pos)
                 return False
             elif any([txt == "Unable to sign in\n",
-                      re.match("We found some errors.*", txt)]):
-                logging.debug(f"incorrect login credits, stopping auto script")
+                      re.match("We found some errors", txt)]):
+                logging.debug(f"incorrect login credits, stopping auto script: {txt}")
                 return True
 
         logging.debug(f"Nothing to do, will try next round.")
         return False
+
+
+class TimerExecGLogin(TimerExecLoginPage):
+    '''Gmail Page'''
+    def run(self):
+        '''routin'''
+        def handler(txt, rect):
+            if re.search('@zoom.us\n', txt):  # logouted, click to login again
+                mouse_click(pos = win32gui.ClientToScreen(self.hwnd, rect[:2]))
+                return False    # next round
+            elif re.search('Email or phone\n', txt):
+                pos = (rect[0], rect[1]+rect[3])
+                apply_1st_auto_fill(win32gui.ClientToScreen(self.hwnd, pos))
+                return False    # next round
+            elif any([txt == 'Verification timed out. Please try again\n',
+                     re.search('Refresh or return', txt)]):
+                logging.debug(f'try refresh page for: {txt}')
+                win32api.keybd_event(win32con.VK_F5, 0, 0, 0)
+                win32api.keybd_event(win32con.VK_F5, 0, win32con.KEYEVENTF_KEYUP, 0)
+                return False
+            else:
+                return None
+
+        return super().run(handler)
 
 
 def listen_foreground(cb=lambda *args:None):
@@ -266,15 +298,23 @@ if not globals().get('MANUAL_START_THREAD'):
 
     eObjs = dict()
     def evtCB(e,hwnd,title):
-        if hwnd in eObjs:
-            pass
-        elif title == "Windows Security":
-            eObjs[hwnd] = TimerExecSecurityDlg(hwnd)
-            eObjs[hwnd].run()
+        # overwrite the eObjs if the title changed
+        eobj = None
+        if title == "Windows Security":
+            eobj = TimerExecSecurityDlg(hwnd)
+            eobj.run()
         elif title == "GlobalProtect" and '#32770' == win32gui.GetClassName(hwnd):
-            eObjs[hwnd] = TimerExecGlobalProDlg(hwnd)
-        elif re.match(".*Communications - Sign In.*", title):
-            eObjs[hwnd] = TimerExecLoginPage(hwnd)
+            eobj = TimerExecGlobalProDlg(hwnd)
+        elif re.search("Communications - Sign In", title):
+            eobj = TimerExecLoginPage(hwnd, "Communications - Sign In")
+        elif re.match("Sign in - Google Accounts", title):
+            eobj = TimerExecGLogin(hwnd, "^Sign in - Google Accounts")
+        elif title == "Gmail":
+            eobj = TimerExecGLogin(hwnd, "^Gmail$")
+
+        if eobj:
+            eObjs[hwnd] = eobj
+            return True         # True for intresting on the window
 
     _listen_thread = threading.Thread(target=listen_foreground, args=(evtCB,), daemon=True)
     _listen_thread.start()
@@ -298,6 +338,7 @@ if not globals().get('MANUAL_START_THREAD'):
         True)
 
 if __name__ == '__main__':
+    logging.basicConfig(format='%(asctime)s %(filename)s:%(lineno)d %(message)s', level=logging.DEBUG)
     win32api.SetConsoleCtrlHandler(
         # return True to avoid backtrace, discontinue the signal hander chain
         lambda ct: [True, ct == win32con.CTRL_C_EVENT and stop()][0], True)
