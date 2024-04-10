@@ -12,10 +12,10 @@
 (declare-function 'ede-current-project "ede/cpp-root")
 (declare-function 'ede-project-root-directory "ede/auto")
 (declare-function 'hash-table-keys "subr-x")
-(eieio-defclass-autoload 'sl-ede-cpp-root-project '(ede-cpp-root-project)
-                         "sl-cpp-root"
-                         "SL EDE cpp-root project class,
-Each directory needs a project file to control it.")
+;; (eieio-defclass-autoload 'sl-ede-cpp-root-project '(ede-cpp-root-project)
+;;                          "sl-cpp-root"
+;;                          "SL EDE cpp-root project class. \
+;; Each directory needs a project file to control it.")
 
 (defun sl-ede-read-file-lines (filename)
   "Return the list of lines of a file in `filename', FILENAME should no be nil."

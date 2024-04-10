@@ -154,6 +154,10 @@
      (nconc sl-configuration-layers '())
      (with-eval-after-load "files" (delete '("\\.org\\'" . org-mode) auto-mode-alist))))
 
+  (when (and (not (equal portable-home-dir portable-root-dir))
+             (file-exists-p (expand-file-name ".wl" portable-home-dir)))
+    (add-to-list 'sl-packages-list 'wanderlust))
+
   (define-advice dotspacemacs/layers (:after ())
     (setq-default dotspacemacs-configuration-layers sl-configuration-layers
                   dotspacemacs-additional-packages sl-packages-list
