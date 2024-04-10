@@ -76,6 +76,7 @@
               git
               ietf
               javascript
+              (lsp :variables lsp-restart 'ignore)
               (multiple-cursors :variables multiple-cursors-backend 'mc)
               org
               python
