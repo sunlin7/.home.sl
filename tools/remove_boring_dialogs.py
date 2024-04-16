@@ -30,6 +30,7 @@ def get_rectangles(img, mode=cv2.RETR_EXTERNAL):
     return [cv2.boundingRect(x) for x in contours]  # ordered in buttom to up
 
 def mouse_click(pos, evt=win32con.MOUSEEVENTF_LEFTDOWN):
+    logging.debug(f"click at {pos}")
     cInfo = win32gui.GetCursorInfo()  # save the Cursor pos
     win32api.SetCursor(None)          # hide the Cursor
     win32api.SetCursorPos(pos)
@@ -40,6 +41,7 @@ def mouse_click(pos, evt=win32con.MOUSEEVENTF_LEFTDOWN):
 
 
 def apply_1st_auto_fill(pos):
+    logging.debug(f"auto fill at {pos}")
     cInfo = win32gui.GetCursorInfo()  # save the Cursor pos
     win32api.SetCursor(None)          # hide the Cursor
     win32api.SetCursorPos(pos)
@@ -165,80 +167,106 @@ class TimerExecLoginPage(ITimerExec):
     tesserocr-data: https://github.com/tesseract-ocr/tessdata/blob/main/eng.traineddata
       download and put on the work directoy.
     '''
-    def __init__(self, hwnd, searchTitle):
+    def __init__(self, hwnd):
         self.hwnd = hwnd
-        self.searchTitle = searchTitle
 
-    def run(self, fn = lambda txt, rect: None):
+    def run(self):
         if (win32gui.GetForegroundWindow() != self.hwnd  # foreground switched
             or not win32gui.IsWindowVisible(self.hwnd)):  # invisible
             logging.debug("discontinue for foreground or invisible changed")
             return True
 
         title = win32gui.GetWindowText(self.hwnd)
-        if not re.search(self.searchTitle, title):
-            logging.debug(f"Title changed: {self.searchTitle} -> {title}, try other routines")
-            res = evtCB(win32con.EVENT_SYSTEM_FOREGROUND, self.hwnd, title)
-            return False if res else True  # res is True for continue with new procedual
+        pageIters = pageIterFactor(self.hwnd, title)
+        if len(pageIters) <= 0:
+            logging.debug(f"not page iters for: {title}")
+            return False        # retry on next round
 
         titleH = win32api.GetSystemMetrics(win32con.SM_CYCAPTION)
         wRect = win32gui.GetWindowRect(self.hwnd)
         img = igrab.grab(wRect)
         rectList = get_rectangles(img, cv2.RETR_CCOMP)
-        rectList.sort(key=lambda x: x[1]+x[3])  # sort by right-bottom
-        preY = 0
+        rectList.sort(key=lambda x:(x[1], x[0]))  # sort by (top, left)
+        rectList = [x for x in rectList if titleH//2 <= x[3] <= titleH*2]  # drop small or large rectangles
         tess = PyTessBaseAPI()
         tess.SetImage(img)
         for x in rectList:
             Y = x[1]+x[3]
-            if (Y < titleH*4    # skip browser tab head and address line
-                or Y <= preY):  # skip same line
+            if (Y < titleH*4):  # skip browser tab head and address line
                 continue
 
-            preY = Y
             tess.SetRectangle(*x)
             txt = tess.GetUTF8Text()
-            res = fn(txt, x)
-            if not res is None:
-                return res
 
-            if txt in ["Username\n", "Password\n"]:
-                pos0 = (x[0], x[1]+int(x[3]*2))
-                pos = win32gui.ClientToScreen(self.hwnd, pos0)
-                logging.debug(f'try input on: {pos}')
-                apply_1st_auto_fill(pos)
-                return False
-            elif any([txt == "Unable to sign in\n",
-                      re.match("We found some errors", txt)]):
-                logging.debug(f"incorrect login credits, stopping auto script: {txt}")
-                return True
+            for pg in pageIters:
+                res, cont = pg.send((txt, x))
+                if not cont:     # page matched and action done
+                    return False  # still watch the browser window
 
         logging.debug(f"Nothing to do, will try next round.")
         return False
 
 
-class TimerExecGLogin(TimerExecLoginPage):
-    '''Gmail Page'''
-    def run(self):
-        '''routin'''
-        def handler(txt, rect):
-            if re.search('@zoom.us\n', txt):  # logouted, click to login again
-                mouse_click(pos = win32gui.ClientToScreen(self.hwnd, rect[:2]))
-                return False    # next round
-            elif re.search('Email or phone\n', txt):
-                pos = (rect[0], rect[1]+rect[3])
-                apply_1st_auto_fill(win32gui.ClientToScreen(self.hwnd, pos))
-                return False    # next round
-            elif any([txt == 'Verification timed out. Please try again\n',
-                     re.search('Refresh or return', txt)]):
-                logging.debug(f'try refresh page for: {txt}')
-                win32api.keybd_event(win32con.VK_F5, 0, 0, 0)
-                win32api.keybd_event(win32con.VK_F5, 0, win32con.KEYEVENTF_KEYUP, 0)
-                return False
-            else:
-                return None
+def PageAutoFillNamePass(hwnd):
+    txt, x = "", (0,0,1,1)
+    while txt not in ["Username\n", "Password\n"]:
+        txt, x = yield(0, True)
 
-        return super().run(handler)
+    pos0 = (x[0], x[1]+int(x[3]*2))
+    pos = win32gui.ClientToScreen(hwnd, pos0)
+    logging.debug(f'try auto fill on: {pos}')
+    apply_1st_auto_fill(pos)
+    yield (1, False)
+
+
+def PageGRefresh(hwnd):
+    txt, rect = "", (0,0,1,1)
+    while not any([txt == 'Verification timed out. Please try again\n',
+                 re.search('Refresh or return', txt)]):
+        txt, rect = yield(0, True)
+
+    logging.debug(f'try refresh page for: {txt}')
+    win32api.keybd_event(win32con.VK_F5, 0, 0, 0)
+    win32api.keybd_event(win32con.VK_F5, 0, win32con.KEYEVENTF_KEYUP, 0)
+    yield(1, False)
+
+
+def PageGAccounts(hwnd):
+    txt, rect = "", (0,0,1,1)
+    while not re.search('Email or phone\n', txt):
+        txt, rect = yield(0, True)
+    while not re.search('Forgot email', txt):
+        txt, rect = yield(0, True)
+    # reach here mean got previous conditions are satisfied
+    pos = (rect[0], rect[1]-rect[3])  # on its Top
+    apply_1st_auto_fill(win32gui.ClientToScreen(hwnd, pos))
+    yield(1, False)
+
+
+def PageGAccountRelogin(hwnd):
+    txt, rect = "", (0,0,1,1)
+    while not re.search('Choose an account', txt):
+        txt, rect = yield(0, True)
+    while not re.search('@[a-z.]+\n', txt):
+        txt, rect = yield(0, True)
+
+    mouse_click( win32gui.ClientToScreen(hwnd, rect[:2]))
+    logging.debug(f"try relogin: {txt}")
+    yield(1, False)
+
+
+def pageIterFactor(hwnd, title):
+    res = []
+    if any([re.search(x, title) for x in ["^Gmail$", "Communications - Sign In"]]):
+        res.append(PageAutoFillNamePass(hwnd))
+        res.append(PageGRefresh(hwnd))
+        res.append(PageGAccountRelogin(hwnd))
+    elif re.search("Sign in - Google Accounts", title):
+        res.append(PageGAccounts(hwnd))
+        res.append(PageGAccountRelogin(hwnd))
+
+    [next(x) for x in res]      # reach the first yield in iterators
+    return res
 
 
 def listen_foreground(cb=lambda *args:None):
@@ -305,12 +333,9 @@ if not globals().get('MANUAL_START_THREAD'):
             eobj.run()
         elif title == "GlobalProtect" and '#32770' == win32gui.GetClassName(hwnd):
             eobj = TimerExecGlobalProDlg(hwnd)
-        elif re.search("Communications - Sign In", title):
-            eobj = TimerExecLoginPage(hwnd, "Communications - Sign In")
-        elif re.match("Sign in - Google Accounts", title):
-            eobj = TimerExecGLogin(hwnd, "^Sign in - Google Accounts")
-        elif title == "Gmail":
-            eobj = TimerExecGLogin(hwnd, "^Gmail$")
+        elif any([re.search(x, title) for x in [" - Google Chrome", "^Gmail$"]]):
+            page = TimerExecLoginPage(hwnd)
+            eobj = None if page.run() else page
 
         if eobj:
             eObjs[hwnd] = eobj
@@ -340,6 +365,6 @@ if not globals().get('MANUAL_START_THREAD'):
 if __name__ == '__main__':
     logging.basicConfig(format='%(asctime)s %(filename)s:%(lineno)d %(message)s', level=logging.DEBUG)
     win32api.SetConsoleCtrlHandler(
-        # return True to avoid backtrace, discontinue the signal hander chain
+        # return True to avoid backtrace, discontinue the signal handler chain
         lambda ct: [True, ct == win32con.CTRL_C_EVENT and stop()][0], True)
     _listen_thread.join()
