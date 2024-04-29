@@ -135,6 +135,14 @@
               version-control
               (xclipboard :variables xclipboard-enable-cliphist t)
               yaml))
+     (setq sl-packages-list (append sl-packages-list '(edit-indirect mermaid-mode math-preview)))
+     (add-hook 'kill-buffer-hook
+               #'(lambda ()
+                   (when-let* (((boundp 'mermaid-tmp-dir))
+                               (prefix (concat mermaid-tmp-dir "current-buffer"))
+                               ((string-prefix-p prefix (buffer-file-name))))
+                     (dolist (x (file-expand-wildcards (concat prefix "*")))
+                       (delete-file x t)))))
      (delq 'shell sl-configuration-layers) ;delete the no-argument `shell' layer
      (when (fboundp 'image-mask-p)
        (add-to-list 'sl-packages-list 'org-pdftools)
