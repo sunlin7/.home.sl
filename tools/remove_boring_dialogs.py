@@ -131,31 +131,39 @@ class TimerExecGlobalProDlg(ITimerExec):
         self.hwnd = hwnd
         self.lastTime = time.time()
 
-    def sWinEnumHandler(self, hwnd, res):
-        if win32gui.GetWindowText(hwnd) == "Connected":
-            res.append(hwnd)
-            return False        # discontinue the loop
-
     def run(self):
+        lastTime = self.lastTime
+        self.lastTime = 0       # reset lastTime for failure branches defaultly
+        if not win32gui.IsWindow(self.hwnd):
+            return True         # invalid window, discontinue
+
         if not win32gui.IsWindowVisible(self.hwnd):
-            return True
+            self.lastTime = time.time()
+            return False        # invisible, try next round
 
         fhwnd = win32gui.GetForegroundWindow()
         if fhwnd and (fhwnd == self.hwnd  # still foreground
                       or '#32770' == win32gui.GetClassName(fhwnd)):  # list popup
+            logging.debug("The GP is still foreground or its list activated")
             return False
 
-        ntime = time.time()
-        if ntime - self.lastTime <= 3.0:
-            return False         # will let the UI show 3+ seconds
-
-        self.lastTime = ntime
+        def childEnumHandler(hwnd, res):
+            if win32gui.GetWindowText(hwnd) == "Connected":
+                res.append(hwnd)
+                return False    # discontinue enum child windows
 
         res = []
-        win32gui.EnumChildWindows(self.hwnd, self.sWinEnumHandler, res)
+        win32gui.EnumChildWindows(self.hwnd, childEnumHandler, res)
         if len(res) > 0:
+            ntime = time.time()
+            if ntime - lastTime <= 3.0:  # will let the UI show 3+ seconds
+                self.lastTime = lastTime  # restore to the saved value
+                return False
+
+            self.lastTime = 0
             win32gui.ShowWindow(self.hwnd, win32con.SW_HIDE)
-            return True
+            logging.debug(f'Stop displaying the GlobalProcect window {self.hwnd}')
+            return False
 
         return False
 
@@ -239,6 +247,7 @@ def PageGAccounts(hwnd):
         txt, rect = yield(0, True)
     # reach here mean got previous conditions are satisfied
     pos = (rect[0], rect[1]-rect[3])  # on its Top
+    logging.debug("try auto fill on page [%s], pos (%s)", txt, pos)
     apply_1st_auto_fill(win32gui.ClientToScreen(hwnd, pos))
     yield(1, False)
 
