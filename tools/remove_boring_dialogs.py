@@ -329,8 +329,8 @@ if not globals().get('MANUAL_START_THREAD'):
         # overwrite the eObjs if the title changed
         eobj = None
         if title == "Windows Security":
-            eobj = TimerExecSecurityDlg(hwnd)
-            eobj.run()
+            dlg = TimerExecSecurityDlg(hwnd)
+            eobj = None if dlg.run() else dlg
         elif title == "GlobalProtect" and '#32770' == win32gui.GetClassName(hwnd):
             eobj = TimerExecGlobalProDlg(hwnd)
         elif any([re.search(x, title) for x in [" - Google Chrome", "^Gmail$"]]):
@@ -356,6 +356,12 @@ if not globals().get('MANUAL_START_THREAD'):
 
     _timer_thread = RepeatTimer(1, timerCB, (eObjs,))
     _timer_thread.start()
+
+    # initialize the list at startup
+    win32gui.EnumWindows(
+        # always return True to continue enum window
+        lambda hwnd,_: [True, evtCB(win32con.EVENT_SYSTEM_FOREGROUND, hwnd, win32gui.GetWindowText(hwnd))][0],
+        None)
 
     win32api.SetConsoleCtrlHandler(
         # always return False to continue signal chain
