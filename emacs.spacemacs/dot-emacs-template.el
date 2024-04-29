@@ -23,7 +23,7 @@
    '(native-comp-async-env-modifier-form  ; dirver or compiler options
      `(setq native-comp-driver-options '(,(concat "-B" (expand-file-name "../lib64/" invocation-directory)))))))
 
-(defvar sl-savefile-dir (if-let* ((save-dir (expand-file-name "~/.emacs.save/"))
+(defvar sl-savefile-dir (if-let* ((save-dir (expand-file-name ".emacs.save/" (or (getenv "OHOME") (getenv "HOME"))))
                                   (_ (file-exists-p save-dir)))
                             save-dir
                           user-emacs-directory))
@@ -62,7 +62,7 @@
           ibuffer
           imenu-list
           (lua :variables
-               lua-indent-offset 4
+               lua-indent-level 4
                lua-lsp-server 'lua-language-server) ; if lsp enabled
           markdown
           nginx
