@@ -7,6 +7,8 @@
 
 (with-eval-after-load 'org
   (custom-set-variables
+   '(org-archive-reversed-order t)
+   '(org-reverse-note-order t)
    '(org-directory (expand-file-name "org/" sl-savefile-dir))
    '(org-default-notes-file (expand-file-name "note.org" org-directory))
    '(org-fast-tag-selection-single-key 'expert)
@@ -35,11 +37,11 @@
    '(org-refile-use-outline-path 'file)
    '(org-capture-templates
      '(("t" "Todo" entry (file+headline "todo.org" "Tasks") ; file path relate to org-directory
-        "* TODO %?\n  %i\n  %a")
+        "* TODO %?\n  %i\n  %a" :prepend t)
        ("n" "Note" entry (file+headline "note.org" "Note")
-        "* NOTE %?\n  %i\n  %a")
+        "* NOTE %?\n  %i\n  %a" :prepend t)
        ("j" "Journal" entry (file+datetree "journal.org")
-        "* %?\nEntered on %U\n  %i\n  %a")))
+        "* %?\nEntered on %U\n  %i\n  %a" :prepend t)))
    '(org-confirm-babel-evaluate nil)
    ;; '(org-babel-load-languages
    ;;   '((shell . t)
