@@ -216,37 +216,42 @@ class TimerExecLoginPage(ITimerExec):
 
 
 def PageAutoFillNamePass(hwnd):
-    txt, x = "", (0,0,1,1)
-    while txt not in ["Username\n", "Password\n"]:
-        txt, x = yield(0, True)
-
-    pos0 = (x[0], x[1]+int(x[3]*2))
-    pos = win32gui.ClientToScreen(hwnd, pos0)
-    logging.debug(f'try auto fill on: {pos}')
-    apply_1st_auto_fill(pos)
-    yield (1, False)
-
-
-def PageGRefresh(hwnd):
     txt, rect = "", (0,0,1,1)
     while not any([txt == 'Verification timed out. Please try again\n',
-                 re.search('Refresh or return', txt)]):
+                   re.search('Refresh or return', txt),
+                   txt in ["Username\n", "Password\n"]]):
         txt, rect = yield(0, True)
 
-    logging.debug(f'try refresh page for: {txt}')
-    win32api.keybd_event(win32con.VK_F5, 0, 0, 0)
-    win32api.keybd_event(win32con.VK_F5, 0, win32con.KEYEVENTF_KEYUP, 0)
+    if txt in ["Username\n", "Password\n"]:
+        pos0 = (rect[0], rect[1]+int(rect[3]*2))
+        pos = win32gui.ClientToScreen(hwnd, pos0)
+        logging.debug(f'try auto fill on: {pos}')
+        apply_1st_auto_fill(pos)
+        yield (1, False)
+
+    if re.search('Refresh or return', txt):
+        logging.debug(f'try refresh page for: {txt}')
+        win32api.keybd_event(win32con.VK_F5, 0, 0, 0)
+        win32api.keybd_event(win32con.VK_F5, 0, win32con.KEYEVENTF_KEYUP, 0)
+        yield(1, False)
+
+    while txt != "Back to sign in\n":
+        txt, rect = yield(0, True)
+
+    # Try to click "Back to sign in"
+    logging.debug(f'try to click on: {rect[:2]}')
+    mouse_click(win32gui.ClientToScreen(hwnd, rect[:2]))
     yield(1, False)
 
 
 def PageGAccounts(hwnd):
     txt, rect = "", (0,0,1,1)
-    while not re.search('Email or phone\n', txt):
+    while not re.search('Use your Google Account\n', txt):
         txt, rect = yield(0, True)
     while not re.search('Forgot email', txt):
         txt, rect = yield(0, True)
     # reach here mean got previous conditions are satisfied
-    pos = (rect[0], rect[1]-rect[3])  # on its Top
+    pos = (rect[0], rect[1]-rect[3]-rect[3]//2)  # on its Top
     logging.debug("try auto fill on page [%s], pos (%s)", txt, pos)
     apply_1st_auto_fill(win32gui.ClientToScreen(hwnd, pos))
     yield(1, False)
@@ -268,7 +273,6 @@ def pageIterFactor(hwnd, title):
     res = []
     if any([re.search(x, title) for x in ["^Gmail$", "Communications - Sign In"]]):
         res.append(PageAutoFillNamePass(hwnd))
-        res.append(PageGRefresh(hwnd))
         res.append(PageGAccountRelogin(hwnd))
     elif re.search("Sign in - Google Accounts", title):
         res.append(PageGAccounts(hwnd))
