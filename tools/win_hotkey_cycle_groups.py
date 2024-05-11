@@ -111,7 +111,7 @@ def hotkey_main():
                 win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
                 win32api.keybd_event(win32con.VK_CONTROL, 0, win32con.KEYEVENTF_KEYUP, 0)
                 win32api.SetCursorPos(cInfo[2])  # restore the Cursor, may emit exception
-            except pywintypes.error(x):
+            except pywintypes.error as x:
                 logging.error(f"exception: {x}")
                 pass
 
