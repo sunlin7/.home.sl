@@ -1,4 +1,4 @@
-;;; progmodes --- settings for the program modes
+;;; progmodes --- settings for the program modes -*- lexical-binding: t; coding: utf-8 -*-
 ;;; Commentary:
 ;;; Code:
 
@@ -21,9 +21,7 @@
 
 
 (with-eval-after-load 'hideshow
-  (declare-function 'hs-already-hidden-p "hideshow")
-  (declare-function 'hs-show-all "hideshow")
-  (declare-function 'hs-hide-all "hideshow")
+  (eval-and-compile (require 'hideshow))
   (defun sl-toggle-hideshow-all ()
     "Toggle hideshow all."
     (interactive)
@@ -55,71 +53,25 @@
               ;; (c-toggle-electric-state -1)
               )))
 
-;;; CEDET configure
-;; (add-hook 'after-init-hook
-;;           (lambda ()
-;;             (when (locate-library "cedet/semantic")
-;;               (global-ede-mode t)
-;;               ;; (ede-enable-generic-projects)
-;;               ;; (semantic-add-system-include "/usr/include/c++/4.6/bits" 'c++-mode)
-;;               ;; (semantic-c-reset-preprocessor-symbol-map)
-;;               ;;;; optimize the search speed
-;;               ;; (setq-mode-local c-mode semanticdb-find-default-throttle
-;;               ;;                  '(project unloaded system recursive))
-;;               ;; (add-to-list 'semantic-default-submodes
-;;               ;;              'global-semantic-mru-bookmark-mode)
-;;               (semantic-mode t)
-;;               ;; (global-srecode-minor-mode t)
-;;               ;; Disable the semantic-mode in js2/json mode for it's extremly slow
-;;               (setq-mode-local js2-mode
-;;                                semantic-mode nil
-;;                                forward-sexp-function nil)
-;;               (setq-mode-local json-mode semantic-mode nil))))
-
-(with-eval-after-load 'semantic
-  (define-key semantic-mode-map (kbd "C-c , t") #'spacemacs/helm-jump-in-buffer)
-  (define-key-after
-    (lookup-key cedet-menu-map [navigate-menu])
-    [semantic-select-local-tags]
-    '(menu-item "(SL)Find Local Tags..." spacemacs/helm-jump-in-buffer
-                :enable (and (semantic-active-p))
-                :help "Find tags in current buffer..")
-    'semantic-symref-symbol)
-  ;;;; to setup the emacs-lisp-mode
-  ;; (defvar semantic-new-buffer-setup-functions)
-  ;; (add-to-list 'semantic-new-buffer-setup-functions
-  ;;              '(emacs-lisp-mode . semantic-default-elisp-setup))
-  )
-
-(define-advice cedet-directory-name-to-file-name (:around (orig-fun file) sl-adv)
-  "Check the return value, if it longer than 255, generate an MD5 value instead.
-ORIG-FUN is the original function.
-FILE is the filename.
-
-For many file system, the file name (without dir) should less than 255.
-Please refer http://wikipedia.org/wiki/Comparison_of_file_systems for detail."
-  (defvar semanticdb-default-file-name)
-  (let ((ret (funcall orig-fun file))
-        (flen (length semanticdb-default-file-name)))
-    (if (< (+ flen (length ret)) 255)
-        ret
-      (concat (md5 (file-name-directory file)) "!" (file-name-nondirectory file)))))
-
-(define-advice semantic-find-file-noselect (:around (orig file &rest r))
-  (let ((find-file-hook nil))           ; avoid unnecessary actions
-    (apply orig file r)))
-
+(defcustom sl-preferred-c++-std nil
+  "The default c++ standard.  Example: c++11."
+  :type 'string
+  :group 'c)
 
 (with-eval-after-load 'quickrun
+  (defvar quickrun--language-alist)
   (setf (alist-get ':command (alist-get "python" quickrun--language-alist nil nil #'string=)) "python3")
-  (dolist (lang '("c++/g++" "c++/clang++"))
-    (if-let* ((cmd_list (alist-get lang quickrun--language-alist nil nil #'string=))
-              (exec (alist-get ':exec cmd_list))
-              (compile (car exec)))
-        (unless (string-match "-std=" compile)
-          (setf (car exec) (concat compile " -std=c++11"))))))
+  ;;; gcc < 6.1 uses -std=gnu++98 by default, clang < 6.0 uses -std=gnu++98 by default
+  (when sl-preferred-c++-std
+    (dolist (lang '("c++/g++" "c++/clang++"))
+      (if-let* ((cmd_list (alist-get lang quickrun--language-alist nil nil #'string=))
+                (exec (alist-get ':exec cmd_list))
+                (compile (car exec)))
+          (unless (string-match "-std=" compile)
+            (setf (car exec) (concat compile " -std=" sl-preferred-c++-std)))))))
 
 (with-eval-after-load 'menu-bar
+  (declare-function spacemacs/quickrun "")
   (easy-menu-add-item
    nil '("Tools")
    '["Quick Run..." spacemacs/quickrun :help "Quick run the code"]
@@ -128,61 +80,18 @@ Please refer http://wikipedia.org/wiki/Comparison_of_file_systems for detail."
 
 
 ;;; flycheck -- settings for flycheck
-(autoload 'oref "eieio")
-(autoload 'class-p "eieio-core")
-(autoload 'object-of-class-p "eieio")
-(autoload 'ede-current-project "ede")
-(autoload 'ede-project-root-directory "ede/auto")
 
 (defvar flycheck-clang-args)
-(defvar flycheck-clang-blocks)
-(defvar flycheck-clang-definitions)
-(defvar flycheck-clang-include-path)
-(defvar flycheck-clang-includes)
 (defvar flycheck-clang-language-standard)
-(defvar flycheck-clang-ms-extensions)
-(defvar flycheck-clang-no-exceptions)
-(defvar flycheck-clang-no-rtti)
-(defvar flycheck-clang-standard-library)
-
-(defun sl-ede-cpp-root-project-flycheck-init ()
-  "Setup the flycheck for ede-cpp-root-project."
-  (when-let* ((cur-proj (ede-current-project))
-              (project-root (ede-project-root-directory cur-proj))
-              (_ (object-of-class-p cur-proj 'ede-cpp-root-project)))
-    (setq-local flycheck-clang-include-path
-                (append flycheck-clang-include-path
-                        (oref cur-proj system-include-path)
-                        (mapcar
-                         (lambda (prj-inc)
-                           (if (string-prefix-p "/" prj-inc)
-                               ;; drop the "/" from an :include-path
-                               (expand-file-name (substring prj-inc 1) project-root)
-                             prj-inc))
-                         (oref cur-proj include-path))))
-
-    (setq-local flycheck-clang-definitions
-                (mapcar (lambda(defs)
-                          (cond ((zerop (length (cdr defs))) (car defs))
-                                (t (concat (car defs) "=" (cdr defs)))))
-                        (oref cur-proj spp-table)))))
-
-(defun sl-ede-flycheck-init ()
-  "Setup the flycheck for ede projects."
-  (when-let ((cur-proj (ede-current-project)))
-    (when (and (class-p 'ede-cpp-root-project)
-               (object-of-class-p cur-proj 'ede-cpp-root-project))
-      (sl-ede-cpp-root-project-flycheck-init))))
 
 (defun sl-flycheck-c++-std ()
   "Change the g++/clang++ language standards param -std to c++11."
   (when (eq major-mode 'c++-mode)
     (dolist (x '(flycheck-clang-language-standard flycheck-gcc-language-standard))
       (when (string-empty-p (or (symbol-value x) ""))
-        (set (make-local-variable x) "c++11")))))
+        (set (make-local-variable x) sl-preferred-c++-std)))))
 
 (with-eval-after-load 'flycheck
-  (add-hook 'ede-minor-mode-hook #'sl-ede-flycheck-init)
   (add-hook 'flycheck-mode-hook #'sl-flycheck-c++-std)
   ;; FIXME: disable clang warning on struct init syntax "struct a = {0}".
   (add-to-list 'flycheck-clang-args "-Wno-missing-field-initializers"))
@@ -196,6 +105,7 @@ Please refer http://wikipedia.org/wiki/Comparison_of_file_systems for detail."
 
 ;;; gdb interface
 (with-eval-after-load 'gdb-mi
+  (eval-and-compile (require 'gdb-mi))
   (define-key gud-minor-mode-map [(f5)] 'gud-go)
   (define-key gud-minor-mode-map [(f6)] 'gud-print)
   (define-key gud-minor-mode-map [(S+f6)] 'gud-pstar)
@@ -221,4 +131,4 @@ Please refer http://wikipedia.org/wiki/Comparison_of_file_systems for detail."
 
 
 (provide '50progmodes)
-;;; 50progmodes ends here
+;;; 50progmodes.el ends here
