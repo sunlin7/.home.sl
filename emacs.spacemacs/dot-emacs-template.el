@@ -169,8 +169,9 @@
   (define-advice dotspacemacs/layers (:after ())
     (setq-default dotspacemacs-configuration-layers sl-configuration-layers
                   dotspacemacs-additional-packages sl-packages-list
-                  dotspacemacs-excluded-packages sl-packages-excluded
-                  dotspacemacs-editing-style 'emacs
+                  dotspacemacs-excluded-packages sl-packages-excluded))
+  (define-advice dotspacemacs/init (:after ())
+    (setq-default dotspacemacs-editing-style 'hybrid
                   dotspacemacs-loading-progress-bar nil
                   dotspacemacs-maximized-at-startup nil
                   dotspacemacs-line-numbers '(:disabled-for-modes org-mode)))
