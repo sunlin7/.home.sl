@@ -58,7 +58,7 @@
         '(auto-completion
           better-defaults
           emacs-lisp
-          helm
+          (helm :variables helm-ff-allow-non-existing-file-at-point t)
           ibuffer
           imenu-list
           (lua :variables
