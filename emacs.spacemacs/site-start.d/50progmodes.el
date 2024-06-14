@@ -10,15 +10,24 @@
   (redraw-display)
   (message "tab-width is %s now" tab-width))
 
+(defvar sl-packages-list)
+
+;; The dtrt-indent guess tab-width based on the syntax, but not support emacs-lisp
+(add-to-list 'sl-packages-list 'dtrt-indent)
+(use-package dtrt-indent
+  :hook (lua-mode-local-vars
+         . (lambda () (unless (local-variable-p 'tab-width) (dtrt-indent-mode)))))
 
 (add-to-list 'sl-packages-list
              '(guess-style :location (recipe :fetcher github :repo "nschum/guess-style")))
+(use-package guess-style
+  :commands (guess-style-guess-variable)
+  :hook (emacs-lisp-mode-local-vars
+         . (lambda () (unless (local-variable-p 'tab-width) (guess-style-guess-variable 'tab-width)))))
 
-(add-hook 'emacs-lisp-mode-hook
-          #'(lambda ()
-              (when (fboundp 'guess-style-guess-variable)
-                (guess-style-guess-variable 'tab-width))))
-
+(use-package cc-mode
+  :hook ((c-mode-local-vars c++-mode-local-vars)
+         . (lambda () (unless (local-variable-p 'tab-width) (c-guess)))))
 
 (with-eval-after-load 'hideshow
   (eval-and-compile (require 'hideshow))
