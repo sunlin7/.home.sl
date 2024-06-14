@@ -3,7 +3,8 @@
 ;;; Code:
 ;; Various preferences
 
-(defmacro org-publish-dir() (list 'expand-file-name "publish" 'org-directory))
+(defmacro org-publish-dir() "Concat pub dir."
+          (list 'expand-file-name "publish" 'org-directory))
 
 (with-eval-after-load 'org
   (custom-set-variables
@@ -21,12 +22,9 @@
    '(org-todo-keyword-faces '(("NOTE" . '(:foreground "#875f00"))))
    '(org-src-fontify-natively t)
    '(org-agenda-files '("personal.org"  ; file path relate to org-directory
-                        "action.org"
                         "memory.org"
-                        "sched.org"
                         "todo.org"
-                        "note.org"
-                        "wait.org"))
+                        "note.org"))
    '(org-agenda-start-on-weekday nil)
    '(org-agenda-span 14)
    '(org-agenda-include-diary t)
@@ -96,7 +94,7 @@
   (org-clock-persistence-insinuate))
 
 (with-eval-after-load 'ox-html
-  (require 'ox-html)
+  (eval-and-compile (require 'ox-html))
   ;; https://niklasfasching.de/posts/org-html-export-inline-images/
   (defun org-html-export-to-mhtml (&optional async subtree visible body)
     (cl-letf (((symbol-function 'org-html--format-image) 'format-image-inline))
@@ -125,4 +123,4 @@
     (mapc #'find-file org-agenda-files)))
 
 (provide '50org-mode)
-;;; 50org-mode ends here
+;;; 50org-mode.el ends here
