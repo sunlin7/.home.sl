@@ -150,6 +150,7 @@
        (nconc sl-configuration-layers
               '(graphviz
                 pdf))
+       (add-hook 'pdf-view-mode-hook #'pdf-view-themed-minor-mode)
        (custom-set-variables '(pdf-view-restore-filename (locate-user-emacs-file ".cache/pdf-view-restore"))))
      (when-let* ((default-directory portable-home-dir)
                  (paths (file-expand-wildcards ".local/LanguageTool*/languagetool-commandline.jar" t)))
@@ -196,11 +197,7 @@
   (menu-bar-mode t)
   (when (string-match "X11" system-configuration-features)
     (use-package org-pdftools ; make sure the function org-pdftools-setup-link exists
-      :defer t :after org :config (org-pdftools-setup-link))
-    (add-hook 'pdf-view-mode-hook
-              (lambda ()
-                (when (string-match-p "-dark" (format "%s" custom-enabled-themes))
-                  (pdf-view-midnight-minor-mode t)))))
+      :defer t :after org :config (org-pdftools-setup-link)))
   ;; (or (file-exists-p plantuml-jar-path) (plantuml-download-jar)); download plantuml.jar
   (with-eval-after-load 'plantuml-mode
     (when (fboundp 'image-mask-p)
