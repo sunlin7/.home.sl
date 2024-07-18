@@ -103,6 +103,7 @@
               csv
               django
               epub
+              eww
               git
               html
               imenu-list
@@ -232,11 +233,6 @@
 
   (define-advice undo-tree-save-history-from-hook (:around (ORIG))
     (when (buffer-modified-p) (funcall ORIG)))
-
-  (define-advice git-gutter-mode (:around (ORIG &optional ARG) large-file)
-    (if (< (point-max) (* 512 1024))
-        (funcall ORIG ARG)
-      (message "disable git-gutter for large file")))
 
   (with-eval-after-load 'multi-term
     (nconc term-bind-key-alist '(("<M-backspace>" . term-send-backward-kill-word))))
