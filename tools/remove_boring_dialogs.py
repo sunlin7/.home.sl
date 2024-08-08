@@ -53,7 +53,7 @@ def apply_1st_auto_fill(pos):
     time.sleep(0.1)
     win32api.keybd_event(win32con.VK_RETURN, 0, 0, 0)
     win32api.keybd_event(win32con.VK_RETURN, 0, win32con.KEYEVENTF_KEYUP, 0)
-    time.sleep(0.1)
+    time.sleep(0.2)
     win32api.keybd_event(win32con.VK_RETURN, 0, 0, 0)
     win32api.keybd_event(win32con.VK_RETURN, 0, win32con.KEYEVENTF_KEYUP, 0)
     win32api.SetCursorPos(cInfo[2])  # restore the Cursor
