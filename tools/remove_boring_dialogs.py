@@ -177,6 +177,7 @@ class TimerExecLoginPage(ITimerExec):
     '''
     def __init__(self, hwnd):
         self.hwnd = hwnd
+        self.lastTime = time.time()
 
     def run(self):
         if (win32gui.GetForegroundWindow() != self.hwnd  # foreground switched
@@ -185,6 +186,24 @@ class TimerExecLoginPage(ITimerExec):
             return True
 
         title = win32gui.GetWindowText(self.hwnd)
+        if title == "GlobalProtect - Google Chrome":
+            ntime = time.time()
+            dtime = ntime - self.lastTime
+            if dtime <= 1.0:    # will let the UI show 1+ seconds
+                return False
+            elif dtime >= 3.0:  # page switched, reset the timer
+                self.lastTime = ntime
+                return False
+
+            win32api.keybd_event(win32con.VK_LCONTROL, 0, 0, 0)
+            win32api.keybd_event(win32con.VK_F4, 0, win32con.KEYEVENTF_KEYUP, 0)
+            win32api.keybd_event(win32con.VK_F4, 0, 0, 0)
+            win32api.keybd_event(win32con.VK_LCONTROL, 0, win32con.KEYEVENTF_KEYUP, 0)
+            logging.debug(f'Close the GlobalProcect page {self.hwnd}')
+            self.lastTime = ntime  # next GlobalProcect page
+            return False        # continue to other pages
+
+
         pageIters = pageIterFactor(self.hwnd, title)
         if len(pageIters) <= 0:
             logging.debug(f"not page iters for: {title}")
