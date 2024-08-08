@@ -236,7 +236,7 @@ class TimerExecLoginPage(ITimerExec):
 
 def PageAutoFillNamePass(hwnd):
     txt, rect = "", (0,0,1,1)
-    while not any([txt == 'Verification timed out. Please try again\n',
+    while not any([re.search('Verification timed out.', txt),
                    re.search('Refresh or return', txt),
                    txt in ["Username\n", "Password\n"]]):
         txt, rect = yield(0, True)
