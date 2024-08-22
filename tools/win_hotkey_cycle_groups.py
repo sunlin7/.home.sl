@@ -79,9 +79,18 @@ def hotkey_main():
                 continue
 
             rectList = [cv2.boundingRect(x) for x in contours]
-            logging.debug(f"rectList: {rectList}")
+            logging.debug(f"H: {H}, rectList: {rectList}")
             rectList.sort()     # the contours maybe in reverse order
-            activeIdx = next((idx for idx,val in enumerate(rectList) if val[2]>H), -1)
+            # for a flashing group indicator, the Contours are near by, connect them to a large one
+            for idx in range (len(rectList) - 1, 0, -1):  # reverse
+                ra,rb = rectList[idx-1], rectList[idx]
+                if ra[0] + ra[2] >= rb[0]:  # near by
+                    ra = list(ra)           # conver tuple to list first
+                    ra[2] = rb[0]+rb[2]-ra[0]
+                    rectList[idx-1] = ra
+                    del rectList[idx]
+
+            activeIdx = next((idx for idx,val in enumerate(rectList) if val[2]>H and val[2]<3*H), -1)
             ts1 = time.time()
             if ts1 - ts0 >= 1.0 and activeIdx != len(rectList) - 1:
                 off = -activeIdx-1  # non-continily operation, jump to tail
