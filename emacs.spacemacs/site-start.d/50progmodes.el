@@ -15,6 +15,7 @@
 ;; The dtrt-indent guess tab-width based on the syntax, but not support emacs-lisp
 (add-to-list 'sl-packages-list 'dtrt-indent)
 (use-package dtrt-indent
+  :commands (dtrt-indent-mode)
   :hook (lua-mode-local-vars
          . (lambda () (unless (local-variable-p 'tab-width) (dtrt-indent-mode)))))
 
@@ -26,11 +27,17 @@
          . (lambda () (unless (local-variable-p 'tab-width) (guess-style-guess-variable 'tab-width)))))
 
 (use-package cc-mode
+  :commands (c-guess)
   :hook ((c-mode-local-vars c++-mode-local-vars)
          . (lambda () (unless (local-variable-p 'tab-width) (c-guess)))))
 
 (with-eval-after-load 'hideshow
-  (eval-and-compile (require 'hideshow))
+  (declare-function hs-life-goes-on "hideshow")
+  (declare-function hs-already-hidden-p "hideshow")
+  (declare-function hs-show-all "hideshow")
+  (declare-function hs-hide-all "hideshow")
+  (defvar hs-minor-mode-map)
+  (defvar hs-minor-mode-menu)
   (defun sl-toggle-hideshow-all ()
     "Toggle hideshow all."
     (interactive)
@@ -114,7 +121,7 @@
 
 ;;; gdb interface
 (with-eval-after-load 'gdb-mi
-  (eval-and-compile (require 'gdb-mi))
+  (defvar gud-minor-mode-map)
   (define-key gud-minor-mode-map [(f5)] 'gud-go)
   (define-key gud-minor-mode-map [(f6)] 'gud-print)
   (define-key gud-minor-mode-map [(S+f6)] 'gud-pstar)

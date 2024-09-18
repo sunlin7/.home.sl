@@ -94,7 +94,12 @@
   (org-clock-persistence-insinuate))
 
 (with-eval-after-load 'ox-html
-  (eval-and-compile (require 'ox-html))
+  (declare-function org-html--format-image "ox-html")
+  (declare-function org-html-export-to-html "ox-html")
+  (declare-function org-html-close-tag "ox-html")
+  (declare-function org-combine-plists "org-macs")
+  (declare-function org-html--make-attribute-string "ox-html")
+  (declare-function org-export-define-derived-backend "ox")
   ;; https://niklasfasching.de/posts/org-html-export-inline-images/
   (defun org-html-export-to-mhtml (&optional async subtree visible body)
     (cl-letf (((symbol-function 'org-html--format-image) 'format-image-inline))
@@ -115,6 +120,7 @@
       'html-inline-images 'html
     :menu-entry '(?h "Export to HTML" ((?m "As MHTML file and open" org-html-export-to-mhtml)))))
 
+(defvar org-directory)
 (defun gtd ()
   "The gtd function."
   (interactive)

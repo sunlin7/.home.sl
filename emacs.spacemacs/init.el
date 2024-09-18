@@ -24,9 +24,11 @@
  )
 
 (with-eval-after-load 'dired
+  (declare-function dired-omit-mode "dired")
   (add-hook 'dired-mode-hook #'dired-omit-mode))
 
 (with-eval-after-load 'dired-x
+  (defvar dired-omit-files)
   (setq dired-omit-files (concat dired-omit-files "\\|^#.*\\|^\\..*")))
 
 (defun sl-toggle-color ()
