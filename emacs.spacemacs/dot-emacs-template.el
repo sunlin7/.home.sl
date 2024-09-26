@@ -21,7 +21,7 @@
   (custom-set-variables
    '(native-comp-async-jobs-number (1- (num-processors)))
    '(native-comp-async-env-modifier-form  ; dirver or compiler options
-     `(setq native-comp-driver-options '(,(concat "-B" (expand-file-name "../lib64/" invocation-directory)))))))
+     `(setq native-comp-driver-options '(,(concat "-B" (expand-file-name "../lib/" invocation-directory)))))))
 
 (defvar sl-savefile-dir (if-let* ((save-dir (expand-file-name ".emacs.save/" (or (getenv "OHOME") (getenv "HOME"))))
                                   (_ (file-exists-p save-dir)))
@@ -58,7 +58,7 @@
         '(auto-completion
           better-defaults
           emacs-lisp
-          (helm :variables helm-ff-allow-non-existing-file-at-point t)
+          helm
           ibuffer
           imenu-list
           (lua :variables
