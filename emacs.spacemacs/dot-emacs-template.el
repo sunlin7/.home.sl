@@ -261,7 +261,8 @@
   (when (terminal-live-p (frame-terminal frame))
     (with-selected-frame frame
       (define-key input-decode-map "[;5~" [C-backspace])
-      (define-key input-decode-map "[;6~" [C-S-backspace]))))
+      (define-key input-decode-map "[;6~" [C-S-backspace])
+      (define-key input-decode-map "[1;8u" [?\C-\M-%]))))
 
 (add-hook 'after-make-frame-functions #'sl-term-kdb-patch)
 (sl-term-kdb-patch (selected-frame)) ; patch 'after-make-frame-functions for the initialed term
