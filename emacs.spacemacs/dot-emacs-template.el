@@ -37,22 +37,28 @@
 
   (setq sl-packages-excluded
         '(anaconda-mode
+          blacken
           ccls
           chinese-conv
           company-anaconda
           company-rtags
           company-ycmd
+          fancy-battery
           flycheck-rtags
           flycheck-ycmd
           gtags
           helm-rtags
           lsp-pyright
           magit-svn
+          multi-term
+          pangu-spacing
+          dactyl-mode
           rainbow-delimiters
           rtags
           tern
           tide
           xcscope
+          yapfify
           ycmd))
   (setq sl-configuration-layers
         '(auto-completion
