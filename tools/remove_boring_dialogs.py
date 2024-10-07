@@ -13,6 +13,7 @@ import threading
 import win32api
 import win32con
 import win32gui
+import winreg
 import copy
 from ctypes import windll, wintypes
 from PIL import ImageGrab as igrab
@@ -50,7 +51,7 @@ def apply_1st_auto_fill(pos):
     time.sleep(0.5)
     win32api.keybd_event(win32con.VK_DOWN, 0, 0, 0)
     win32api.keybd_event(win32con.VK_DOWN, 0, win32con.KEYEVENTF_KEYUP, 0)
-    time.sleep(0.1)
+    time.sleep(0.15)
     win32api.keybd_event(win32con.VK_RETURN, 0, 0, 0)
     win32api.keybd_event(win32con.VK_RETURN, 0, win32con.KEYEVENTF_KEYUP, 0)
     time.sleep(0.2)
@@ -186,6 +187,7 @@ class TimerExecLoginPage(ITimerExec):
             return True
 
         title = win32gui.GetWindowText(self.hwnd)
+        logging.debug(f"title: {title}")
         if title == "GlobalProtect - Google Chrome":
             ntime = time.time()
             dtime = ntime - self.lastTime
@@ -332,7 +334,7 @@ def listen_foreground(cb=lambda *args:None):
 
     WinEventProc = WinEventProcType(
         lambda hWinEventHook, event, hwnd, idObject, idChild, dwEventThread, dwmsEventTime:\
-        cb(event, hwnd, win32gui.GetWindowText(hwnd)))
+        cb(event, hwnd, win32gui.GetWindowText(hwnd), win32gui.GetClassName(hwnd)))
 
     hook = windll.user32.SetWinEventHook(
         win32con.EVENT_SYSTEM_FOREGROUND,
@@ -369,18 +371,30 @@ def stop():
     if _listen_thread:
         win32api.PostThreadMessage(_listen_thread.ident, win32con.WM_QUIT, 0, 0)
 
+def join(rgs):
+    _listen_thread.join()
+
 if not globals().get('MANUAL_START_THREAD'):
     '''The main function when running as a plugin'''
     windll.user32.SetProcessDpiAwarenessContext(wintypes.HANDLE(-2))  # Toggle ON
 
     eObjs = dict()
-    def evtCB(e,hwnd,title):
+    def evtCB(e, hwnd, title, clsName):
+        if 'cygwin/x X rl' == clsName:
+            regKey = winreg.OpenKey(winreg.HKEY_CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", 0, winreg.KEY_QUERY_VALUE)
+            light, _ = winreg.QueryValueEx(regKey, "AppsUseLightTheme")
+            winreg.CloseKey(regKey)
+            DWMWA_USE_IMMERSIVE_DARK_MODE = 20
+            rendering_policy = DWMWA_USE_IMMERSIVE_DARK_MODE
+            dark = ctypes.c_int(not light)
+            ctypes.windll.dwmapi.DwmSetWindowAttribute(hwnd, rendering_policy, ctypes.byref(dark), ctypes.sizeof(dark))
+
         # overwrite the eObjs if the title changed
         eobj = None
         if title == "Windows Security":
             dlg = TimerExecSecurityDlg(hwnd)
             eobj = None if dlg.run() else dlg
-        elif title == "GlobalProtect" and '#32770' == win32gui.GetClassName(hwnd):
+        elif title == "GlobalProtect" and '#32770' == clsName:
             eobj = TimerExecGlobalProDlg(hwnd)
         elif any([re.search(x, title) for x in [" - Google Chrome", "^Gmail$"]]):
             page = TimerExecLoginPage(hwnd)
@@ -409,7 +423,7 @@ if not globals().get('MANUAL_START_THREAD'):
     # initialize the list at startup
     win32gui.EnumWindows(
         # always return True to continue enum window
-        lambda hwnd,_: [True, evtCB(win32con.EVENT_SYSTEM_FOREGROUND, hwnd, win32gui.GetWindowText(hwnd))][0],
+        lambda hwnd,_: [True, evtCB(win32con.EVENT_SYSTEM_FOREGROUND, hwnd, win32gui.GetWindowText(hwnd), win32gui.GetClassName(hwnd))][0],
         None)
 
     win32api.SetConsoleCtrlHandler(
