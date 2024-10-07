@@ -288,6 +288,21 @@ def PageGAccountRelogin(hwnd):
     yield(1, False)
 
 
+def PageTeleportLogin(hwnd):
+    txt, rect = "", (0,0,1,1)
+    while not re.search('Teleport\n', txt):
+        txt, rect = yield(0, True)
+    while not re.search('Successful\n', txt):
+        txt, rect = yield(0, True)
+
+    logging.debug(f"try close succeed Teleport page: {txt}")
+    win32api.keybd_event(win32con.VK_LCONTROL, 0, 0, 0)
+    win32api.keybd_event(win32con.VK_F4, 0, win32con.KEYEVENTF_KEYUP, 0)
+    win32api.keybd_event(win32con.VK_F4, 0, 0, 0)
+    win32api.keybd_event(win32con.VK_LCONTROL, 0, win32con.KEYEVENTF_KEYUP, 0)
+    yield(1, False)
+
+
 def pageIterFactor(hwnd, title):
     res = []
     if any([re.search(x, title) for x in ["^Gmail$", "Communications - Sign In"]]):
@@ -296,6 +311,8 @@ def pageIterFactor(hwnd, title):
     elif re.search("Sign in - Google Accounts", title):
         res.append(PageGAccounts(hwnd))
         res.append(PageGAccountRelogin(hwnd))
+    elif re.search("^Success -", title):
+        res.append(PageTeleportLogin(hwnd))
 
     [next(x) for x in res]      # reach the first yield in iterators
     return res
