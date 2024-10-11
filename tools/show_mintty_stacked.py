@@ -68,13 +68,22 @@ def show_mintty_stacked_main(argv=None):
     top_windows.sort(key=lambda x: (x[1], x[0]))
 
     x, y, w, h = getWorkArea()
-    nw, nh = int(w/2), int(h/2)
-    posPre = [           # split workarea(x,y, w,h) into 2 columns and two rows
-        (x-6,       y, nw+16, nh+8),
-        (x-6,    y+nh, nw+16, nh+8),
-        (x+nw-6,    y, nw+16, nh+8),
-        (x+nw-6, y+nh, nw+16, nh+8),
-    ]
+    nw, nh = w//2, h//2
+    match len(top_windows):
+        case 1: posPre = [(x-6,       y, (w*3)//4, (h*3)//4)]
+        case 2: posPre = [(x-6,       y, nw+16, h),
+                          (x+nw-6,    y, nw+16, h)]
+        case 3: posPre = [(x-6,       y, nw+16, h),
+                          (x+nw-6,    y, nw+16, nh+8),
+                          (x+nw-6, y+nh, nw+16, nh+8)]
+        case _:
+                posPre = [           # split workarea(x,y, w,h) into 2 columns and two rows
+                    (x-6,       y, nw+16, nh+8),
+                    (x-6,    y+nh, nw+16, nh+8),
+                    (x+nw-6,    y, nw+16, nh+8),
+                    (x+nw-6, y+nh, nw+16, nh+8),
+                ]
+
     # rect = win32gui.GetWindowRect(top_windows[0][0])
     # if rect[:2] == posPre[0][:2]:
     #     top_windows.reverse()
