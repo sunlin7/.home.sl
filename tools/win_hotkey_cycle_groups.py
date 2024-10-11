@@ -90,7 +90,7 @@ def hotkey_main():
                     rectList[idx-1] = ra
                     del rectList[idx]
 
-            activeIdx = next((idx for idx,val in enumerate(rectList) if val[2]>H and val[2]<3*H), -1)
+            activeIdx = next((idx for idx,val in enumerate(rectList) if val[2]>H and val[2]<2.5*H), -1)
             ts1 = time.time()
             if ts1 - ts0 >= 1.0 and activeIdx != len(rectList) - 1:
                 off = -activeIdx-1  # non-continily operation, jump to tail
@@ -104,7 +104,7 @@ def hotkey_main():
             logging.debug(f"pos1: {pos1}")
 
             hwnd = win32gui.WindowFromPoint(pos1)
-            if hwndTaskbar != hwnd and "MSTaskSwWClass" != win32gui.GetClassName(hwnd):
+            if hwndTaskbar != win32gui.GetAncestor(hwnd, win32con.GA_ROOTOWNER):
                 logging.error(f"taskbar covered by: {hwnd}")
                 continue
 
