@@ -32,7 +32,6 @@
 
 ;; assume the spacemaces was installed.
 (when-let* ((spacemacs-dir (expand-file-name ".emacs.spacemacs/" portable-home-dir))
-            (_ (file-exists-p spacemacs-dir))
             (sl-spacemacs-init (locate-file "init" (list spacemacs-dir) load-suffixes)))
 
   (setq sl-packages-excluded
@@ -43,6 +42,7 @@
           company-anaconda
           company-rtags
           company-ycmd
+          evil-tutor
           fancy-battery
           flycheck-rtags
           flycheck-ycmd
@@ -57,6 +57,7 @@
           rtags
           tern
           tide
+          vi-tilde-fringe
           xcscope
           yapfify
           ycmd))
@@ -81,7 +82,6 @@
             '(csv
               git
               ietf
-              javascript
               (lsp :variables lsp-restart 'ignore)
               (multiple-cursors :variables multiple-cursors-backend 'mc)
               org
@@ -111,13 +111,8 @@
               epub
               eww
               git
-              html
               imenu-list
               ietf
-              (javascript :variables
-                          js2-basic-offset 2
-                          javascript-backend 'lsp
-                          javascript-lsp-linter nil)
               (lsp :variables
                    lsp-restart 'ignore
                    ;; lsp-semantic-tokens-enable t
@@ -138,9 +133,7 @@
               systemd
               (sql :variables sql-capitalize-keywords t
                    sql-capitalize-keywords-blacklist '("name" "varchar"))
-              typescript
               version-control
-              (xclipboard :variables xclipboard-enable-cliphist t)
               yaml))
      (setq sl-packages-list (append sl-packages-list '(edit-indirect mermaid-mode math-preview)))
      (add-hook 'kill-buffer-hook
