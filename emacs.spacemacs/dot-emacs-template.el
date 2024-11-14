@@ -227,9 +227,6 @@
     (with-temp-buffer (helm-mode)) ;; preload heavy packages
     (with-temp-buffer (org-mode)))
 
-  (define-advice undo-tree-save-history-from-hook (:around (ORIG))
-    (when (buffer-modified-p) (funcall ORIG)))
-
   (with-eval-after-load 'multi-term
     (nconc term-bind-key-alist '(("<M-backspace>" . term-send-backward-kill-word))))
 
