@@ -178,7 +178,7 @@
                   dotspacemacs-line-numbers '(:disabled-for-modes org-mode)))
   ;; load the spacemacs
   (load-file sl-spacemacs-init)
-  (when-let (OHOME (getenv "OHOME"))
+  (when-let* ((OHOME (getenv "OHOME")))
     ;; set `default-directory' to full path to avoid "~/bin" is invalid after change HOME
     (setq default-directory (file-truename default-directory))
     (setenv "HOME" OHOME)
@@ -207,12 +207,11 @@
   ;; disable img resize for window size is changed by HELM windows
   (custom-set-variables '(image-auto-resize-on-window-resize nil)
                         '(image-auto-resize ; resize image for HiDPI
-                          (if-let ((scale (getenv "GDK_DPI_SCALE")))
+                          (if-let* ((scale (getenv "GDK_DPI_SCALE")))
                               (string-to-number scale)
                             t)))
 
   (with-eval-after-load 'helm-files
-    (require 'filenotify)
     (setq helm-ff-use-notify (and file-notify--library t)))
 
   ;;;; fix the c-basic-offset for google-c-style

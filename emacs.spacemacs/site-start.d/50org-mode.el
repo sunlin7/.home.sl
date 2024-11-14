@@ -38,7 +38,7 @@
         "* TODO %?\n  %i\n  %a" :prepend t)
        ("n" "Note" entry (file+headline "note.org" "Note")
         "* NOTE %?\n  %i\n  %a" :prepend t)
-       ("j" "Journal" entry (file+datetree "journal.org")
+       ("j" "Journal" entry (file+olp+datetree "journal.org")
         "* %?\nEntered on %U\n  %i\n  %a" :prepend t)))
    '(org-confirm-babel-evaluate nil)
    ;; '(org-babel-load-languages
