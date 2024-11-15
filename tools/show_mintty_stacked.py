@@ -73,9 +73,12 @@ def show_mintty_stacked_main(argv=None):
         case 1: posPre = [(x-6,       y, (w*3)//4, (h*3)//4)]
         case 2: posPre = [(x-6,       y, nw+16, h),
                           (x+nw-6,    y, nw+16, h)]
-        case 3: posPre = [(x-6,       y, nw+16, h),
-                          (x+nw-6,    y, nw+16, nh+8),
+        case 3: posPre = [(x-6,       y,     w, nh+8),
+                          (x-6,    y+nh, nw+16, nh+8),
                           (x+nw-6, y+nh, nw+16, nh+8)]
+        # case 3: posPre = [(x-6,       y, nw+16, h),
+        #                   (x+nw-6,    y, nw+16, nh+8),
+        #                   (x+nw-6, y+nh, nw+16, nh+8)]
         case _:
                 posPre = [           # split workarea(x,y, w,h) into 2 columns and two rows
                     (x-6,       y, nw+16, nh+8),
