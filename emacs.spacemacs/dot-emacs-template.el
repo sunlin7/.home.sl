@@ -222,9 +222,9 @@
   ;; (add-hook 'c-mode-common-hook
   ;;           (lambda () (setq-local tab-width c-basic-offset)))
 
-  (when (daemonp)
-    (with-temp-buffer (helm-mode)) ;; preload heavy packages
-    (with-temp-buffer (org-mode)))
+  ;; (when (daemonp)
+  ;;   (with-temp-buffer (helm-mode)) ;; preload heavy packages
+  ;;   (with-temp-buffer (org-mode)))
 
   (with-eval-after-load 'multi-term
     (nconc term-bind-key-alist '(("<M-backspace>" . term-send-backward-kill-word))))
