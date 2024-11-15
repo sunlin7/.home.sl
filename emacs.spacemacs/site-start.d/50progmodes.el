@@ -24,7 +24,8 @@
 (use-package guess-style
   :commands (guess-style-guess-variable)
   :hook (emacs-lisp-mode-local-vars
-         . (lambda () (unless (local-variable-p 'tab-width) (guess-style-guess-variable 'tab-width)))))
+         . (lambda () (unless (or (local-variable-p 'tab-width) (string-prefix-p " " (buffer-name)))
+                        (guess-style-guess-variable 'tab-width)))))
 
 (use-package cc-mode
   :commands (c-guess)
