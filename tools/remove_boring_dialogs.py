@@ -379,7 +379,7 @@ if not globals().get('MANUAL_START_THREAD'):
     windll.user32.SetProcessDpiAwarenessContext(wintypes.HANDLE(-2))  # Toggle ON
 
     eObjs = dict()
-    def evtCB(e, hwnd, title, clsName):
+    def evtCB(e, hwnd, title, clsName, *startup):
         if 'cygwin/x X rl' == clsName:
             regKey = winreg.OpenKey(winreg.HKEY_CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", 0, winreg.KEY_QUERY_VALUE)
             light, _ = winreg.QueryValueEx(regKey, "AppsUseLightTheme")
@@ -388,6 +388,15 @@ if not globals().get('MANUAL_START_THREAD'):
             rendering_policy = DWMWA_USE_IMMERSIVE_DARK_MODE
             dark = ctypes.c_int(not light)
             ctypes.windll.dwmapi.DwmSetWindowAttribute(hwnd, rendering_policy, ctypes.byref(dark), ctypes.sizeof(dark))
+            logging.info(f'Set USE_IMMERSIVE_DARK_MODE: {hwnd}')
+            return
+        elif not startup and 'Chrome_WidgetWin_1' == clsName and title == '' \
+             and not win32gui.GetWindowLong(hwnd, win32con.GWL_STYLE) & win32con.WS_VISIBLE:
+            nHwnd = win32gui.GetAncestor(hwnd, win32con.GA_ROOTOWNER)
+            if nHwnd:
+                win32gui.SetForegroundWindow(nHwnd)
+                logging.info(f'Skip "Close" tips window: {hwnd}')
+            return
 
         # overwrite the eObjs if the title changed
         eobj = None
@@ -402,7 +411,7 @@ if not globals().get('MANUAL_START_THREAD'):
 
         if eobj:
             eObjs[hwnd] = eobj
-            return True         # True for intresting on the window
+
 
     _listen_thread = threading.Thread(target=listen_foreground, args=(evtCB,), daemon=True)
     _listen_thread.start()
@@ -423,7 +432,7 @@ if not globals().get('MANUAL_START_THREAD'):
     # initialize the list at startup
     win32gui.EnumWindows(
         # always return True to continue enum window
-        lambda hwnd,_: [True, evtCB(win32con.EVENT_SYSTEM_FOREGROUND, hwnd, win32gui.GetWindowText(hwnd), win32gui.GetClassName(hwnd))][0],
+        lambda hwnd,_: [True, evtCB(win32con.EVENT_SYSTEM_FOREGROUND, hwnd, win32gui.GetWindowText(hwnd), win32gui.GetClassName(hwnd), True)][0],
         None)
 
     win32api.SetConsoleCtrlHandler(
