@@ -113,17 +113,13 @@ def hotkey_main():
                 win32api.keybd_event(win32con.VK_SHIFT, 0, win32con.KEYEVENTF_KEYUP, 0)
             cInfo = win32gui.GetCursorInfo()  # save the Cursor pos
             win32api.SetCursor(None)
-            try:
-                win32api.SetCursorPos(pos1)  # may emit exception "Access is denied"
-                win32api.keybd_event(win32con.VK_CONTROL, 0, 0, 0)
-                win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
-                win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
-                win32api.keybd_event(win32con.VK_CONTROL, 0, win32con.KEYEVENTF_KEYUP, 0)
-                win32api.SetCursorPos(cInfo[2])  # restore the Cursor, may emit exception
-            except pywintypes.error as x:
-                logging.error(f"exception: {x}")
-                pass
-
+            win32api.SetCursorPos(pos1)
+            win32api.keybd_event(win32con.VK_CONTROL, 0, 0, 0)
+            # NOTE: use the ABSOLUTE mouse event to avoid "Access is denied" exception
+            win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN|win32con.MOUSEEVENTF_ABSOLUTE, pos1[0], pos1[1], 0, 0)
+            win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP|win32con.MOUSEEVENTF_ABSOLUTE, pos1[0], pos1[1], 0, 0)
+            win32api.keybd_event(win32con.VK_CONTROL, 0, win32con.KEYEVENTF_KEYUP, 0)
+            win32api.SetCursorPos(cInfo[2])
             win32api.SetCursor(cInfo[1])
             if ksSHIFT & 0x8000:
                 win32api.keybd_event(win32con.VK_SHIFT, 0, 0, 0)
