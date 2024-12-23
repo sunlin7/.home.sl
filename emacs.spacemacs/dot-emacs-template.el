@@ -4,8 +4,8 @@
 ;; And Emacs 28.1+ is required.
 ;;; Code:
 
-(autoload 'if-let* "subr-x")
-(autoload 'when-let* "subr-x")
+(when (version<= emacs-version "28")
+  (require 'subr-x))                       ; for when-let*/if-let*
 
 (defvar portable-root-dir (file-name-parent-directory invocation-directory))
 (defvar portable-home-dir
@@ -35,32 +35,18 @@
             (sl-spacemacs-init (locate-file "init" (list spacemacs-dir) load-suffixes)))
 
   (setq sl-packages-excluded
-        '(anaconda-mode
-          blacken
-          ccls
-          chinese-conv
-          company-anaconda
-          company-rtags
-          company-ycmd
+        '(chinese-conv
           evil-tutor
           fancy-battery
-          flycheck-rtags
-          flycheck-ycmd
           gtags
-          helm-rtags
-          lsp-pyright
-          magit-svn
           multi-term
           pangu-spacing
           dactyl-mode
           rainbow-delimiters
-          rtags
           tern
           tide
           vi-tilde-fringe
-          xcscope
-          yapfify
-          ycmd))
+          xcscope))
   (setq sl-configuration-layers
         '(auto-completion
           better-defaults
