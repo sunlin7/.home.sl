@@ -203,13 +203,13 @@ class TimerExecLoginPage(ITimerExec):
             win32api.keybd_event(win32con.VK_LCONTROL, 0, win32con.KEYEVENTF_KEYUP, 0)
             logging.debug(f'Close the GlobalProcect page {self.hwnd}')
             self.lastTime = ntime  # next GlobalProcect page
-            return False        # continue to other pages
+            return True
 
 
         pageIters = pageIterFactor(self.hwnd, title)
         if len(pageIters) <= 0:
             logging.debug(f"not page iters for: {title}")
-            return False        # retry on next round
+            return True
 
         titleH = win32api.GetSystemMetrics(win32con.SM_CYCAPTION)
         wRect = win32gui.GetWindowRect(self.hwnd)
@@ -230,7 +230,7 @@ class TimerExecLoginPage(ITimerExec):
             for pg in pageIters:
                 res, cont = pg.send((txt, x))
                 if not cont:     # page matched and action done
-                    return False  # still watch the browser window
+                    return True
 
         logging.debug(f"Nothing to do, will try next round.")
         return False
@@ -332,18 +332,35 @@ def listen_foreground(cb=lambda *args:None):
         wintypes.DWORD
     )
 
-    WinEventProc = WinEventProcType(
+    wEvtProcForge = WinEventProcType(
         lambda hWinEventHook, event, hwnd, idObject, idChild, dwEventThread, dwmsEventTime:\
         cb(event, hwnd, win32gui.GetWindowText(hwnd), win32gui.GetClassName(hwnd)))
 
-    hook = windll.user32.SetWinEventHook(
+    hookForge = windll.user32.SetWinEventHook(
         win32con.EVENT_SYSTEM_FOREGROUND,
         win32con.EVENT_SYSTEM_FOREGROUND,
-        0, WinEventProc, 0, 0,
+        0, wEvtProcForge, 0, 0,
         win32con.WINEVENT_OUTOFCONTEXT | win32con.WINEVENT_SKIPOWNPROCESS
     )
-    if hook == 0:
+    if hookForge == 0:
         logging.error('SetWinEventHook failed', file=sys.stderr)
+        exit(1)
+
+    wEvtProcTitle = WinEventProcType(
+        lambda hWinEventHook, event, hwnd, idObject, idChild, dwEventThread, dwmsEventTime: \
+        (idObject == win32con.OBJID_WINDOW and idChild == win32con.CHILDID_SELF \
+         and event == win32con.EVENT_OBJECT_NAMECHANGE and hwnd == win32gui.GetForegroundWindow() \
+         and cb(event, hwnd, win32gui.GetWindowText(hwnd), win32gui.GetClassName(hwnd))))
+
+    hookTitle = windll.user32.SetWinEventHook(
+        win32con.EVENT_OBJECT_NAMECHANGE,
+        win32con.EVENT_OBJECT_NAMECHANGE,
+        0, wEvtProcTitle, 0, 0,
+        win32con.WINEVENT_OUTOFCONTEXT | win32con.WINEVENT_SKIPOWNPROCESS
+    )
+    if hookTitle == 0:
+        logging.error('SetWinEventHook for title change failed', file=sys.stderr)
+        windll.user32.UnhookWinEvent(hookForge)
         exit(1)
 
     msg = wintypes.MSG()
@@ -353,7 +370,8 @@ def listen_foreground(cb=lambda *args:None):
 
     # Stopped receiving events, so clear up the winevent hook and uninitialise.
     logging.error('Stopped receiving new window change events. Exiting...')
-    windll.user32.UnhookWinEvent(hook)
+    windll.user32.UnhookWinEvent(hookForge)
+    windll.user32.UnhookWinEvent(hookTitle)
 
 
 class RepeatTimer(threading.Timer):
