@@ -1,7 +1,7 @@
 #+TITLE: My emacs configuration
 #+INCLUDE: ~/.emacs.save/org/common_header.org
 
-This is my =.emacs= configure for emacs29 on CentOS 7.
+This is my =.emacs= configure for emacs31 on Ubuntu 20.04.
 It depends on the [[https://github.com/syl20bnr/spacemacs/commits/develop][Spacemacs develop branch]].
 
 ** My configurations
