@@ -333,8 +333,9 @@ def listen_foreground(cb=lambda *args:None):
     )
 
     wEvtProcForge = WinEventProcType(
-        lambda hWinEventHook, event, hwnd, idObject, idChild, dwEventThread, dwmsEventTime:\
-        cb(event, hwnd, win32gui.GetWindowText(hwnd), win32gui.GetClassName(hwnd)))
+        lambda hWinEventHook, event, hwnd, idObject, idChild, dwEventThread, dwmsEventTime: \
+        win32gui.IsWindow(hwnd) \
+        and cb(event, hwnd, win32gui.GetWindowText(hwnd), win32gui.GetClassName(hwnd)))
 
     hookForge = windll.user32.SetWinEventHook(
         win32con.EVENT_SYSTEM_FOREGROUND,
