@@ -267,7 +267,7 @@ def PageAutoFillNamePass(hwnd):
 
 def PageGAccounts(hwnd):
     txt, rect = "", (0,0,1,1)
-    while not re.search('Use your Google Account\n', txt):
+    while not re.search('with your Google Account', txt):
         txt, rect = yield(0, True)
     while not re.search('Forgot email', txt):
         txt, rect = yield(0, True)
