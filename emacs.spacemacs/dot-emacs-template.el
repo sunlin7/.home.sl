@@ -122,7 +122,7 @@
                    sql-capitalize-keywords-blacklist '("name" "varchar"))
               version-control
               yaml))
-     (setq sl-packages-list (append sl-packages-list '(edit-indirect mermaid-mode math-preview)))
+     (setq sl-packages-list (append sl-packages-list '(mermaid-mode math-preview)))
      (add-hook 'kill-buffer-hook
                #'(lambda ()
                    (when-let* (((boundp 'mermaid-tmp-dir))
@@ -160,6 +160,7 @@
                   dotspacemacs-excluded-packages sl-packages-excluded))
   (define-advice dotspacemacs/init (:after ())
     (setq-default dotspacemacs-editing-style 'hybrid
+                  dotspacemacs-enable-load-hints t
                   dotspacemacs-loading-progress-bar nil
                   dotspacemacs-maximized-at-startup nil
                   dotspacemacs-line-numbers '(:disabled-for-modes org-mode)))
