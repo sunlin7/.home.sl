@@ -2,6 +2,29 @@
 ;;; Commentary:
 ;;; Code:
 
+(defmacro sl-deferred-run-in-buffer (&rest body)
+  "Entry point that defers server startup until buffer is visible.
+It will wait until the buffer is visible before executing the instructions."
+  `(progn
+     (setq-local sl-init-if-buffer-visible
+                 (lambda ()
+                   "Run the commands for the current buffer if the buffer is visible.
+Returns non nil if it was run for the buffer."
+                   (when (or (buffer-modified-p) (get-buffer-window nil t))
+                     (remove-hook 'window-configuration-change-hook
+                                  sl-init-if-buffer-visible t)
+                     ,@body
+                     t)))
+     (run-with-idle-timer
+      0 nil
+      (lambda (buffer)
+        (when (buffer-live-p buffer)
+          (with-current-buffer buffer
+            (unless (funcall sl-init-if-buffer-visible)
+              (add-hook 'window-configuration-change-hook
+                        sl-init-if-buffer-visible nil t)))))
+      (current-buffer))))
+
 (defun sl-toggle-tab-width-setting ()
   "Toggle setting tab widths between 4 and 8."
   (interactive)
@@ -17,20 +40,27 @@
 (use-package dtrt-indent
   :commands (dtrt-indent-mode)
   :hook (lua-mode-local-vars
-         . (lambda () (unless (local-variable-p 'tab-width) (dtrt-indent-mode)))))
+         . (lambda ()
+             (sl-deferred-run-in-buffer
+              (unless (local-variable-p 'tab-width) (dtrt-indent-mode))))))
 
 (add-to-list 'sl-packages-list
              '(guess-style :location (recipe :fetcher github :repo "nschum/guess-style")))
 (use-package guess-style
   :commands (guess-style-guess-variable)
   :hook (emacs-lisp-mode-local-vars
-         . (lambda () (unless (or (local-variable-p 'tab-width) (string-prefix-p " " (buffer-name)))
-                        (guess-style-guess-variable 'tab-width)))))
+         . (lambda ()
+             (sl-deferred-run-in-buffer
+               (unless (or (local-variable-p 'tab-width)
+                           (string-prefix-p " " (buffer-name)))
+                 (guess-style-guess-variable 'tab-width))))))
 
 (use-package cc-mode
   :commands (c-guess)
   :hook ((c-mode-local-vars c++-mode-local-vars)
-         . (lambda () (unless (local-variable-p 'tab-width) (c-guess)))))
+         . (lambda ()
+             (sl-deferred-run-in-buffer
+              (unless (local-variable-p 'tab-width) (c-guess))))))
 
 (with-eval-after-load 'hideshow
   (declare-function hs-life-goes-on "hideshow")
