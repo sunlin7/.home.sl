@@ -104,7 +104,8 @@
                    ;; lsp-semantic-tokens-enable t
                    lsp-clients-lua-language-server-install-dir (expand-file-name "share/lua-language-server" portable-root-dir)
                    ;; lsp-lua-runtime-path ["?.lua" "?/init.lua" "?/?.lua" "../?/?.lua"]
-                   lsp-lua-workspace-preload-file-size 500)
+                   lsp-lua-workspace-preload-file-size 500
+                   lsp-copilot-applicable-fn nil)
               (multiple-cursors :variables multiple-cursors-backend 'mc)
               octave
               (org :variables
