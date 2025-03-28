@@ -62,7 +62,7 @@
 (with-eval-after-load 'yasnippet
   (defvar yas-snippet-dirs)
   (when-let* ((snippets-dir (expand-file-name "snippets/" sl-savefile-dir))
-              (file-exists-p snippets-dir))
+              ((file-exists-p snippets-dir)))
     (add-to-list 'yas-snippet-dirs snippets-dir)))
 
 (define-advice undo-tree-make-history-save-file-name (:around (orig-fun file) sl-adv)

@@ -22,8 +22,8 @@
    '(org-todo-keyword-faces '(("NOTE" . '(:foreground "#875f00"))))
    '(org-src-fontify-natively t)
    '(org-agenda-files '("personal.org"  ; file path relate to org-directory
-                        "memory.org"
                         "todo.org"
+                        "memory.org"
                         "note.org"))
    '(org-agenda-start-on-weekday nil)
    '(org-agenda-span 14)

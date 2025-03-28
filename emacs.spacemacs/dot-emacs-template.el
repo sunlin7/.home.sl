@@ -20,7 +20,7 @@
 (when (native-comp-available-p)
   (custom-set-variables
    '(native-comp-async-jobs-number (1- (num-processors)))
-   '(native-comp-async-env-modifier-form  ; dirver or compiler options
+   '(native-comp-async-env-modifier-form  ; driver or compiler options
      `(setq native-comp-driver-options '(,(concat "-B" (expand-file-name "../lib/" invocation-directory)))))))
 
 (defvar sl-savefile-dir (if-let* ((save-dir (expand-file-name ".emacs.save/" (or (getenv "OHOME") (getenv "HOME"))))
@@ -50,7 +50,7 @@
   (setq sl-configuration-layers
         '(auto-completion
           better-defaults
-          emacs-lisp
+          (emacs-lisp :variables emacs-lisp-format-on-save nil)
           helm
           ibuffer
           imenu-list
