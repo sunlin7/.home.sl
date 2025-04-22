@@ -154,6 +154,12 @@
              (file-exists-p (expand-file-name ".wl" portable-home-dir)))
     (add-to-list 'sl-packages-list 'wanderlust))
 
+  (define-advice recentf-load-list (:around (ofun &rest args) ADV)
+    (let ((file-name-handler-alist
+           (cl-remove-if (lambda (x) (string-prefix-p "tramp-" (symbol-name (cdr x))))
+                         file-name-handler-alist)))
+      (apply ofun args)))
+
   (define-advice dotspacemacs/layers (:after ())
     (setq-default dotspacemacs-configuration-layers sl-configuration-layers
                   dotspacemacs-additional-packages sl-packages-list
