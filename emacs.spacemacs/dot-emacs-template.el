@@ -187,7 +187,7 @@
         (pyim-extra-dicts-add-dict
          `(:name ,(file-name-base x) :file ,(expand-file-name x portable-root-dir))))))
 
-  (menu-bar-mode t)
+  (add-to-list 'after-init-hook 'menu-bar-mode t) ;; glich
   (when (string-match "X11" system-configuration-features)
     (use-package org-pdftools ; make sure the function org-pdftools-setup-link exists
       :defer t :after org :config (org-pdftools-setup-link)))
