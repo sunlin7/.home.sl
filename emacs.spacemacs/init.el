@@ -49,14 +49,6 @@
 (sl-url-hex-macro sl-url-hex #'url-hexify-string)
 (sl-url-hex-macro sl-url-unhex #'url-unhex-string)
 
-(with-eval-after-load 'dired
-  (defvar dired-mode-map)
-  (declare-function spacemacs/open-file-or-directory-in-external-app "")
-  (define-key dired-mode-map [menu-bar operate open-file-or-directory-in-external-app]
-              '(menu-item "Open with external app" spacemacs/open-file-or-directory-in-external-app
-                          :help "Open the file with external application"))
-  (define-key dired-mode-map "E" #'spacemacs/open-file-or-directory-in-external-app))
-
 ;; yasnippet is disabled for term by 'spacemacs/force-yasnippet-off' in
 ;; spacemacs "layers/+completion/auto-completion/packages.el".
 (with-eval-after-load 'yasnippet
