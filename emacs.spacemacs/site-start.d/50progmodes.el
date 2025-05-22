@@ -3,26 +3,26 @@
 ;;; Code:
 
 (defmacro sl-deferred-run-in-buffer (&rest body)
-  "Entry point that defers server startup until buffer is visible.
-It will wait until the buffer is visible before executing the instructions."
-  `(progn
-     (setq-local sl-init-if-buffer-visible
-                 (lambda ()
-                   "Run the commands for the current buffer if the buffer is visible.
+  "Entry point that defers BODY instructions until buffer is visible."
+  `(let ((init-if-buffer-visible nil)
+         (secs ,(if (numberp (car-safe body)) (car body) 0)))
+     (setq init-if-buffer-visible
+           (lambda ()
+             "Run the commands for the current buffer if the buffer is visible.
 Returns non nil if it was run for the buffer."
-                   (when (or (buffer-modified-p) (get-buffer-window nil t))
-                     (remove-hook 'window-configuration-change-hook
-                                  sl-init-if-buffer-visible t)
-                     ,@body
-                     t)))
+             (when (or (buffer-modified-p) (get-buffer-window nil t))
+               (remove-hook 'window-configuration-change-hook
+                            init-if-buffer-visible t)
+               ,@body
+               t)))
      (run-with-idle-timer
-      0 nil
-      (lambda (buffer)
-        (when (buffer-live-p buffer)
-          (with-current-buffer buffer
-            (unless (funcall sl-init-if-buffer-visible)
+      secs nil
+      (lambda (&rest args)
+        (when (buffer-live-p (car args))
+          (with-current-buffer (car args)
+            (unless (funcall init-if-buffer-visible)
               (add-hook 'window-configuration-change-hook
-                        sl-init-if-buffer-visible nil t)))))
+                        init-if-buffer-visible nil t)))))
       (current-buffer))))
 
 (defun sl-toggle-tab-width-setting ()
@@ -51,9 +51,9 @@ Returns non nil if it was run for the buffer."
   :hook (emacs-lisp-mode-local-vars
          . (lambda ()
              (sl-deferred-run-in-buffer
-               (unless (or (local-variable-p 'tab-width)
-                           (string-prefix-p " " (buffer-name)))
-                 (guess-style-guess-variable 'tab-width))))))
+              (unless (or (local-variable-p 'tab-width)
+                          (string-prefix-p " " (buffer-name)))
+                (guess-style-guess-variable 'tab-width))))))
 
 (use-package cc-mode
   :commands (c-guess)
