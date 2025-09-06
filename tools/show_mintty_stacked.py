@@ -1,6 +1,6 @@
 '''
-Show the mintty as two columns and two rows in the screen.
-This tools depends on pywin32.
+Show mintty windows in stacked or cascaded layout.
+This tool depends on pywin32.
 '''
 import sys
 import win32api
@@ -45,31 +45,62 @@ def getWorkArea():
     return (0, 0, 640, 480)
 
 
-def windowEnumerationHandler(hwnd, top_windows):
+def windowEnumerationHandler(hwnd, mintty_windows):
     if 'mintty' == win32gui.GetClassName(hwnd) \
-       and win32con.WS_VISIBLE & win32gui.GetWindowLong(hwnd, win32con.GWL_STYLE):
+       and win32gui.IsWindowVisible(hwnd) and not win32gui.IsIconic(hwnd):
         threadId, _ = win32process.GetWindowThreadProcessId(hwnd)
         threadHdl = win32api.OpenThread(win32con.THREAD_QUERY_INFORMATION,
                                         False, threadId)
         info = win32process.GetThreadTimes(threadHdl)
-        top_windows.append((hwnd, info['CreationTime'], threadId,
+        mintty_windows.append((hwnd, info['CreationTime'], threadId,
                             win32gui.GetWindowText(hwnd)))
 
 
-def show_mintty_stacked_main(argv=None):
-    '''The main function to show mintty windows statcked'''
-    top_windows = []
-    win32gui.EnumWindows(windowEnumerationHandler, top_windows)
-    if len(top_windows) < 1:
+def show_mintty_stacked_main():
+    '''The main function to show mintty windows stacked'''
+    mintty_windows = []
+    win32gui.EnumWindows(windowEnumerationHandler, mintty_windows)
+    if len(mintty_windows) < 1:
         print('No Mintty window be found!')
         sys.exit(1)
 
-    latest = top_windows[0]
-    top_windows.sort(key=lambda x: (x[1], x[0]))
+    focused_window = mintty_windows[0]
+    mintty_windows.sort(key=lambda x: (x[1], x[0]))
+
+    x, y, _, _ = getWorkArea()
+    # stacking
+    match len(mintty_windows):
+        case 2: posPre = [(x-6,     y,     0, 0),
+                          (x-6+160, y+160, 0, 0)]
+        case _: posPre = [(x-6,     y,     0, 0),
+                          (x-6+80,  y+80,  0, 0),
+                          (x-6+160, y+160, 0, 0)]
+
+    for idx, item in enumerate(mintty_windows[:len(posPre)]):
+        win32gui.ShowWindow(item[0], win32con.SW_RESTORE)
+        win32gui.SetWindowPos(item[0], win32con.HWND_TOP,
+                              *posPre[idx],  # it has four params
+                              win32con.SWP_SHOWWINDOW|win32con.SWP_NOSIZE)
+
+    win32gui.SetForegroundWindow(focused_window[0])
+    return 0
+
+
+def show_mintty_cascade_main():
+    '''The main function to show mintty windows cascaded'''
+    mintty_windows = []
+    win32gui.EnumWindows(windowEnumerationHandler, mintty_windows)
+    if len(mintty_windows) < 1:
+        print('No Mintty window be found!')
+        sys.exit(1)
+
+    focused_window = mintty_windows[0]
+    mintty_windows.sort(key=lambda x: (x[1], x[0]))
 
     x, y, w, h = getWorkArea()
     nw, nh = w//2, h//2
-    match len(top_windows):
+    # Cascading
+    match len(mintty_windows):
         case 1: posPre = [(x-6,       y, (w*3)//4, (h*3)//4)]
         case 2: posPre = [(x-6,       y, nw+16, h),
                           (x+nw-6,    y, nw+16, h)]
@@ -91,15 +122,19 @@ def show_mintty_stacked_main(argv=None):
     # if rect[:2] == posPre[0][:2]:
     #     top_windows.reverse()
 
-    for idx, item in enumerate(top_windows[:4]):
+    for idx, item in enumerate(mintty_windows[:4]):
         win32gui.ShowWindow(item[0], win32con.SW_RESTORE)
         win32gui.SetWindowPos(item[0], win32con.HWND_TOP,
                               *posPre[idx],  # it has four params
                               win32con.SWP_SHOWWINDOW)
 
-    win32gui.SetForegroundWindow(latest[0])
+    win32gui.SetForegroundWindow(focused_window[0])
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(show_mintty_stacked_main())
+    if len(sys.argv) > 2:
+        sys.exit(show_mintty_cascade_main())
+    else:
+        sys.exit(show_mintty_stacked_main())
+
