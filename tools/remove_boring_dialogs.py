@@ -74,9 +74,10 @@ class TimerExecSecurityDlg(ITimerExec):
         self.hwnd = hwnd
 
     def run(self):
-        if (win32gui.GetForegroundWindow() != self.hwnd  # foreground switched
+        fwnd = win32gui.GetForegroundWindow()
+        if (fwnd != self.hwnd  # foreground switched
             or not win32gui.IsWindowVisible(self.hwnd)):  # invisible
-            logging.debug(f"SecrityDlg:foreground changed or invisible window {self.hwnd}")
+            logging.debug(f"SecrityDlg:foreground changed or invisible window {self.hwnd}, {fwnd}")
             return True
 
         tess = PyTessBaseAPI()
@@ -347,10 +348,16 @@ def listen_foreground(cb=lambda *args:None):
         logging.error('SetWinEventHook failed', file=sys.stderr)
         exit(1)
 
+    tfun = lambda hWinEventHook, event, hwnd, idObject, idChild, dwEventThread, dwmsEventTime, hWndForeg: \
+        [True, logging.info(f"{hWinEventHook}, {event}, {hwnd}, {idObject}, {idChild}, {dwEventThread}, {dwmsEventTime}, {hWndForeg}")][0]
+
     wEvtProcTitle = WinEventProcType(
         lambda hWinEventHook, event, hwnd, idObject, idChild, dwEventThread, dwmsEventTime: \
-        (idObject == win32con.OBJID_WINDOW and idChild == win32con.CHILDID_SELF \
-         and event == win32con.EVENT_OBJECT_NAMECHANGE and hwnd == win32gui.GetForegroundWindow() \
+        (idObject == win32con.OBJID_WINDOW \
+         and idChild == win32con.CHILDID_SELF \
+         and event == win32con.EVENT_OBJECT_NAMECHANGE \
+         and tfun(hWinEventHook, event, hwnd, idObject, idChild, dwEventThread, dwmsEventTime, win32gui.GetForegroundWindow()) \
+         and hwnd == win32gui.GetForegroundWindow() \
          and cb(event, hwnd, win32gui.GetWindowText(hwnd), win32gui.GetClassName(hwnd))))
 
     hookTitle = windll.user32.SetWinEventHook(
@@ -400,6 +407,15 @@ if not globals().get('MANUAL_START_THREAD'):
     eObjs = dict()
     def evtCB(e, hwnd, title, clsName, *startup):
         if 'cygwin/x X rl' == clsName:
+            logging.info(f'the wnd {hwnd} title {title}')
+            if re.search("Cursor@", title):
+                style = win32gui.GetWindowLong(hwnd, win32con.GWL_STYLE)
+                logging.info(f'the wnd {hwnd} style {style}')
+                if not style & win32con.WS_CAPTION:
+                    time.sleep(0.5)
+                    win32gui.SetWindowLong(hwnd, win32con.GWL_STYLE, style | win32con.WS_OVERLAPPEDWINDOW & ~win32con.WS_THICKFRAME)
+                    logging.info(f'Set Cursor window {hwnd} to new style')
+
             regKey = winreg.OpenKey(winreg.HKEY_CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", 0, winreg.KEY_QUERY_VALUE)
             light, _ = winreg.QueryValueEx(regKey, "AppsUseLightTheme")
             winreg.CloseKey(regKey)

@@ -55,12 +55,12 @@ Returns non nil if it was run for the buffer."
                           (string-prefix-p " " (buffer-name)))
                 (guess-style-guess-variable 'tab-width))))))
 
-(use-package cc-mode
-  :commands (c-guess)
-  :hook ((c-mode-local-vars c++-mode-local-vars)
-         . (lambda ()
-             (sl-deferred-run-in-buffer
-              (unless (local-variable-p 'tab-width) (c-guess))))))
+;; (use-package cc-mode
+;;   :commands (c-guess)
+;;   :hook ((c-mode-local-vars c++-mode-local-vars)
+;;          . (lambda ()
+;;              (sl-deferred-run-in-buffer
+;;               (unless (local-variable-p 'tab-width) (c-guess))))))
 
 (with-eval-after-load 'hideshow
   (declare-function hs-life-goes-on "hideshow")

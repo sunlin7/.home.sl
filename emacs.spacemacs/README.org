@@ -100,7 +100,7 @@ A =.emacs= can copy from the =dot-emacs-template.el=; or to load the =dot-emacs-
    '(ietf-docs-rfc-url-directory "https://ietf.org/rfc/") ; FIXME: https://github.com/choppsv1/ietf-docs/pull/4
    '(ietf-docs-draft-url-directory "http://ietf.org/id/")
    '(google-translate-default-target-language "zh-CN")
-   '(eww-search-prefix "https://www.google.com/search?q=")
+   ;; '(eww-search-prefix "https://www.google.com/search?q=") ;; google reuqires JS enabled since Jan 2025
    '(url-cookie-save-interval 60)
    '(rmail-file-name "~/.emacs.d/RMAIL"))
 

@@ -88,9 +88,11 @@
             '((c-c++ :variables
                      ;; c-c++-enable-google-style t
                      ;; c-c++-enable-google-newline t
+                     c-c++-formatter-indent-line t
                      c-c++-backend 'lsp-clangd)
               (chinese :variables chinese-default-input-method t
                        chinese-enable-avy-pinyin nil)
+              claude-code
               cmake
               csv
               django
@@ -99,6 +101,7 @@
               git
               imenu-list
               ietf
+              llm-client
               (lsp :variables
                    lsp-restart 'ignore
                    ;; lsp-semantic-tokens-enable t
@@ -140,7 +143,10 @@
        (custom-set-variables '(pdf-view-restore-filename (locate-user-emacs-file ".cache/pdf-view-restore"))))
      (when-let* ((default-directory portable-home-dir)
                  (paths (file-expand-wildcards ".local/LanguageTool*/languagetool-commandline.jar" t)))
-       (add-to-list 'sl-configuration-layers `(languagetool :variables langtool-language-tool-jar ,(car paths)))))
+       (add-to-list 'sl-configuration-layers `(languagetool :variables langtool-language-tool-jar ,(car paths))))
+     (when (and (not (equal portable-home-dir portable-root-dir))
+                (file-exists-p (expand-file-name ".wl" portable-home-dir)))
+       (add-to-list 'sl-packages-list 'wanderlust)))
 
     (_ ;; terminal without X11, a minimum config
      (nconc sl-packages-excluded '(pdf-tools
@@ -150,10 +156,6 @@
      (nconc sl-configuration-layers '())
      (with-eval-after-load "files" (delete '("\\.org\\'" . org-mode) auto-mode-alist))))
 
-  (when (and (not (equal portable-home-dir portable-root-dir))
-             (file-exists-p (expand-file-name ".wl" portable-home-dir)))
-    (add-to-list 'sl-packages-list 'wanderlust))
-
   (define-advice recentf-load-list (:around (ofun &rest args) ADV)
     (let ((file-name-handler-alist
            (cl-remove-if (lambda (x) (string-prefix-p "tramp-" (symbol-name (cdr x))))
@@ -161,9 +163,11 @@
       (apply ofun args)))
 
   (define-advice dotspacemacs/layers (:after ())
-    (setq-default dotspacemacs-configuration-layers sl-configuration-layers
+    (setq-default configuration-layer--elpa-root-directory (concat portable-home-dir ".emacs.d/elpa")
+     dotspacemacs-configuration-layers sl-configuration-layers
                   dotspacemacs-additional-packages sl-packages-list
-                  dotspacemacs-excluded-packages sl-packages-excluded))
+                  dotspacemacs-excluded-packages sl-packages-excluded
+									dotspacemacs-enable-lazy-installation nil))
   (define-advice dotspacemacs/init (:after ())
     (setq-default dotspacemacs-editing-style 'hybrid
                   dotspacemacs-enable-load-hints t
@@ -201,7 +205,7 @@
   ;; disable img resize for window size is changed by HELM windows
   (custom-set-variables '(image-auto-resize-on-window-resize nil)
                         '(image-auto-resize ; resize image for HiDPI
-                          (if-let* ((scale (getenv "GDK_DPI_SCALE")))
+                          (if-let* ((scale (getenv "GDK_SCALE")))
                               (string-to-number scale)
                             t)))
 
@@ -243,14 +247,24 @@
   "Update key binding in terminal for FRAME, `$showkey -a` for key sequence."
   (when (terminal-live-p (frame-terminal frame))
     (with-selected-frame frame
-      (define-key input-decode-map "[;5~" [C-backspace])
-      (define-key input-decode-map "[;6~" [C-S-backspace])
-      (define-key input-decode-map "[1;8u" [?\C-\M-%]))))
+      ;; (define-key input-decode-map "[;5~" [C-backspace])
+      ;; (define-key input-decode-map "[;6~" [C-S-backspace])
+      ;; (define-key input-decode-map "[1;5l"  [?\C-.])
+      ;; (define-key input-decode-map "[1;5n"  [?\C-,])
+      ;; (define-key input-decode-map "[96;5u"  [?\C-`])
+      ;; (define-key input-decode-map "[97;7u"  [?\C-\M-a])
+      ;; (define-key input-decode-map "[98;7u"  [?\C-\M-b])
+      ;; (define-key input-decode-map "[99;7u"  [?\C-\M-c])
+      ;; (define-key input-decode-map "[100;7u"  [?\C-\M-d])
+      ;; (define-key input-decode-map "[101;7u"  [?\C-\M-e])
+      ;; (define-key input-decode-map "[102;7u"  [?\C-\M-f])
+      ;; (define-key input-decode-map "[1;8u"  [?\C-\M-%])
+			)))
 
 (add-hook 'after-make-frame-functions #'sl-term-kdb-patch)
 (sl-term-kdb-patch (selected-frame)) ; patch 'after-make-frame-functions for the initialed term
 
-(add-to-list 'after-init-hook (apply-partially 'xterm-mouse-mode 0))
+;; (add-to-list 'after-init-hook (apply-partially 'xterm-mouse-mode 0))
 (add-to-list 'after-init-hook #'global-hungry-delete-mode)
 
 ;; dired-quick-sort integration with dired.
