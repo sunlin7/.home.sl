@@ -140,7 +140,10 @@
        (custom-set-variables '(pdf-view-restore-filename (locate-user-emacs-file ".cache/pdf-view-restore"))))
      (when-let* ((default-directory portable-home-dir)
                  (paths (file-expand-wildcards ".local/LanguageTool*/languagetool-commandline.jar" t)))
-       (add-to-list 'sl-configuration-layers `(languagetool :variables langtool-language-tool-jar ,(car paths)))))
+       (add-to-list 'sl-configuration-layers `(languagetool :variables langtool-language-tool-jar ,(car paths))))
+     (when (and (not (equal portable-home-dir portable-root-dir))
+                (file-exists-p (expand-file-name ".wl" portable-home-dir)))
+       (add-to-list 'sl-packages-list 'wanderlust)))
 
     (_ ;; terminal without X11, a minimum config
      (nconc sl-packages-excluded '(pdf-tools
@@ -149,10 +152,6 @@
                                    yasnippet-snippets))
      (nconc sl-configuration-layers '())
      (with-eval-after-load "files" (delete '("\\.org\\'" . org-mode) auto-mode-alist))))
-
-  (when (and (not (equal portable-home-dir portable-root-dir))
-             (file-exists-p (expand-file-name ".wl" portable-home-dir)))
-    (add-to-list 'sl-packages-list 'wanderlust))
 
   (define-advice recentf-load-list (:around (ofun &rest args) ADV)
     (let ((file-name-handler-alist
