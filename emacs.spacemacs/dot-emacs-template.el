@@ -78,10 +78,7 @@
      (setq exec-path ; remove Python-App from path to avoid issues for Emacs-Win32
            (cl-delete-if
             (apply-partially 'string-match-p "AppData/Local/Programs/Python")
-            exec-path))
-
-     (when (not (executable-find invocation-name))
-       (warn "Emacs not in PATH, recommend '[...\\mingw64.exe] bash -lc runemacs'")))
+            exec-path)))
 
     ((guard (or (fboundp 'image-mask-p) (native-comp-available-p))) ; not minimal
      (nconc sl-configuration-layers
