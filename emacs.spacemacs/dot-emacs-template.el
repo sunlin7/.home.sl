@@ -251,7 +251,7 @@
 (add-hook 'after-make-frame-functions #'sl-term-kdb-patch)
 (sl-term-kdb-patch (selected-frame)) ; patch 'after-make-frame-functions for the initialed term
 
-(add-to-list 'after-init-hook (apply-partially 'xterm-mouse-mode 0))
+;; (add-to-list 'after-init-hook (apply-partially 'xterm-mouse-mode 0))
 (add-to-list 'after-init-hook #'global-hungry-delete-mode)
 
 ;; dired-quick-sort integration with dired.
