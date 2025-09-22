@@ -202,7 +202,7 @@
   ;; disable img resize for window size is changed by HELM windows
   (custom-set-variables '(image-auto-resize-on-window-resize nil)
                         '(image-auto-resize ; resize image for HiDPI
-                          (if-let* ((scale (getenv "GDK_DPI_SCALE")))
+                          (if-let* ((scale (getenv "GDK_SCALE")))
                               (string-to-number scale)
                             t)))
 
