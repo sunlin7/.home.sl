@@ -160,6 +160,8 @@
                          file-name-handler-alist)))
       (apply ofun args)))
 
+  (with-eval-after-load 'core-configuration-layer
+    (setq configuration-layer--elpa-root-directory (concat portable-home-dir ".emacs.d/elpa")))
   (define-advice dotspacemacs/layers (:after ())
     (setq-default dotspacemacs-configuration-layers sl-configuration-layers
                   dotspacemacs-additional-packages sl-packages-list
