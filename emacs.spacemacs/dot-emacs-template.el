@@ -80,9 +80,6 @@
             (apply-partially 'string-match-p "AppData/Local/Programs/Python")
             exec-path))
 
-     (when (not (executable-find invocation-name))
-       (warn "Emacs not in PATH, recommend '[...\\mingw64.exe] bash -lc runemacs'")))
-
     ((guard (or (fboundp 'image-mask-p) (native-comp-available-p))) ; not minimal
      (nconc sl-configuration-layers
             '((c-c++ :variables
