@@ -164,7 +164,8 @@
   (define-advice dotspacemacs/layers (:after ())
     (setq-default dotspacemacs-configuration-layers sl-configuration-layers
                   dotspacemacs-additional-packages sl-packages-list
-                  dotspacemacs-excluded-packages sl-packages-excluded))
+                  dotspacemacs-excluded-packages sl-packages-excluded
+									dotspacemacs-enable-lazy-installation nil))
   (define-advice dotspacemacs/init (:after ())
     (setq-default dotspacemacs-editing-style 'hybrid
                   dotspacemacs-enable-load-hints t
