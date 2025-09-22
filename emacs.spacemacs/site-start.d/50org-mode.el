@@ -18,7 +18,8 @@
    '(org-todo-keywords
      '((sequence "TODO(t)" "DOING(i)" "PENDING(p)" "WAIT(w)" "|" "DONE(d)" "CANCEL(l)")
        (sequence "OPEN(o)" "|" "CLOSED(c)")
-       (type "NOTE")))
+       ;; the "|" behind the NOTE to avoid timestamp when using C-c C-t
+       (type "NOTE" "|")))
    '(org-todo-keyword-faces '(("NOTE" . '(:foreground "#875f00"))))
    '(org-src-fontify-natively t)
    '(org-agenda-files '("personal.org"  ; file path relate to org-directory
