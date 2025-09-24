@@ -71,7 +71,7 @@
               (lsp :variables lsp-restart 'ignore)
               (multiple-cursors :variables multiple-cursors-backend 'mc)
               org
-              (python :variable importmagic-python-interpreter "python3")
+              (python :variables python-enable-tools '(pipenv))
               sql
               version-control
               windows-scripts))
@@ -109,7 +109,7 @@
                    org-plantuml-jar-path (expand-file-name "share/plantuml.jar" portable-root-dir))
               (plantuml :variables plantuml-default-exec-mode 'jar
                         plantuml-jar-path (expand-file-name "share/plantuml.jar" portable-root-dir))
-              python
+              (python :variables python-enable-tools '(pipenv))
               rust
               (shell :variables shell-default-shell 'multi-vterm)
               shell-scripts
