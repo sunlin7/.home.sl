@@ -63,7 +63,7 @@ def apply_1st_auto_fill(pos):
 
 class ITimerExec(object):
     '''Interface for executable object'''
-    def run():
+    def run(self):
         '''Run the action. Return True for done, False for need another try'''
         return True
 
@@ -198,8 +198,8 @@ class TimerExecLoginPage(ITimerExec):
                 return False
 
             win32api.keybd_event(win32con.VK_LCONTROL, 0, 0, 0)
-            win32api.keybd_event(win32con.VK_F4, 0, win32con.KEYEVENTF_KEYUP, 0)
             win32api.keybd_event(win32con.VK_F4, 0, 0, 0)
+            win32api.keybd_event(win32con.VK_F4, 0, win32con.KEYEVENTF_KEYUP, 0)
             win32api.keybd_event(win32con.VK_LCONTROL, 0, win32con.KEYEVENTF_KEYUP, 0)
             logging.debug(f'Close the GlobalProcect page {self.hwnd}')
             self.lastTime = ntime  # next GlobalProcect page
@@ -299,8 +299,8 @@ def PageTeleportLogin(hwnd):
 
     logging.debug(f"try close succeed Teleport page: {txt}")
     win32api.keybd_event(win32con.VK_LCONTROL, 0, 0, 0)
-    win32api.keybd_event(win32con.VK_F4, 0, win32con.KEYEVENTF_KEYUP, 0)
     win32api.keybd_event(win32con.VK_F4, 0, 0, 0)
+    win32api.keybd_event(win32con.VK_F4, 0, win32con.KEYEVENTF_KEYUP, 0)
     win32api.keybd_event(win32con.VK_LCONTROL, 0, win32con.KEYEVENTF_KEYUP, 0)
     yield(1, False)
 
@@ -390,7 +390,7 @@ def stop():
     if _listen_thread:
         win32api.PostThreadMessage(_listen_thread.ident, win32con.WM_QUIT, 0, 0)
 
-def join(rgs):
+def join(args):
     _listen_thread.join()
 
 if not globals().get('MANUAL_START_THREAD'):
@@ -473,4 +473,5 @@ if __name__ == '__main__':
     win32api.SetConsoleCtrlHandler(
         # return True to avoid backtrace, discontinue the signal handler chain
         lambda ct: [True, ct == win32con.CTRL_C_EVENT and stop()][0], True)
-    _listen_thread.join()
+    if _listen_thread:
+        _listen_thread.join()
