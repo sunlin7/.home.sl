@@ -400,6 +400,15 @@ if not globals().get('MANUAL_START_THREAD'):
     eObjs = dict()
     def evtCB(e, hwnd, title, clsName, *startup):
         if 'cygwin/x X rl' == clsName:
+            logging.info(f'the wnd {hwnd} title {title}')
+            if re.search("Cursor@", title):
+                style = win32gui.GetWindowLong(hwnd, win32con.GWL_STYLE)
+                logging.info(f'the wnd {hwnd} style {style}')
+                if not style & win32con.WS_CAPTION:
+                    time.sleep(0.4)
+                    win32gui.SetWindowLong(hwnd, win32con.GWL_STYLE, style | win32con.WS_OVERLAPPEDWINDOW)  # the WS_THICKFRAME for resizing
+                    logging.info(f'Set Cursor window {hwnd} to new style')
+
             regKey = winreg.OpenKey(winreg.HKEY_CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", 0, winreg.KEY_QUERY_VALUE)
             light, _ = winreg.QueryValueEx(regKey, "AppsUseLightTheme")
             winreg.CloseKey(regKey)
