@@ -272,9 +272,12 @@ def PageGAccounts(hwnd):
     while not re.search('Forgot email', txt):
         txt, rect = yield(0, True)
     # reach here mean got previous conditions are satisfied
-    pos = (rect[0], rect[1]-rect[3]-rect[3]//2)  # on its Top
-    logging.debug("try auto fill on page [%s], pos (%s)", txt, pos)
-    apply_1st_auto_fill(win32gui.ClientToScreen(hwnd, pos))
+    logging.debug(f"Just press entry to continue login for email {txt}")
+    win32api.keybd_event(win32con.VK_RETURN, 0, 0, 0)
+    win32api.keybd_event(win32con.VK_RETURN, 0, win32con.KEYEVENTF_KEYUP, 0)
+    # pos = (rect[0], rect[1]-rect[3]-rect[3]//2)  # on its Top
+    # logging.debug("try auto fill on page [%s], pos (%s)", txt, pos)
+    # apply_1st_auto_fill(win32gui.ClientToScreen(hwnd, pos))
     yield(1, False)
 
 
