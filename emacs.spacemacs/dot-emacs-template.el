@@ -193,9 +193,7 @@
   ;; (or (file-exists-p plantuml-jar-path) (plantuml-download-jar)); download plantuml.jar
   (with-eval-after-load 'plantuml-mode
     (when (fboundp 'image-mask-p)
-      (plantuml-set-output-type "png")) ; text in svg image hard to see in dark theme
-    (define-advice plantuml-jar-output-type-opt (:around (ORIG output-type))
-      (funcall ORIG (if (display-graphic-p) output-type "txt")))) ; "txt" for terminal
+      (plantuml-set-output-type "png"))) ; default SVG is hard to see under dark theme
 
   ;; disable img resize for window size is changed by HELM windows
   (custom-set-variables '(image-auto-resize-on-window-resize nil)
