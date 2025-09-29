@@ -1,61 +1,60 @@
-#+Title: My .home.sl direcotry
+#+Title: My .home.sl directory
 
-This is my .home.sl directory, it containts my Emcas and vim configurations.
+This is my .home.sl directory; it contains my Emacs and Vim configurations.
 
- The configurations are maintained as git subtrees, follow repos are included,
-| [[https://github.com/sunlin7/.home.sl/tree/master/emacs.spacemacs][.emacs.spacemacs]] | in using |
-| [[https://github.com/SpaceVim/SpaceVim][SpaceVim]]         | in using |
-| [[https://github.com/ohmyzsh/ohmyzsh][Oh My Zsh]]        | in using |
+ The configurations are maintained as Git subtrees; the following repositories are included:
+|| [[https://github.com/sunlin7/.home.sl/tree/master/emacs.spacemacs][.emacs.spacemacs]] | in use |
+|| [[https://github.com/SpaceVim/SpaceVim][SpaceVim]]         | in use |
+|| [[https://github.com/ohmyzsh/ohmyzsh][Oh My Zsh]]        | in use |
 
-* Install and config
+* Install and configure
 ** .emacs.spacemacs for Emacs
-The .emcas.spacemacs is included in this repo.
-Please refer the [[file:emacs.spacemacs/README.org][emacs.spacemacs/README.org]]
+The .emacs.spacemacs is included in this repository.
+Please refer to [[file:emacs.spacemacs/README.org][emacs.spacemacs/README.org]]
 
 ** The SpaceVim distribution https://spacevim.org/
-The SpaceVim can be installed via
+SpaceVim can be installed via
 #+BEGIN_SRC sh
 curl -sLf https://spacevim.org/install.sh | bash
 #+END_SRC
 
-Then make a link for .vimrc.local
+Then create a symlink for .vimrc.local
 #+BEGIN_SRC sh
 ln -s ~/.home.sl/vim.sl/.vimrc.local ~/.vimrc.local
 #+END_SRC
 
-Upgrade with one of follow step:
-- ~git -C ~/.SpaceVim pull.```~
+Upgrade with one of the following steps:
+- ~git -C ~/.SpaceVim pull~
 - Add ~automatic_update = 1~ to your custom configuration file, or
-- Use ~:SPUpdate SpaceVim~ in SpaceVim buffer.
-For more information, please refer the https://spacevim.org/.
-NOTE: vimproc didn't build automatically, run follow command to build it:
+- Use ~:SPUpdate SpaceVim~ in a SpaceVim buffer.
+For more information, please refer to https://spacevim.org/.
+NOTE: vimproc is not built automatically; run the following command to build it:
 make -C ~/.SpaceVim/bundle/vimproc.vim/
 
 
 ** Oh My Zsh
-Follow the https://github.com/ohmyzsh/ohmyzsh to setup the Oh My Zsh utils:
+See https://github.com/ohmyzsh/ohmyzsh to set up Oh My Zsh:
 #+begin_src shell
   sudo yum install zsh
   sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 #+end_src
 
-And change the key binding to familiar behavior:
+And change the key binding to match familiar behavior:
 #+begin_src shell
-  bindkey \^u backward-kill-line  # change zsh to follow bash behavior
+  bindkey \^u backward-kill-line  # change zsh to follow Bash behavior
 #+end_src
 
 ** Misc tools
-Please refer the [[./tools/Readme.org]] for details.
+Please refer to [[./tools/Readme.org]] for details.
 * Update or upgrade
 #+BEGIN_SRC sh
 git -C ~/.home.sl/ pull
 #+END_SRC
 
-* Misc note for usage
+* Misc notes for usage
 ** WSL2 DISPLAY
-In .bashrc of WSL2 env
+In the .bashrc of the WSL2 environment
 export DISPLAY="$(route -4 |awk '/172/ {print $1"1:0"}')"
 
-** WSL start emacs daemon from windows shortcut
+** Start Emacs daemon in WSL from a Windows shortcut
 wsl.exe -u sunlin7 -e /bin/bash -lc "PATH=~/.root/bin:$PATH emacs --daemon --display=172.17.16.1:0"
-

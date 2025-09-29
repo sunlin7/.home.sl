@@ -30,7 +30,7 @@
 
 (load (expand-file-name ".home.sl/emacs.spacemacs/init" portable-home-dir))
 
-;; assume the spacemaces was installed.
+;; assume that spacemacs was installed.
 (when-let* ((spacemacs-dir (expand-file-name ".emacs.spacemacs/" portable-home-dir))
             (sl-spacemacs-init (locate-file "init" (list spacemacs-dir) load-suffixes)))
 
@@ -186,7 +186,7 @@
         (pyim-extra-dicts-add-dict
          `(:name ,(file-name-base x) :file ,(expand-file-name x portable-root-dir))))))
 
-  (add-to-list 'after-init-hook 'menu-bar-mode t) ;; glich
+  (add-to-list 'after-init-hook 'menu-bar-mode t) ;; glitch
   (when (string-match "X11" system-configuration-features)
     (use-package org-pdftools ; make sure the function org-pdftools-setup-link exists
       :defer t :after org :config (org-pdftools-setup-link)))
@@ -253,8 +253,8 @@
 ;; dired-quick-sort integration with dired.
 ;; https://github.com/syl20bnr/spacemacs/pull/16814
 (define-advice dired-sort-toggle (:before ())
-  "Recover `dired-actual-switches' with `dired-listing-switches' when long
-      option \"--sort=...\" exists, and convert \"--sort=time\" to \"-t\"."
+  "Recover `dired-actual-switches' with `dired-listing-switches' when the long
+option \"--sort=...\" exists, and convert \"--sort=time\" to \"-t\"."
   (when-let* (((string-match-p "--sort=" dired-actual-switches))
               (switches dired-listing-switches))
     ;; ignore "-t" option first, determines it from actually switches later
@@ -284,7 +284,7 @@
         (t (apply ofun args))))
 ;; (custom-set-variables
 ;; (window-system-default-frame-alist
-;;  '((x . ((left . 0) (top . 50) (width . 190) (height . 50))) ;NOTE: get vlaues by (frame-position), (frame-height), (frame-width)
+;;  '((x . ((left . 0) (top . 50) (width . 190) (height . 50))) ;NOTE: get values by (frame-position), (frame-height), (frame-width)
 ;;    (w32 . ((left . (+ -10)) (top . 1) (width . 190) (height . 52)))))
 
 ;; (when-let (my-project-init (locate-file "projects" (list sl-savefile-dir)))

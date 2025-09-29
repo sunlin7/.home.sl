@@ -1,11 +1,11 @@
 #+TITLE: My emacs configuration
 #+INCLUDE: ~/.emacs.save/org/common_header.org
 
-This is my =.emacs= configure for emacs31 on Ubuntu 20.04.
+This is my =.emacs= configuration for emacs31 on Ubuntu 22.04.
 It depends on the [[https://github.com/syl20bnr/spacemacs/commits/develop][Spacemacs develop branch]].
 
 ** My configurations
-The =sl-packages-list= record the packages depends.
+The =sl-packages-list= records the package dependencies.
 The =sl-savefile-dir= can change savefile folder out of .emacs.d directory.
 #+BEGIN_SRC emacs-lisp :tangle dot-emacs.el
   (defvar sl-savefile-dir (expand-file-name ".emacs.save/" portable-home-dir))
@@ -13,12 +13,12 @@ The =sl-savefile-dir= can change savefile folder out of .emacs.d directory.
 
 If the =sl-modules= file exists, it will be loaded.
 
-For more details, just refer the [[./init.el]].
+For more details, just refer to the [[./init.el]].
 
-The [[./dot-emacs-template.el]] is a template for dot-emacs, refer it for details.
+The [[./dot-emacs-template.el]] is a template for dot-emacs, refer to it for details.
 
 *** Integrate with Spacemacs
- In the [[./dot-emacs-template.el]], it will advice the function ~dotspacemacs/layers~ to rewrite following key variables to the desiered values for =Spacemacs=:
+ In the [[./dot-emacs-template.el]], it will advice the function ~dotspacemacs/layers~ to rewrite following key variables to the desired values for =Spacemacs=:
  #+BEGIN_SRC emacs-lisp :tangle no
    dotspacemacs-configuration-layers sl-configuration-layers
    dotspacemacs-additional-packages sl-packages-list
@@ -27,7 +27,7 @@ The [[./dot-emacs-template.el]] is a template for dot-emacs, refer it for detail
  #+end_src
 
 *** An example for early-init.el
-The =early-init.el= should do the very early initialization, like follow:
+The =early-init.el= should do the very early initialization, as follows:
 #+begin_src emacs-lisp :tangle ~/.emacs.d/early-init.el
   (setq gc-cons-threshold 402653184       ; copy from the init.el of Spacemacs
         gc-cons-percentage 0.6
@@ -42,7 +42,7 @@ The =early-init.el= should do the very early initialization, like follow:
 #+end_src
 
 *** An example for .emacs
-A =.emacs= can copy from the =dot-emacs-template.el=; or to load the =dot-emacs-template.el=, like follow:
+A =.emacs= can copy from the =dot-emacs-template.el=; or to load the =dot-emacs-template.el=, as follows:
 #+begin_src emacs-lisp :tangle "dot-emacs.el"
   ;; -*- mode: emacs-lisp; lexical-binding: t -*-
 
@@ -133,7 +133,7 @@ A =.emacs= can copy from the =dot-emacs-template.el=; or to load the =dot-emacs-
     (define-key eww-mode-map "Q" #'spacemacs/kill-this-buffer))
 #+end_src
 *** emacs with msys64
-Starting emacs-x86_64-mingw64 directly maybe got the PATH without mingw32/64; follow cmds will help to get correct PATH.
+Starting emacs-x86_64-mingw64 directly may not have the PATH with mingw32/64; the following commands will help to get the correct PATH.
 #+begin_src shell
   # starting emacs daemon
   c:\msys64\mingw64.exe bash -lc "runemacs --daemon"
@@ -144,7 +144,7 @@ Starting emacs-x86_64-mingw64 directly maybe got the PATH without mingw32/64; fo
   # for just starting an emacsclient
   c:\msys64\mingw64\bin\emacsclient -c
 #+end_src
-** Addtional Requirest
+** Additional Requirements
 If you need support python =live-py-mode=, it requests the =tkinter= package, can install by
 #+begin_src shell
 apt-get install python36-tkinter
@@ -154,7 +154,7 @@ Spacemacs use some symbols fonts in ~spacemacs--diminished-minor-modes~, install
 The fonts depend on ~all-the-icons~ can download with elisp ~all-the-icons-install-fonts~.
 ** Misc notes
 *** Use the emacsclient as the default git difftool and mergetool
-Edit ~/.gitconfig file, add follow sections to invoke the emacsclient.
+Edit ~/.gitconfig file, add the following sections to invoke the emacsclient.
 #+begin_src conf
   [difftool]
     tool = ediff
