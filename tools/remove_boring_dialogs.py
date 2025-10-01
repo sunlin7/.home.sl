@@ -74,9 +74,10 @@ class TimerExecSecurityDlg(ITimerExec):
         self.hwnd = hwnd
 
     def run(self):
-        if (win32gui.GetForegroundWindow() != self.hwnd  # foreground switched
+        fwnd = win32gui.GetForegroundWindow()
+        if (fwnd != self.hwnd  # foreground switched
             or not win32gui.IsWindowVisible(self.hwnd)):  # invisible
-            logging.debug(f"SecrityDlg:foreground changed or invisible window {self.hwnd}")
+            logging.debug(f"SecrityDlg:foreground changed or invisible window {self.hwnd}, {fwnd}")
             return True
 
         tess = PyTessBaseAPI()
