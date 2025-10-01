@@ -188,7 +188,7 @@ class TimerExecLoginPage(ITimerExec):
 
         title = win32gui.GetWindowText(self.hwnd)
         logging.debug(f"title: {title}")
-        if title == "GlobalProtect - Google Chrome":
+        if title in ["Google - Google Chrome", "GlobalProtect - Google Chrome"]:
             ntime = time.time()
             dtime = ntime - self.lastTime
             if dtime <= 1.0:    # will let the UI show 1+ seconds
@@ -201,8 +201,15 @@ class TimerExecLoginPage(ITimerExec):
             win32api.keybd_event(win32con.VK_F4, 0, 0, 0)
             win32api.keybd_event(win32con.VK_F4, 0, win32con.KEYEVENTF_KEYUP, 0)
             win32api.keybd_event(win32con.VK_LCONTROL, 0, win32con.KEYEVENTF_KEYUP, 0)
-            logging.debug(f'Close the GlobalProcect page {self.hwnd}')
+            logging.debug(f'Close the page {title} {hex(self.hwnd)}')
             self.lastTime = ntime  # next GlobalProcect page
+            if re.search('GlobalProtect', title):
+                # the GlobalProcect model dialog
+                dlg = win32gui.FindWindowEx(None, None, '#32770', '')
+                if dlg and win32gui.IsWindowVisible(dlg):
+                    win32gui.ShowWindow(dlg, win32con.SW_HIDE)
+                    logging.info(f"Hide the GlobalProtect dialog {dlg}")
+
             return True
 
 
