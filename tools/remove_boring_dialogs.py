@@ -352,8 +352,11 @@ def listen_foreground(cb=lambda *args:None):
 
     wEvtProcTitle = WinEventProcType(
         lambda hWinEventHook, event, hwnd, idObject, idChild, dwEventThread, dwmsEventTime: \
-        (idObject == win32con.OBJID_WINDOW and idChild == win32con.CHILDID_SELF \
-         and event == win32con.EVENT_OBJECT_NAMECHANGE and hwnd == win32gui.GetForegroundWindow() \
+        (idObject == win32con.OBJID_WINDOW \
+         and idChild == win32con.CHILDID_SELF \
+         and event == win32con.EVENT_OBJECT_NAMECHANGE \
+         and hwnd == win32gui.GetForegroundWindow() \
+         and win32gui.IsWindow(hwnd) \
          and cb(event, hwnd, win32gui.GetWindowText(hwnd), win32gui.GetClassName(hwnd))))
 
     hookTitle = windll.user32.SetWinEventHook(
