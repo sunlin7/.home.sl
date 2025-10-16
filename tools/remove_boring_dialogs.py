@@ -204,12 +204,6 @@ class TimerExecLoginPage(ITimerExec):
             win32api.keybd_event(win32con.VK_LCONTROL, 0, win32con.KEYEVENTF_KEYUP, 0)
             logging.debug(f'Close the page {title} {hex(self.hwnd)}')
             self.lastTime = ntime  # next GlobalProcect page
-            if re.search('GlobalProtect', title):
-                # the GlobalProcect model dialog
-                dlg = win32gui.FindWindowEx(None, None, '#32770', '')
-                if dlg and win32gui.IsWindowVisible(dlg):
-                    win32gui.ShowWindow(dlg, win32con.SW_HIDE)
-                    logging.info(f"Hide the GlobalProtect dialog {dlg}")
 
             return True
 
@@ -349,13 +343,21 @@ def listen_foreground(cb=lambda *args:None):
         and cb(event, hwnd, win32gui.GetWindowText(hwnd), win32gui.GetClassName(hwnd)))
 
     hookForge = windll.user32.SetWinEventHook(
-        win32con.EVENT_SYSTEM_FOREGROUND,
-        win32con.EVENT_SYSTEM_FOREGROUND,
+        win32con.EVENT_SYSTEM_FOREGROUND, win32con.EVENT_SYSTEM_FOREGROUND,
         0, wEvtProcForge, 0, 0,
         win32con.WINEVENT_OUTOFCONTEXT | win32con.WINEVENT_SKIPOWNPROCESS
     )
     if hookForge == 0:
-        logging.error('SetWinEventHook failed', file=sys.stderr)
+        logging.error('SetWinEventHook for FORGEGROUND failed', file=sys.stderr)
+        exit(1)
+
+    hookShow = windll.user32.SetWinEventHook(
+        win32con.EVENT_OBJECT_SHOW, win32con.EVENT_OBJECT_SHOW,
+        0, wEvtProcForge, 0, 0,
+        win32con.WINEVENT_OUTOFCONTEXT | win32con.WINEVENT_SKIPOWNPROCESS
+    )
+    if hookForge == 0:
+        logging.error('SetWinEventHook for OBJECT_SHOW failed', file=sys.stderr)
         exit(1)
 
     wEvtProcTitle = WinEventProcType(
@@ -368,8 +370,7 @@ def listen_foreground(cb=lambda *args:None):
          and cb(event, hwnd, win32gui.GetWindowText(hwnd), win32gui.GetClassName(hwnd))))
 
     hookTitle = windll.user32.SetWinEventHook(
-        win32con.EVENT_OBJECT_NAMECHANGE,
-        win32con.EVENT_OBJECT_NAMECHANGE,
+        win32con.EVENT_OBJECT_NAMECHANGE, win32con.EVENT_OBJECT_NAMECHANGE,
         0, wEvtProcTitle, 0, 0,
         win32con.WINEVENT_OUTOFCONTEXT | win32con.WINEVENT_SKIPOWNPROCESS
     )
@@ -447,6 +448,9 @@ if not globals().get('MANUAL_START_THREAD'):
             eobj = None if dlg.run() else dlg
         elif title == "GlobalProtect" and '#32770' == clsName:
             eobj = TimerExecGlobalProDlg(hwnd)
+        elif title == "" and '#32770' == clsName:  # a popup dlg after connecting
+            win32gui.ShowWindow(hwnd, win32con.SW_HIDE)
+            logging.info(f"Hide the GlobalProtect popup dialog {hwnd}")
         elif any([re.search(x, title) for x in [" - Google Chrome", "^Gmail$"]]):
             page = TimerExecLoginPage(hwnd)
             eobj = None if page.run() else page
