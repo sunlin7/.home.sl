@@ -27,10 +27,10 @@ def set_dark_mode():
         #     # win32con.HWND_BROADCAST, win32con.WM_SETTINGCHANGE, 0,
         #     ctypes.c_wchar_p("ImmersiveColorSet")
         # )
-        res = ctypes.windll.user32.SendMessageA(
+        res, ret = ctypes.windll.user32.SendMessageTimeoutA(
             win32con.HWND_BROADCAST, win32con.WM_SETTINGCHANGE, 0,
-            ctypes.c_char_p(b"ImmersiveColorSet")
-        )
+            ctypes.c_char_p(b"ImmersiveColorSet"),
+            win32con.SMTO_ABORTIFHUNG, 1)
         print(f"Windows color setting changes return : {res}")
 
     except FileNotFoundError:
