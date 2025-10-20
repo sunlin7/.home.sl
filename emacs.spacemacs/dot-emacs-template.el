@@ -247,6 +247,7 @@
       (define-key input-decode-map "[;6~" [C-S-backspace])
       (define-key input-decode-map "[1;5l"  [?\C-.])
       (define-key input-decode-map "[1;5n"  [?\C-,])
+      (define-key input-decode-map "[37;6u"  [?\C-\M-%])
       (define-key input-decode-map "[96;5u"  [?\C-`])
       (define-key input-decode-map "[97;7u"  [?\C-\M-a])
       (define-key input-decode-map "[98;7u"  [?\C-\M-b])
@@ -254,7 +255,6 @@
       (define-key input-decode-map "[100;7u"  [?\C-\M-d])
       (define-key input-decode-map "[101;7u"  [?\C-\M-e])
       (define-key input-decode-map "[102;7u"  [?\C-\M-f])
-      (define-key input-decode-map "[1;8u"  [?\C-\M-%])
 			)))
 
 (add-hook 'after-make-frame-functions #'sl-term-kdb-patch)
