@@ -3,6 +3,7 @@ Tools for removing the boring dialog.
 globals().update("MANUAL_START_THREAD=True") will suppress auto start the thread.
 '''
 import cv2
+import itertools
 import numpy as np
 import re
 import sys
@@ -95,7 +96,7 @@ class TimerExecSecurityDlg(ITimerExec):
         for x in rectList:
             tess.SetRectangle(*x)
             txt = tess.GetUTF8Text()
-            if txt == "OK\n":
+            if txt == "Ok\n" or txt == "OK\n":
                 pos = np.add(okBtnVector[:2], x[:2])  # btn pos to window pos
                 logging.debug(f"Click the OK button: {pos} : {okBtnVector}")
                 mouse_click(win32gui.ClientToScreen(self.hwnd, tuple(pos)))
@@ -110,8 +111,10 @@ class TimerExecSecurityDlg(ITimerExec):
             if txt == "Face\n":
                 r0, r1 = x[1] - x[3], x[1] + x[3]  # range in [-h, +h]
                 res = [x for x in rectList if r0 < x[1] < r1]
-                logging.debug(f"'Face' column has rectangles count={len(res)}")
-                if len(res) < 3:  # not click on "Face"
+                threshold = x[2] // 2  # the elements width should larger than half of "Face"
+                res2 = [abs(x[0] - y[0]) > threshold for x,y in itertools.combinations(res, 2)]  # check intersected rectangles
+                logging.debug(f"'Face' column has rectangles {res} count={len(res)}, res2={res2}")
+                if len(res) - res2.count(False) < 3:  # "Face" is not clicked
                     mouse_click(win32gui.ClientToScreen(self.hwnd, x[:2]))
 
                 return False     # to the next round
