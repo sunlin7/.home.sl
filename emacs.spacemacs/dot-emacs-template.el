@@ -89,6 +89,7 @@
                      c-c++-backend 'lsp-clangd)
               (chinese :variables chinese-default-input-method t
                        chinese-enable-avy-pinyin nil)
+              claude-code
               cmake
               csv
               django
@@ -226,7 +227,7 @@
   (with-eval-after-load 'vterm
     (define-key vterm-mode-map (kbd "C-y") 'vterm--self-insert)
     (define-key vterm-mode-map (kbd "C-S-<insert>")
-                #'(lambda () "`kill-ring-save' then `yank'"
+                #'(lambda () "Copy selection and then yank it"
                     (interactive)
                     (call-interactively 'kill-ring-save)
                     (call-interactively 'vterm-yank))))
