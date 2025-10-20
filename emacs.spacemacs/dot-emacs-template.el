@@ -85,6 +85,7 @@
             '((c-c++ :variables
                      ;; c-c++-enable-google-style t
                      ;; c-c++-enable-google-newline t
+                     c-c++-formatter-indent-line t
                      c-c++-backend 'lsp-clangd)
               (chinese :variables chinese-default-input-method t
                        chinese-enable-avy-pinyin nil)
@@ -96,12 +97,14 @@
               git
               imenu-list
               ietf
+              llm-client
               (lsp :variables
                    lsp-restart 'ignore
                    ;; lsp-semantic-tokens-enable t
                    lsp-clients-lua-language-server-install-dir (expand-file-name "share/lua-language-server" portable-root-dir)
                    ;; lsp-lua-runtime-path ["?.lua" "?/init.lua" "?/?.lua" "../?/?.lua"]
                    lsp-lua-workspace-preload-file-size 500
+                   lsp-clients-clangd-args '("--header-insertion=never")
                    lsp-copilot-applicable-fn nil)
               (multiple-cursors :variables multiple-cursors-backend 'mc)
               octave
