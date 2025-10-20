@@ -43,37 +43,37 @@ The =early-init.el= should do the very early initialization, as follows:
 
 *** An example for .emacs
 A =.emacs= can copy from the =dot-emacs-template.el=; or to load the =dot-emacs-template.el=, as follows:
-#+begin_src emacs-lisp :tangle "dot-emacs.el"
-  ;; -*- mode: emacs-lisp; lexical-binding: t -*-
+#+begin_src emacs-lisp :tangle ".emacs/init.el"
+  ;; -*- mode: emacs-lisp; lexical-binding: t; -*-
 
-  (when (eq system-type 'windows-nt)   ; more executables from cygwin, should before other path
+  (when (eq system-type 'windows-nt)   ; executables in cygwin, in low prior
     (nconc exec-path '("c:/temp/cygwin64/bin" "~/.local/bin"))
-    (setenv "PATH" (concat (getenv "HOME") "\\.local\\bin;" (getenv "PATH") ";c:\\temp\\cygwin64\\bin"))
+    (setenv "PATH" (concat (getenv "PATH") ";c:\\temp\\cygwin64\\bin;" (getenv "HOME") "\\.local\\bin"))
+    (add-to-list 'auto-mode-alist '("\\.mtl\\'" . xml-mode))
     (with-eval-after-load 'org ; org-mode on windows will try call associated Apps
       (add-to-list 'org-file-apps-windowsnt '("\\.txt\\'" . emacs))
-      (add-to-list 'org-file-apps-windowsnt '("\\.log\\'" . emacs)))
-    (add-to-list 'auto-mode-alist '("\\.mtl\\'" . xml-mode)))
+      (add-to-list 'org-file-apps-windowsnt '("\\.log\\'" . emacs))))
 
+  (defvar portable-emacs-d (file-name-directory (or (buffer-file-name) load-file-name)))
   ;; copy from the template to initialize the portable-* values
   (defvar portable-root-dir (file-name-parent-directory invocation-directory))
   (defvar portable-home-dir
     (if (and (not (fboundp 'image-mask-p)) ; for noX build try .root[im]-*/.emacs
              (file-exists-p (expand-file-name ".emacs" portable-root-dir)))
         portable-root-dir
-      (file-name-directory (or (buffer-file-name) load-file-name))))
+      (concat portable-emacs-d "../")))
 
   (unless early-init-file         ; load the early-init.el for essential variables
-    (load (expand-file-name "early-init.el" user-emacs-directory) t t t))
-
-  (setq package-quickstart-file (expand-file-name ".emacs.d/package-quickstart.el" portable-home-dir))
-  (define-advice configuration-layer//load (:before (&rest _))
-    (package-activate-all))
+    (load (concat portable-emacs-d "early-init") t t))
 
   ;; FIXME: `spacemacs-cache-directory' is required on initialize
   (dolist (x (flatten-list (mapcar 'getenv '("OHOME" "HOME"))))
     (let ((user-emacs-directory (expand-file-name ".emacs.d" x))
           (noninteractive nil)) ; `locate-user-emacs-file' short return for "-batch" mode
       (locate-user-emacs-file ".cache/")))
+
+  (with-eval-after-load 'core-dotspacemacs
+    (setq  dotspacemacs-filepath (expand-file-name dotspacemacs-filepath))) ; expand to absolute path
 
   ;; add snippets dir on initialize; when Spacemacs turn on yas-global-mode the snippets are reloaded
   (define-advice yasnippet-snippets-initialize (:around (&rest _))
@@ -85,52 +85,85 @@ A =.emacs= can copy from the =dot-emacs-template.el=; or to load the =dot-emacs-
     (load init-template))
 
   (custom-set-variables                   ; variables after loading Spacemacs
-   '(window-system-default-frame-alist
-     '((x . ((left . 0) (top . 72) (width . 190) (height . 50)))
-       (w32 . ((left . (+ -16)) (top . (+ -3)) (width . 191) (height . 52)))))
-   '(lsp-clients-clangd-args '("--header-insertion-decorators=0" "--clang-tidy" "--completion-style=detailed"))
-   '(lsp-server-install-dir (expand-file-name ".emacs.d/.cache/lsp/" portable-home-dir))
-   ;; '(dired-listing-switches "-alt") ; (setq dired-quick-sort-sort-by-last "time")
+   '(bookmark-default-file (expand-file-name "bookmarks" sl-savefile-dir))
+   '(browse-url-browser-function 'eww)
    '(dired-compress-directory-default-suffix ".tar.xz")
    '(dired-compress-file-default-suffix ".tar.xz")
-   '(display-time-mode 1)
-   '(display-time-24hr-format t)
-   '(browse-url-browser-function 'eww)
-   '(bookmark-default-file (expand-file-name "bookmarks" sl-savefile-dir))
-   '(ietf-docs-rfc-url-directory "https://ietf.org/rfc/") ; FIXME: https://github.com/choppsv1/ietf-docs/pull/4
-   '(ietf-docs-draft-url-directory "http://ietf.org/id/")
+   '(dired-listing-switches "-alt")
+   '(dumb-jump-default-project ".")       ; for dump searching in a folder
+   ;; '(eww-search-prefix "https://www.google.com/search?q="); google requires JS enabled since Jan 2025
+   '(flycheck-checker-error-threshold 1200)
    '(google-translate-default-target-language "zh-CN")
-   '(eww-search-prefix "https://www.google.com/search?q=")
+   '(google-translate-output-destination 'popup)
+   '(helm-ls-git-with-editor-fill-column 79)
+   '(ietf-docs-draft-url-directory "http://ietf.org/id/")
+   '(ietf-docs-rfc-url-directory "https://ietf.org/rfc/") ; FIXME: https://github.com/choppsv1/ietf-docs/pull/4
+   '(large-file-warning-threshold 100000000)
+   '(lsp-lua-workspace-preload-file-size 500)
+   '(lsp-warn-no-matched-clients nil)
+   '(next-error-recenter 35)
+   '(remote-file-name-inhibit-auto-save-visited t)
+   '(rmail-file-name "~/.emacs.d/RMAIL")
+   '(savehist-file "~/.emacs.d/.cache/savehist")
+   '(spacemacs-keep-legacy-current-buffer-delete-bindings nil)
+   '(tramp-histfile-override nil)        ; FIXME /home/pbxuser not exists in docker
    '(url-cookie-save-interval 60)
-   '(rmail-file-name "~/.emacs.d/RMAIL"))
+   '(use-short-answers t)
+   '(vc-handled-backends '(Git)) ; avoid search other backends
+   '(vterm-environment '("PAGER=less"))
+   '(window-system-default-frame-alist
+     '((x . ((left . 0) (top . 72) (width . 190) (height . 50)))
+       (w32 . ((left . (+ -16)) (top . (+ -3)) (width . 191) (height . 52))))))
+
+  ;; (when (file-exists-p "/proc/sys/fs/binfmt_misc/WSLInterop") ; WSL
+  ;;   (setcdr (car (last (assoc 'x window-system-default-frame-alist))) 52)
+  ;;   (spacemacs/set-default-font '("Source Code Pro" :size 12.0 :weight normal :width normal)))
 
   (custom-set-faces
-   '(irfc-reference-face ((t (:foreground "RoyalBlue4" :weight bold)))))
+   '(irfc-reference-face ((t (:foreground "RoyalBlue4" :weight bold))))
+   '(vterm-color-bright-blue ((t (:inherit term-color-bright-blue :background "#0096ff" :foreground "#0096ff")))))
 
-  (with-eval-after-load 'dired-quick-sort
-    (setq dired-quick-sort-sort-by-last "time"))
+  (dolist (x auto-save-file-name-transforms)
+    (unless (file-exists-p (cadr x))
+      (make-directory (cadr x))))
+
+  (advice-add 'create-image :filter-return
+              #'(lambda (img) (when img (nconc img (list :background "#FFFFFF")))))
+
+  (autoload 'popup-tip "popup")
+  (advice-add 'define-word-displayfn :filter-return
+              #'(lambda (fn) (when (eq fn 'message) #'popup-tip)))
 
   ;; the X11 window will shrink after apply the Spacemacs default font
   (spacemacs|do-after-display-system-init
    (modify-frame-parameters nil (alist-get (framep (selected-frame)) window-system-default-frame-alist)))
 
-  (defun advice-unadvice (sym)
-    "Remove all advices from symbol SYM."
-    (interactive "aFunction symbol: ")
-    (advice-mapc (lambda (advice _props) (advice-remove sym advice)) sym))
+  (with-eval-after-load 'dired-quick-sort
+    (setq dired-quick-sort-sort-by-last "time"))
+
+  (with-eval-after-load 'markdown-mode
+    (setq markdown-command "pandoc -s --webtex -F mermaid-filter --highlight-style pygments")
+    (add-hook 'mermaid-mode-hook #'(lambda() (keymap-local-set "C-c C-c" 'mermaid-compile-buffer))))
+
+  (with-eval-after-load 'writeroom-mode
+    (setq writeroom-global-effects nil
+          writeroom-mode-line t))
 
   (with-eval-after-load 'eww
+    ;; (add-to-list 'eww-mode-hook 'writeroom-mode)
     (defun eww-open-background ()
       "Fetch URL in a new EWW background buffer"
       (interactive)
-      (save-window-excursion (funcall 'eww-open-in-new-buffer)))
+      (funcall-interactively 'eww-open-in-new-buffer '(t)))
 
     (define-key-after eww-mode-map
       [menu-bar eww follow-url-background]
       '(menu-item "Follow URL in background" #'eww-open-background)
       'Follow\ URL\ in\ new\ buffer)
     (define-key eww-mode-map [C-return] #'eww-open-background)
-    (define-key eww-mode-map "Q" #'spacemacs/kill-this-buffer))
+    (spacemacs/set-leader-keys-for-major-mode 'eww-mode
+      "q" 'spacemacs/kill-this-buffer
+      "RET" 'eww-open-background))
 #+end_src
 *** emacs with msys64
 Starting emacs-x86_64-mingw64 directly may not have the PATH with mingw32/64; the following commands will help to get the correct PATH.
