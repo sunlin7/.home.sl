@@ -72,16 +72,7 @@ function mycd_builtin() {
 }
 
 pa () {
-    if [ $# -eq 0 ]; then
-        ps aux
-    else
-        exp=
-        for i in "$@"; do
-            # here we append a blank at tail, so the first char of exp will no be blank.
-            exp="${exp}-e \"$i\" "
-            eval "ps aux | grep $exp | grep -v grep"
-        done
-    fi
+    [ $# -eq 0 ] && ps aux || pgrep -d, "$@" | xargs -r ps up
 }
 
 export EDITOR="emacsclient --alternate-editor=" # use exists term
