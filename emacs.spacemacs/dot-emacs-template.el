@@ -123,7 +123,9 @@
                    sql-capitalize-keywords-blacklist '("name" "varchar"))
               version-control
               yaml))
-     (setq sl-packages-list (append sl-packages-list '(mermaid-mode math-preview)))
+     (setq sl-packages-list (append sl-packages-list '(mermaid-mode math-preview tramp-hlo)))
+     (autoload 'tramp-hlo-setup "tramp-hlo")
+     (with-eval-after-load 'tramp (tramp-hlo-setup))
      (add-hook 'kill-buffer-hook
                #'(lambda ()
                    (when-let* (((boundp 'mermaid-tmp-dir))
