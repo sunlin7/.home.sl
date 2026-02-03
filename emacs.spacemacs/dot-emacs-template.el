@@ -109,10 +109,7 @@
                    lsp-copilot-applicable-fn nil)
               (multiple-cursors :variables multiple-cursors-backend 'mc)
               octave
-              (org :variables
-                   org-plantuml-jar-path (expand-file-name "share/plantuml.jar" portable-root-dir))
-              (plantuml :variables plantuml-default-exec-mode 'jar
-                        plantuml-jar-path (expand-file-name "share/plantuml.jar" portable-root-dir))
+              (org :variables org-enable-mermaid-support t)
               (python :variables python-enable-tools '(pipenv))
               rust
               (shell :variables shell-default-shell 'multi-vterm)
@@ -123,16 +120,26 @@
                    sql-capitalize-keywords-blacklist '("name" "varchar"))
               version-control
               yaml))
-     (setq sl-packages-list (append sl-packages-list '(mermaid-mode math-preview tramp-hlo)))
+     (setq sl-packages-list (append sl-packages-list '(math-preview tramp-hlo)))
      (autoload 'tramp-hlo-setup "tramp-hlo")
      (with-eval-after-load 'tramp (tramp-hlo-setup))
-     (add-hook 'kill-buffer-hook
-               #'(lambda ()
-                   (when-let* (((boundp 'mermaid-tmp-dir))
-                               (prefix (concat mermaid-tmp-dir "current-buffer"))
-                               ((string-prefix-p prefix (buffer-file-name))))
-                     (dolist (x (file-expand-wildcards (concat prefix "*")))
-                       (delete-file x t)))))
+     (with-eval-after-load 'mermaid-mode
+       (add-hook 'kill-buffer-hook
+                 #'(lambda ()
+                     (when-let* (((boundp 'mermaid-tmp-dir))
+                                 (prefix (concat mermaid-tmp-dir "current-buffer"))
+                                 ((string-prefix-p prefix (buffer-file-name))))
+                       (dolist (x (file-expand-wildcards (concat prefix "*")))
+                         (delete-file x t)))))
+       (define-advice mermaid-compile-file (:around (ofun file-name) ASCII)
+         (interactive "fFilename: ")
+         (if (or (display-graphic-p) (not (executable-find "mermaid-ascii")))
+             (funcall-interactively ofun file-name)
+           (let* ((mermaid-mmdc-location "mermaid-ascii")
+                  (input file-name)
+                  (output (format "*%s.txt" (file-name-sans-extension input)))
+                  (exit-code (apply #'call-process mermaid-mmdc-location nil output nil (append (split-string mermaid-flags " " t) (list "-f" input)))))
+             (display-buffer output)))))
      (delq 'shell sl-configuration-layers) ;delete the no-argument `shell' layer
      (when (fboundp 'image-mask-p)
        (add-to-list 'sl-packages-list 'org-pdftools)
@@ -196,10 +203,6 @@
   (when (string-match "X11" system-configuration-features)
     (use-package org-pdftools ; make sure the function org-pdftools-setup-link exists
       :defer t :after org :config (org-pdftools-setup-link)))
-  ;; (or (file-exists-p plantuml-jar-path) (plantuml-download-jar)); download plantuml.jar
-  (with-eval-after-load 'plantuml-mode
-    (when (fboundp 'image-mask-p)
-      (plantuml-set-output-type "png"))) ; default SVG is hard to see under dark theme
 
   ;; disable img resize for window size is changed by HELM windows
   (custom-set-variables '(image-auto-resize-on-window-resize nil)

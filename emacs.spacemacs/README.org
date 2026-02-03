@@ -142,8 +142,7 @@ A =.emacs= can copy from the =dot-emacs-template.el=; or to load the =dot-emacs-
     (setq dired-quick-sort-sort-by-last "time"))
 
   (with-eval-after-load 'markdown-mode
-    (setq markdown-command "pandoc -s --webtex -F mermaid-filter --highlight-style pygments")
-    (add-hook 'mermaid-mode-hook #'(lambda() (keymap-local-set "C-c C-c" 'mermaid-compile-buffer))))
+    (setq markdown-command "pandoc -s --webtex -F mermaid-filter --highlight-style pygments"))
 
   (with-eval-after-load 'writeroom-mode
     (setq writeroom-global-effects nil
