@@ -123,6 +123,9 @@
      (setq sl-packages-list (append sl-packages-list '(math-preview tramp-hlo)))
      (autoload 'tramp-hlo-setup "tramp-hlo")
      (with-eval-after-load 'tramp (tramp-hlo-setup))
+     ;; avoid key ", c" conflicting to major-mode
+     (define-advice org-src-mode (:after (&rest _) rmC) (define-key spacemacs-org-src-mode-map "c" nil))
+     (define-advice edit-indirect--mode (:after (&rest _) rmC) (define-key spacemacs-edit-indirect--overlay-map "c" nil))
      (with-eval-after-load 'mermaid-mode
        (add-hook 'kill-buffer-hook
                  #'(lambda ()
