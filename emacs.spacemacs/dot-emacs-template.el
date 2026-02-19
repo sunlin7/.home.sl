@@ -129,10 +129,8 @@
      (with-eval-after-load 'mermaid-mode
        (add-hook 'kill-buffer-hook
                  #'(lambda ()
-                     (when-let* (((boundp 'mermaid-tmp-dir))
-                                 (prefix (concat mermaid-tmp-dir "current-buffer"))
-                                 ((string-prefix-p prefix (buffer-file-name))))
-                       (dolist (x (file-expand-wildcards (concat prefix "*")))
+                     (when (derived-mode-p 'mermaid-mode)
+                       (dolist (x (file-expand-wildcards (format "%s%s*" mermaid-tmp-dir "current-buffer")))
                          (delete-file x t)))))
        (define-advice mermaid-compile-file (:around (ofun file-name) ASCII)
          (interactive "fFilename: ")
@@ -140,8 +138,10 @@
              (funcall-interactively ofun file-name)
            (let* ((mermaid-mmdc-location "mermaid-ascii")
                   (input file-name)
-                  (output (format "*%s.txt" (file-name-sans-extension input)))
-                  (exit-code (apply #'call-process mermaid-mmdc-location nil output nil (append (split-string mermaid-flags " " t) (list "-f" input)))))
+                  (output (format "*%s.txt" (file-name-sans-extension input))))
+             (with-current-buffer (get-buffer-create output)
+               (erase-buffer)
+               (apply #'call-process mermaid-mmdc-location nil output nil (append (split-string mermaid-flags " " t) (list "-f" input))))
              (display-buffer output)))))
      (delq 'shell sl-configuration-layers) ;delete the no-argument `shell' layer
      (when (fboundp 'image-mask-p)
