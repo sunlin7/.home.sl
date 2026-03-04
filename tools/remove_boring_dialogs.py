@@ -49,10 +49,13 @@ def apply_1st_auto_fill(pos):
     win32api.SetCursorPos(pos)
     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
-    time.sleep(0.5)
-    win32api.keybd_event(win32con.VK_DOWN, 0, 0, 0)
+    time.sleep(0.2)
+    win32api.keybd_event(win32con.VK_DOWN, 0, 0, 0)  # trigger autocompletion list and select 1st item
     win32api.keybd_event(win32con.VK_DOWN, 0, win32con.KEYEVENTF_KEYUP, 0)
-    time.sleep(0.15)
+    time.sleep(0.3)
+    win32api.keybd_event(win32con.VK_PRIOR, 0, 0, 0)  # back to 1st item for 2nd one may be selected
+    win32api.keybd_event(win32con.VK_PRIOR, 0, win32con.KEYEVENTF_KEYUP, 0)
+    time.sleep(0.3)
     win32api.keybd_event(win32con.VK_RETURN, 0, 0, 0)
     win32api.keybd_event(win32con.VK_RETURN, 0, win32con.KEYEVENTF_KEYUP, 0)
     time.sleep(0.2)
