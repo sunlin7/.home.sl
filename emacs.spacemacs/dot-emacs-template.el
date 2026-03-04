@@ -233,6 +233,7 @@
     (nconc term-bind-key-alist '(("<M-backspace>" . term-send-backward-kill-word))))
 
   (with-eval-after-load 'vterm
+    (setcdr (assoc "docker" vterm-tramp-shells) '("/bin/bash" "/bin/sh")) ; prefer bash
     (define-key vterm-mode-map (kbd "C-y") 'vterm--self-insert)
     (define-key vterm-mode-map (kbd "C-S-<insert>")
                 #'(lambda () "Copy selection and then yank it"
