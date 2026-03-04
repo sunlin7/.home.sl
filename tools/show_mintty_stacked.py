@@ -70,11 +70,11 @@ def show_mintty_stacked_main():
     x, y, _, _ = getWorkArea()
     # stacking
     match len(mintty_windows):
-        case 2: posPre = [(x-6,     y,     0, 0),
-                          (x-6+160, y+160, 0, 0)]
+        # case 2: posPre = [(x-6,     y,     0, 0),
+        #                   (x-6+300, y+240, 0, 0)]
         case _: posPre = [(x-6,     y,     0, 0),
-                          (x-6+80,  y+80,  0, 0),
-                          (x-6+160, y+160, 0, 0)]
+                          (x-6+170, y+128,  0, 0),
+                          (x-6+340, y+256, 0, 0)]
 
     for idx, item in enumerate(mintty_windows[:len(posPre)]):
         win32gui.ShowWindow(item[0], win32con.SW_RESTORE)
