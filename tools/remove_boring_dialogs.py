@@ -454,7 +454,7 @@ if not globals().get('MANUAL_START_THREAD'):
             eobj = None if dlg.run() else dlg
         elif title == "GlobalProtect" and '#32770' == clsName:
             eobj = TimerExecGlobalProDlg(hwnd)
-        elif title == "" and '#32770' == clsName:  # a popup dlg after connecting
+        elif title == "" and '#32770' == clsName and None == win32gui.FindWindowEx(hwnd, None, 'Button', 'OK'):  # a popup dlg after connecting
             win32gui.ShowWindow(hwnd, win32con.SW_HIDE)
             logging.info(f"Hide the GlobalProtect popup dialog {hwnd}")
         elif any([re.search(x, title) for x in [" - Google Chrome", "^Gmail$"]]):
