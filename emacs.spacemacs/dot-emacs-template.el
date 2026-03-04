@@ -239,7 +239,12 @@
                 #'(lambda () "Copy selection and then yank it"
                     (interactive)
                     (call-interactively 'kill-ring-save)
-                    (call-interactively 'vterm-yank))))
+                    (call-interactively 'vterm-yank)))
+    ;; support kill on vterm
+    (define-advice vterm--self-insert-meta (:before (&rest args) KILL)
+      (interactive)
+      (when (and (eq last-command-event ?w) (region-active-p))
+        (kill-ring-save (region-beginning) (region-end)))))
 
   (let ((template-file (or (buffer-file-name) load-file-name)))
     (defun open-dot-emacs-template ()
