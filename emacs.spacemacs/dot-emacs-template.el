@@ -241,10 +241,11 @@
                     (call-interactively 'kill-ring-save)
                     (call-interactively 'vterm-yank)))
     ;; support kill on vterm
-    (define-advice vterm--self-insert-meta (:before (&rest args) KILL)
+    (define-advice vterm--self-insert-meta (:around (fn &rest args) KILL)
       (interactive)
-      (when (and (eq last-command-event ?w) (region-active-p))
-        (kill-ring-save (region-beginning) (region-end)))))
+      (if (and (eq last-command-event ?w) (region-active-p))
+          (kill-ring-save (region-beginning) (region-end))
+        (apply fn args))))
 
   (let ((template-file (or (buffer-file-name) load-file-name)))
     (defun open-dot-emacs-template ()
