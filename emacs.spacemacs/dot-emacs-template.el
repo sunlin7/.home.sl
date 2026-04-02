@@ -182,9 +182,9 @@
   (define-advice dotspacemacs/init (:after ())
     (setq-default dotspacemacs-editing-style 'hybrid
                   dotspacemacs-enable-load-hints t
+                  dotspacemacs-line-numbers '(:disabled-for-modes org-mode)
                   dotspacemacs-loading-progress-bar nil
-                  dotspacemacs-maximized-at-startup nil
-                  dotspacemacs-line-numbers '(:disabled-for-modes org-mode)))
+                  dotspacemacs-maximized-at-startup nil))
   ;; load the spacemacs
   (load-file sl-spacemacs-init)
   (when-let* ((OHOME (getenv "OHOME")))
@@ -215,7 +215,7 @@
                             t)))
 
   (with-eval-after-load 'helm-files
-    (setq helm-ff-use-notify (and file-notify--library t)))
+    (setq helm-ff-use-notify (and file-notify--library t))) ; following notify library
 
   ;;;; fix the c-basic-offset for google-c-style
   ;; (with-eval-after-load 'google-c-style
