@@ -75,11 +75,17 @@ A =.emacs= can copy from the =dot-emacs-template.el=; or to load the =dot-emacs-
   (with-eval-after-load 'core-dotspacemacs
     (setq  dotspacemacs-filepath (expand-file-name dotspacemacs-filepath))) ; expand to absolute path
 
+  (define-advice spacemacs/write-custom-settings-to-dotfile (:around (&rest))) ; use settings from current file
   ;; add snippets dir on initialize; when Spacemacs turn on yas-global-mode the snippets are reloaded
   (define-advice yasnippet-snippets-initialize (:around (&rest _))
     (add-to-list 'yas-snippet-dirs 'yasnippet-snippets-dir t))
 
-  (autoload 'when-let* "subr-x")
+  (setq dired-guess-shell-gnutar "tar" ; avoiding their initilize forms call external-bin
+        tramp-repository-branch nil
+        tramp-repository-version nil)
+  (custom-set-variables '(spacemacs-theme-custom-colors '((act2 . "#333333")(border . "#000000")(comp . "#646175"))))
+
+  (custom-set-variables '(helm-exit-idle-delay 0.1))
   (when-let* ((init-template
                (expand-file-name ".home.sl/emacs.spacemacs/dot-emacs-template" portable-home-dir)))
     (load init-template))
@@ -106,6 +112,7 @@ A =.emacs= can copy from the =dot-emacs-template.el=; or to load the =dot-emacs-
    '(rmail-file-name "~/.emacs.d/RMAIL")
    '(savehist-file "~/.emacs.d/.cache/savehist")
    '(spacemacs-keep-legacy-current-buffer-delete-bindings nil)
+   '(tramp-default-remote-shell "/bin/bash")
    '(tramp-histfile-override nil)        ; FIXME /home/pbxuser not exists in docker
    '(url-cookie-save-interval 60)
    '(use-short-answers t)
@@ -113,7 +120,7 @@ A =.emacs= can copy from the =dot-emacs-template.el=; or to load the =dot-emacs-
    '(vterm-environment '("PAGER=less"))
    '(window-system-default-frame-alist
      '((x . ((left . 0) (top . 72) (width . 190) (height . 50)))
-       (w32 . ((left . (+ -16)) (top . (+ -3)) (width . 191) (height . 52))))))
+       (w32 . ((left . (+ -16)) (top . (+ -3)) (width . 191) (height . 54))))))
 
   ;; (when (file-exists-p "/proc/sys/fs/binfmt_misc/WSLInterop") ; WSL
   ;;   (setcdr (car (last (assoc 'x window-system-default-frame-alist))) 52)
@@ -125,7 +132,7 @@ A =.emacs= can copy from the =dot-emacs-template.el=; or to load the =dot-emacs-
 
   (dolist (x auto-save-file-name-transforms)
     (unless (file-exists-p (cadr x))
-      (make-directory (cadr x))))
+      (make-directory (cadr x) t)))
 
   (advice-add 'create-image :filter-return
               #'(lambda (img) (when img (nconc img (list :background "#FFFFFF")))))
@@ -147,6 +154,9 @@ A =.emacs= can copy from the =dot-emacs-template.el=; or to load the =dot-emacs-
   (with-eval-after-load 'writeroom-mode
     (setq writeroom-global-effects nil
           writeroom-mode-line t))
+
+  (with-eval-after-load "thingatpt" ; let ffap support `@<path>' and `layers/+<name>/<path>'
+    (define-thing-chars filename (concat (delete ?@ thing-at-point-file-name-chars) "+")))
 
   (with-eval-after-load 'eww
     ;; (add-to-list 'eww-mode-hook 'writeroom-mode)
