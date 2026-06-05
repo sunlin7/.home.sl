@@ -63,28 +63,7 @@ Returns non nil if it was run for the buffer."
               (unless (local-variable-p 'tab-width) (c-guess))))))
 
 (with-eval-after-load 'hideshow
-  (declare-function hs-life-goes-on "hideshow")
-  (declare-function hs-already-hidden-p "hideshow")
-  (declare-function hs-show-all "hideshow")
-  (declare-function hs-hide-all "hideshow")
-  (defvar hs-minor-mode-map)
-  (defvar hs-minor-mode-menu)
-  (defun sl-toggle-hideshow-all ()
-    "Toggle hideshow all."
-    (interactive)
-    (hs-life-goes-on
-     (if (hs-already-hidden-p)
-         (hs-show-all)
-       (hs-hide-all))))
-
-  (define-key-after
-    hs-minor-mode-menu
-    [sl-toggle-hideshow-all]
-    '(menu-item "(SL)Toggle Show/Hide all..." sl-toggle-hideshow-all
-                :help "Toggle Show/Hide all in current buffer..")
-    'Toggle\ Hiding)
-
-  (define-key hs-minor-mode-map (kbd "C-M-;") 'sl-toggle-hideshow-all)
+  (define-key hs-minor-mode-map (kbd "C-M-;") 'hs-toggle-all)
   (define-key hs-minor-mode-map (kbd "C-;") 'hs-toggle-hiding))
 
 
