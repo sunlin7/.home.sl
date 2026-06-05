@@ -104,7 +104,7 @@
                    ;; lsp-semantic-tokens-enable t
                    lsp-clients-lua-language-server-install-dir (expand-file-name "share/lua-language-server" portable-root-dir)
                    ;; lsp-lua-runtime-path ["?.lua" "?/init.lua" "?/?.lua" "../?/?.lua"]
-                   lsp-lua-workspace-preload-file-size 500
+                   lsp-lua-workspace-preload-file-size 700
                    lsp-clients-clangd-args '("--header-insertion=never")
                    lsp-copilot-applicable-fn nil)
               (multiple-cursors :variables multiple-cursors-backend 'mc)
@@ -270,8 +270,7 @@
       (define-key input-decode-map "[99;7u"  [?\C-\M-c])
       (define-key input-decode-map "[100;7u"  [?\C-\M-d])
       (define-key input-decode-map "[101;7u"  [?\C-\M-e])
-      (define-key input-decode-map "[102;7u"  [?\C-\M-f])
-			)))
+      (define-key input-decode-map "[102;7u"  [?\C-\M-f]))))
 
 (add-hook 'after-make-frame-functions #'sl-term-kdb-patch)
 (sl-term-kdb-patch (selected-frame)) ; patch 'after-make-frame-functions for the initialed term

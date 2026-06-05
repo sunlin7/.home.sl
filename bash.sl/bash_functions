@@ -36,7 +36,7 @@ alias cd-='cd -'
 function rm() {
     for cmd in trash-put "gio trash" gvfs-trash /bin/rm /usr/bin/rm; do
         if command -v ${cmd/ */} > /dev/null; then
-            $cmd "$@" 2>/dev/null && break
+            $cmd "$@"; break
         fi
     done
 }
