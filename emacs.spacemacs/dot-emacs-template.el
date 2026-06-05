@@ -275,6 +275,12 @@
 (add-hook 'after-make-frame-functions #'sl-term-kdb-patch)
 (sl-term-kdb-patch (selected-frame)) ; patch 'after-make-frame-functions for the initialed term
 
+(define-advice xterm--init-modify-other-keys (:after (&rest _) mintty)
+  "Let mintty send `Ctrl+Ins' and `Shift+Ins' keys into emacs"
+  (send-string-to-terminal "\e[?7783h")
+  (push "\e[?7783l" (terminal-parameter nil 'tty-mode-reset-strings))
+  (push "\e[?7783h" (terminal-parameter nil 'tty-mode-set-strings)))
+
 ;; (add-to-list 'after-init-hook (apply-partially 'xterm-mouse-mode 0))
 (add-to-list 'after-init-hook #'global-hungry-delete-mode)
 
