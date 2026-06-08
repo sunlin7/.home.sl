@@ -165,6 +165,9 @@
      (nconc sl-configuration-layers '())
      (with-eval-after-load "files" (delete '("\\.org\\'" . org-mode) auto-mode-alist))))
 
+  ;; use built-in org/transient for Spacemacs issue #17275
+  (nconc sl-packages-list '((org :location built-in) (transient :location built-in)))
+
   (define-advice recentf-load-list (:around (ofun &rest args) ADV)
     (let ((file-name-handler-alist
            (cl-remove-if (lambda (x) (string-prefix-p "tramp-" (symbol-name (cdr x))))
