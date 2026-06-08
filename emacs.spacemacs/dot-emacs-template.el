@@ -36,6 +36,7 @@
 
   (setq sl-packages-excluded
         '(chinese-conv
+          eat
           evil-tutor
           fancy-battery
           gtags
@@ -143,12 +144,10 @@
                (erase-buffer)
                (apply #'call-process mermaid-mmdc-location nil output nil (append (split-string mermaid-flags " " t) (list "-f" input))))
              (display-buffer output)))))
-     (delq 'shell sl-configuration-layers) ;delete the no-argument `shell' layer
+     (delq 'shell sl-configuration-layers) ; delete the no-argument `shell' layer
      (when (fboundp 'image-mask-p)
        (add-to-list 'sl-packages-list 'org-pdftools)
-       (nconc sl-configuration-layers
-              '(graphviz
-                pdf))
+       (nconc sl-configuration-layers '(pdf))
        (add-hook 'pdf-view-mode-hook #'pdf-view-themed-minor-mode)
        (custom-set-variables '(pdf-view-restore-filename (locate-user-emacs-file ".cache/pdf-view-restore"))))
      (unless (equal portable-home-dir portable-root-dir) ; not on a branch machine
