@@ -2,9 +2,9 @@ import winreg
 import ctypes
 import win32con
 
-def set_dark_mode():
+def toggle_light_theme():
     """
-    Sets the Windows color setting to "Dark" by modifying the registry.
+    Sets the Windows color setting to Light/Dark by modifying the registry.
     """
     # Define the registry key path
     key_path = r"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize"
@@ -41,4 +41,4 @@ def set_dark_mode():
         print(f"An error occurred: {e}")
 
 if __name__ == "__main__":
-    set_dark_mode()
+    toggle_light_theme()
