@@ -117,7 +117,6 @@ A =.emacs= can copy from the =dot-emacs-template.el=; or to load the =dot-emacs-
    '(url-cookie-save-interval 60)
    '(use-short-answers t)
    '(vc-handled-backends '(Git)) ; avoid search other backends
-   '(vterm-environment '("PAGER=less"))
    '(window-system-default-frame-alist
      '((x . ((left . 0) (top . 72) (width . 190) (height . 50)))
        (w32 . ((left . (+ -16)) (top . (+ -3)) (width . 191) (height . 54))))))
@@ -127,8 +126,7 @@ A =.emacs= can copy from the =dot-emacs-template.el=; or to load the =dot-emacs-
   ;;   (spacemacs/set-default-font '("Source Code Pro" :size 12.0 :weight normal :width normal)))
 
   (custom-set-faces
-   '(irfc-reference-face ((t (:foreground "RoyalBlue4" :weight bold))))
-   '(vterm-color-bright-blue ((t (:inherit term-color-bright-blue :background "#0096ff" :foreground "#0096ff")))))
+   '(irfc-reference-face ((t (:foreground "RoyalBlue4" :weight bold)))))
 
   (dolist (x auto-save-file-name-transforms)
     (unless (file-exists-p (cadr x))

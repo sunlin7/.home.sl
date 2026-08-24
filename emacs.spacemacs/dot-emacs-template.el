@@ -90,7 +90,7 @@
                      c-c++-backend 'lsp-clangd)
               (chinese :variables chinese-default-input-method t
                        chinese-enable-avy-pinyin nil)
-              claude-code
+              (claude-code :variables claude-code-ide-terminal-backend 'ghostel)
               cmake
               csv
               django
@@ -113,7 +113,9 @@
               (org :variables org-enable-mermaid-support t)
               (python :variables python-enable-tools '(pipenv))
               rust
-              (shell :variables shell-default-shell 'multi-vterm)
+              (shell :variables shell-default-shell 'ghostel
+		                 ghostel-enable-osc52 t
+                     shell-enable-vterm-support nil)
               shell-scripts
               syntax-checking
               systemd
@@ -230,24 +232,27 @@
   ;; (when (daemonp)
   ;;   (with-temp-buffer (helm-mode)) ;; preload heavy packages
   ;;   (with-temp-buffer (org-mode)))
-
-  (with-eval-after-load 'multi-term
-    (nconc term-bind-key-alist '(("<M-backspace>" . term-send-backward-kill-word))))
-
-  (with-eval-after-load 'vterm
-    (setcdr (assoc "docker" vterm-tramp-shells) '("/bin/bash" "/bin/sh")) ; prefer bash
-    (define-key vterm-mode-map (kbd "C-y") 'vterm--self-insert)
-    (define-key vterm-mode-map (kbd "C-S-<insert>")
+  (with-eval-after-load 'ghostel
+    (setq ghostel-buffer-name-function
+          #'(lambda (_title) (format "*ghostel: %s/" (file-name-nondirectory (directory-file-name default-directory)))))
+    (setenv "CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN" "1") ; avoid claude builtin screen manager
+    (setcdr (assoc "docker" ghostel-tramp-shells) '("/bin/bash" "/bin/sh")) ; prefer bash
+    (define-key ghostel-semi-char-mode-map (kbd "<S-prior>") #'scroll-down-command)
+    (define-key ghostel-semi-char-mode-map (kbd "<S-next>") #'scroll-up-command)
+    (define-key ghostel-semi-char-mode-map (kbd "C-y") 'ghostel--self-insert)
+    (define-key ghostel-readonly-fast-exit-mode-map (kbd "C-S-<insert>")
                 #'(lambda () "Copy selection and then yank it"
                     (interactive)
                     (call-interactively 'kill-ring-save)
-                    (call-interactively 'vterm-yank)))
-    ;; support kill on vterm
-    (define-advice vterm--self-insert-meta (:around (fn &rest args) KILL)
-      (interactive)
-      (if (and (eq last-command-event ?w) (region-active-p))
-          (kill-ring-save (region-beginning) (region-end))
-        (apply fn args))))
+                    (call-interactively 'ghostel-yank)))
+    (defun sl-ghostel-on-link-click (event)
+      "Kill the hyperlink at the mouse click EVENT position."
+      (interactive "e")
+      (if-let* ((uri (ghostel--uri-at-pos (posn-point (event-start event))))
+                ((string-match-p "^https?://" uri)))
+          (kill-new uri)
+        (funcall 'ghostel-open-link-at-click event)))
+    (dolist (k '(1 2 3)) (define-key ghostel-link-map (kbd (format "<mouse-%d>" k)) 'sl-ghostel-on-link-click)))
 
   (let ((template-file (or (buffer-file-name) load-file-name)))
     (defun open-dot-emacs-template ()
