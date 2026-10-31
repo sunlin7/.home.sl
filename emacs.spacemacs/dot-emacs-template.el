@@ -1,11 +1,8 @@
 ;;; dot-emacs-template --- a template for .emacs -*- lexical-binding: t; no-byte-compile: t -*-
 ;;; Commentary:
 ;; It's a good start for custom dot-emacs file.
-;; And Emacs 28.1+ is required.
+;; And Emacs 29.1+ is required.
 ;;; Code:
-
-(when (version<= emacs-version "28")
-  (require 'subr-x))                       ; for when-let*/if-let*
 
 (defvar portable-root-dir (file-name-parent-directory invocation-directory))
 (defvar portable-home-dir
@@ -32,7 +29,9 @@
 
 ;; assume that spacemacs was installed.
 (when-let* ((spacemacs-dir (expand-file-name ".emacs.spacemacs/" portable-home-dir))
+            (sl-spacemacs-early-init (locate-file "early-init" (list spacemacs-dir) load-suffixes))
             (sl-spacemacs-init (locate-file "init" (list spacemacs-dir) load-suffixes)))
+(load sl-spacemacs-early-init)
 
   (setq sl-packages-excluded
         '(chinese-conv
