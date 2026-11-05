@@ -31,38 +31,85 @@ def get_rectangles(img, mode=cv2.RETR_EXTERNAL):
     contours, _hierarchy = cv2.findContours(dilate, mode, cv2.CHAIN_APPROX_SIMPLE)
     return [cv2.boundingRect(x) for x in contours]  # ordered in buttom to up
 
+
+def img_box_to_screen(grab_box, img_size, box):
+    '''Map ImageGrab (x,y,w,h) into GetWindowRect/SetCursorPos space.
+
+    ImageGrab may return physical pixels while win32 rects are logical under
+    DPI awareness; scale by grab_box vs img size to keep clicks on-screen.
+    '''
+    left, top, right, bottom = [int(v) for v in grab_box]
+    grab_w = max(right - left, 1)
+    grab_h = max(bottom - top, 1)
+    img_w = max(int(img_size[0]), 1)
+    img_h = max(int(img_size[1]), 1)
+    sx = grab_w / img_w
+    sy = grab_h / img_h
+    x, y, w, h = box
+    return (
+        int(left + x * sx),
+        int(top + y * sy),
+        max(int(w * sx), 1),
+        max(int(h * sy), 1),
+    )
+
+
+def img_pos_to_screen(grab_box, img_size, pos):
+    return img_box_to_screen(grab_box, img_size, (pos[0], pos[1], 0, 0))[:2]
+
+
 def mouse_click(pos, evt=win32con.MOUSEEVENTF_LEFTDOWN):
     logging.debug(f"click at {pos}")
-    cInfo = win32gui.GetCursorInfo()  # save the Cursor pos
-    win32api.SetCursor(None)          # hide the Cursor
-    win32api.SetCursorPos(pos)
-    win32api.mouse_event(evt, 0, 0, 0, 0)
-    win32api.mouse_event(evt<<1, 0, 0, 0, 0)
-    win32api.SetCursorPos(cInfo[2])  # restore the Cursor
-    win32api.SetCursor(cInfo[1])
+    cInfo = None
+    try:
+        cInfo = win32gui.GetCursorInfo()  # save the Cursor pos
+        win32api.SetCursor(None)          # hide the Cursor
+        win32api.SetCursorPos(tuple(int(v) for v in pos))
+        win32api.mouse_event(evt, 0, 0, 0, 0)
+        win32api.mouse_event(evt<<1, 0, 0, 0, 0)
+    except Exception as e:
+        logging.error(f"mouse_click failed at {pos}: {e}")
+    finally:
+        if cInfo:
+            try:
+                if cInfo[2]:
+                    win32api.SetCursorPos(cInfo[2])  # restore the Cursor
+                win32api.SetCursor(cInfo[1])
+            except Exception:
+                pass
 
 
 def apply_1st_auto_fill(pos):
     logging.debug(f"auto fill at {pos}")
-    cInfo = win32gui.GetCursorInfo()  # save the Cursor pos
-    win32api.SetCursor(None)          # hide the Cursor
-    win32api.SetCursorPos(pos)
-    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
-    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
-    time.sleep(0.2)
-    win32api.keybd_event(win32con.VK_DOWN, 0, 0, 0)  # trigger autocompletion list and select 1st item
-    win32api.keybd_event(win32con.VK_DOWN, 0, win32con.KEYEVENTF_KEYUP, 0)
-    time.sleep(0.3)
-    win32api.keybd_event(win32con.VK_PRIOR, 0, 0, 0)  # back to 1st item for 2nd one may be selected
-    win32api.keybd_event(win32con.VK_PRIOR, 0, win32con.KEYEVENTF_KEYUP, 0)
-    time.sleep(0.3)
-    win32api.keybd_event(win32con.VK_RETURN, 0, 0, 0)
-    win32api.keybd_event(win32con.VK_RETURN, 0, win32con.KEYEVENTF_KEYUP, 0)
-    time.sleep(0.2)
-    win32api.keybd_event(win32con.VK_RETURN, 0, 0, 0)
-    win32api.keybd_event(win32con.VK_RETURN, 0, win32con.KEYEVENTF_KEYUP, 0)
-    win32api.SetCursorPos(cInfo[2])  # restore the Cursor
-    win32api.SetCursor(cInfo[1])
+    cInfo = None
+    try:
+        cInfo = win32gui.GetCursorInfo()  # save the Cursor pos
+        win32api.SetCursor(None)          # hide the Cursor
+        win32api.SetCursorPos(tuple(int(v) for v in pos))
+        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
+        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
+        time.sleep(0.2)
+        win32api.keybd_event(win32con.VK_DOWN, 0, 0, 0)  # trigger autocompletion list and select 1st item
+        win32api.keybd_event(win32con.VK_DOWN, 0, win32con.KEYEVENTF_KEYUP, 0)
+        time.sleep(0.3)
+        win32api.keybd_event(win32con.VK_PRIOR, 0, 0, 0)  # back to 1st item for 2nd one may be selected
+        win32api.keybd_event(win32con.VK_PRIOR, 0, win32con.KEYEVENTF_KEYUP, 0)
+        time.sleep(0.3)
+        win32api.keybd_event(win32con.VK_RETURN, 0, 0, 0)
+        win32api.keybd_event(win32con.VK_RETURN, 0, win32con.KEYEVENTF_KEYUP, 0)
+        time.sleep(0.2)
+        win32api.keybd_event(win32con.VK_RETURN, 0, 0, 0)
+        win32api.keybd_event(win32con.VK_RETURN, 0, win32con.KEYEVENTF_KEYUP, 0)
+    except Exception as e:
+        logging.error(f"apply_1st_auto_fill failed at {pos}: {e}")
+    finally:
+        if cInfo:
+            try:
+                if cInfo[2]:
+                    win32api.SetCursorPos(cInfo[2])  # restore the Cursor
+                win32api.SetCursor(cInfo[1])
+            except Exception:
+                pass
 
 
 class ITimerExec(object):
@@ -88,7 +135,10 @@ class TimerExecSecurityDlg(ITimerExec):
         titleH = win32api.GetSystemMetrics(win32con.SM_CYCAPTION)
         wRect = win32gui.GetWindowRect(self.hwnd)
         pad = titleH//4         # remove window pad, 1/4 of caption height
-        img = igrab.grab(tuple(np.add(wRect, [pad, pad, -pad, -pad])))
+        grab_box = tuple(int(v) for v in np.add(wRect, [pad, pad, -pad, -pad]))
+        img = igrab.grab(grab_box)
+        # ImageGrab may be physical pixels; scale caption height into image space
+        titleH = max(int(titleH * img.height / max(grab_box[3] - grab_box[1], 1)), 1)
 
         # tesserocr has problem on "OK" with background color
         # re-split "OK" button into exactly rectangle and search text
@@ -100,9 +150,9 @@ class TimerExecSecurityDlg(ITimerExec):
             tess.SetRectangle(*x)
             txt = tess.GetUTF8Text()
             if txt == "Ok\n" or txt == "OK\n":
-                pos = np.add(okBtnVector[:2], x[:2])  # btn pos to window pos
+                pos = np.add(okBtnVector[:2], x[:2])  # btn pos to grab/img pos
                 logging.debug(f"Click the OK button: {pos} : {okBtnVector}")
-                mouse_click(win32gui.ClientToScreen(self.hwnd, tuple(pos)))
+                mouse_click(img_pos_to_screen(grab_box, img.size, tuple(pos)))
                 return True  # discontinue
 
         tess.SetImage(img)
@@ -118,14 +168,14 @@ class TimerExecSecurityDlg(ITimerExec):
                 res2 = [abs(x[0] - y[0]) > threshold for x,y in itertools.combinations(res, 2)]  # check intersected rectangles
                 logging.debug(f"'Face' column has rectangles {res} count={len(res)}, res2={res2}")
                 if len(res) - res2.count(False) < 3:  # "Face" is not clicked
-                    mouse_click(win32gui.ClientToScreen(self.hwnd, x[:2]))
+                    mouse_click(img_pos_to_screen(grab_box, img.size, x[:2]))
 
                 return False     # to the next round
 
             # try click the "More choices"
             if txt == "More choices\n":
                 logging.debug("Click the 'More choices' and retry immediately")
-                mouse_click(win32gui.ClientToScreen(self.hwnd, x[:2]))
+                mouse_click(img_pos_to_screen(grab_box, img.size, x[:2]))
                 time.sleep(0.2)
                 return self.run()  # retry after expanded choices
 
@@ -221,7 +271,10 @@ class TimerExecLoginPage(ITimerExec):
 
         titleH = win32api.GetSystemMetrics(win32con.SM_CYCAPTION)
         wRect = win32gui.GetWindowRect(self.hwnd)
-        img = igrab.grab(wRect)
+        grab_box = tuple(int(v) for v in wRect)
+        img = igrab.grab(grab_box)
+        # ImageGrab may be physical pixels; scale caption height into image space
+        titleH = max(int(titleH * img.height / max(grab_box[3] - grab_box[1], 1)), 1)
         rectList = get_rectangles(img, cv2.RETR_CCOMP)
         rectList.sort(key=lambda x:(x[1], x[0]))  # sort by (top, left)
         rectList = [x for x in rectList if titleH//2 <= x[3] <= titleH*2]  # drop small or large rectangles
@@ -234,9 +287,11 @@ class TimerExecLoginPage(ITimerExec):
 
             tess.SetRectangle(*x)
             txt = tess.GetUTF8Text()
+            # page handlers expect screen-space rectangles (not client/image coords)
+            screen_rect = img_box_to_screen(grab_box, img.size, x)
 
             for pg in pageIters:
-                res, cont = pg.send((txt, x))
+                res, cont = pg.send((txt, screen_rect))
                 if not cont:     # page matched and action done
                     return True
 
@@ -252,8 +307,8 @@ def PageAutoFillNamePass(hwnd):
         txt, rect = yield(0, True)
 
     if txt in ["Username\n", "Password\n"]:
-        pos0 = (rect[0], rect[1]+int(rect[3]*2))
-        pos = win32gui.ClientToScreen(hwnd, pos0)
+        # rect is already screen-space from TimerExecLoginPage
+        pos = (rect[0]+int(rect[3]*2), rect[1]+int(rect[3]*2))
         logging.debug(f'try auto fill on: {pos}')
         apply_1st_auto_fill(pos)
         yield (1, False)
@@ -269,7 +324,7 @@ def PageAutoFillNamePass(hwnd):
 
     # Try to click "Back to sign in"
     logging.debug(f'try to click on: {rect[:2]}')
-    mouse_click(win32gui.ClientToScreen(hwnd, rect[:2]))
+    mouse_click(rect[:2])
     yield(1, False)
 
 
@@ -285,7 +340,7 @@ def PageGAccounts(hwnd):
     win32api.keybd_event(win32con.VK_RETURN, 0, win32con.KEYEVENTF_KEYUP, 0)
     # pos = (rect[0], rect[1]-rect[3]-rect[3]//2)  # on its Top
     # logging.debug("try auto fill on page [%s], pos (%s)", txt, pos)
-    # apply_1st_auto_fill(win32gui.ClientToScreen(hwnd, pos))
+    # apply_1st_auto_fill(pos)  # rect is screen-space
     yield(1, False)
 
 
@@ -296,7 +351,7 @@ def PageGAccountRelogin(hwnd):
     while not re.search('@[a-z.]+\n', txt):
         txt, rect = yield(0, True)
 
-    mouse_click( win32gui.ClientToScreen(hwnd, rect[:2]))
+    mouse_click(rect[:2])  # rect is already screen-space
     logging.debug(f"try relogin: {txt}")
     yield(1, False)
 
@@ -449,17 +504,21 @@ if not globals().get('MANUAL_START_THREAD'):
 
         # overwrite the eObjs if the title changed
         eobj = None
-        if title == "Windows Security":
-            dlg = TimerExecSecurityDlg(hwnd)
-            eobj = None if dlg.run() else dlg
-        elif title == "GlobalProtect" and '#32770' == clsName:
-            eobj = TimerExecGlobalProDlg(hwnd)
-        elif title == "" and '#32770' == clsName and None == win32gui.FindWindowEx(hwnd, None, 'Button', 'OK'):  # a popup dlg after connecting
-            win32gui.ShowWindow(hwnd, win32con.SW_HIDE)
-            logging.info(f"Hide the GlobalProtect popup dialog {hwnd}")
-        elif any([re.search(x, title) for x in [" - Google Chrome", "^Gmail$"]]):
-            page = TimerExecLoginPage(hwnd)
-            eobj = None if page.run() else page
+        try:
+            if title == "Windows Security":
+                dlg = TimerExecSecurityDlg(hwnd)
+                eobj = None if dlg.run() else dlg
+            elif title == "GlobalProtect" and '#32770' == clsName:
+                eobj = TimerExecGlobalProDlg(hwnd)
+            elif title == "" and '#32770' == clsName and None == win32gui.FindWindowEx(hwnd, None, 'Button', 'OK'):  # a popup dlg after connecting
+                win32gui.ShowWindow(hwnd, win32con.SW_HIDE)
+                logging.info(f"Hide the GlobalProtect popup dialog {hwnd}")
+            elif any([re.search(x, title) for x in [" - Google Chrome", "^Gmail$"]]):
+                page = TimerExecLoginPage(hwnd)
+                eobj = None if page.run() else page
+        except Exception:
+            logging.exception(f"evtCB failed for hwnd={hwnd} title={title!r}")
+            return
 
         if eobj:
             eObjs[hwnd] = eobj
@@ -472,8 +531,11 @@ if not globals().get('MANUAL_START_THREAD'):
         rkeys = []
         objs = copy.copy(eObjs)
         for key,obj in objs.items():
-            if obj.run():
-                rkeys.append(key)
+            try:
+                if obj.run():
+                    rkeys.append(key)
+            except Exception:
+                logging.exception(f"timerCB run failed for hwnd={key}")
 
         for key in rkeys:
             del eObjs[key]
