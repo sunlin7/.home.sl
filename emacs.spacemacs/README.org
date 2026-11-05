@@ -29,15 +29,21 @@ The [[./dot-emacs-template.el]] is a template for dot-emacs, refer to it for det
 *** An example for early-init.el
 The =early-init.el= should do the very early initialization, as follows:
 #+begin_src emacs-lisp :tangle ~/.emacs.d/early-init.el
-  (setq gc-cons-threshold 402653184       ; copy from the init.el of Spacemacs
+  ;; -*- lexical-binding: t; -*-
+  (setq gc-cons-threshold 402653184       ; copy from init.el of Spacemacs
         gc-cons-percentage 0.6
         package-enable-at-startup nil
         native-comp-jit-compilation nil
         native-comp-enable-subr-trampolines nil
         comp-el-to-eln-strip-prefix '(".*\\.emacs\\.spacemacs/elpa/")
-        warning-suppress-log-types '((use-package) (comp) (lsp-mode))
         org-modules nil                   ; speedup org-mode startup
-        package-quickstart t              ; enable batch loading
+        evil-want-keybinding nil          ; fix the warning from loading evil-collections
+        early-init-file (or (buffer-file-name) load-file-name)
+        warning-suppress-log-types '((files missing-lexbind-cookie)) ;; (lexical-binding) (treesit) (use-package) (comp) (lsp-mode)
+        x-lax-frame-positioning t
+        x-use-fast-mouse-position 'really-fast
+        xterm-extra-capabilities '(modifyOtherKeys reportBackground getSelection setSelection)
+        load-prefer-newer nil
         )
 #+end_src
 
@@ -46,13 +52,18 @@ A =.emacs= can copy from the =dot-emacs-template.el=; or to load the =dot-emacs-
 #+begin_src emacs-lisp :tangle ".emacs/init.el"
   ;; -*- mode: emacs-lisp; lexical-binding: t; -*-
 
-  (when (eq system-type 'windows-nt)   ; executables in cygwin, in low prior
-    (nconc exec-path '("c:/temp/cygwin64/bin" "~/.local/bin"))
-    (setenv "PATH" (concat (getenv "PATH") ";c:\\temp\\cygwin64\\bin;" (getenv "HOME") "\\.local\\bin"))
-    (add-to-list 'auto-mode-alist '("\\.mtl\\'" . xml-mode))
-    (with-eval-after-load 'org ; org-mode on windows will try call associated Apps
-      (add-to-list 'org-file-apps-windowsnt '("\\.txt\\'" . emacs))
-      (add-to-list 'org-file-apps-windowsnt '("\\.log\\'" . emacs))))
+  (if (eq system-type 'windows-nt)
+      (progn                              ; executables in cygwin, in low prior
+        (nconc exec-path '("c:/temp/cygwin64/bin" "~/.local/bin"))
+        (setenv "PATH" (concat (getenv "PATH") ";c:\\temp\\cygwin64\\bin;" (getenv "HOME") "\\.local\\bin"))
+        (add-to-list 'auto-mode-alist '("\\.mtl\\'" . xml-mode))
+        (with-eval-after-load 'org ; org-mode on windows will try call associated Apps
+          (add-to-list 'org-file-apps-windowsnt '("\\.txt\\'" . emacs))
+          (add-to-list 'org-file-apps-windowsnt '("\\.log\\'" . emacs))))
+    ;; non-windows
+    (when-let ((bdir "~/.local/bin")((file-exists-p bdir)))
+      (add-to-list 'exec-path bdir)
+      (setenv "PATH" (concat (getenv "PATH") ":~/.local/bin"))))
 
   (defvar portable-emacs-d (file-name-directory (or (buffer-file-name) load-file-name)))
   ;; copy from the template to initialize the portable-* values
@@ -108,6 +119,7 @@ A =.emacs= can copy from the =dot-emacs-template.el=; or to load the =dot-emacs-
    '(lsp-lua-workspace-preload-file-size 500)
    '(lsp-warn-no-matched-clients nil)
    '(next-error-recenter 35)
+   '(org--inhibit-version-check t)        ; workaround https://github.com/syl20bnr/spacemacs/issues/17254
    '(remote-file-name-inhibit-auto-save-visited t)
    '(rmail-file-name "~/.emacs.d/RMAIL")
    '(savehist-file "~/.emacs.d/.cache/savehist")
